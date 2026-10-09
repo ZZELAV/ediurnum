@@ -57,6 +57,7 @@ export interface Settings {
 	theme: Theme;
 	sessionMinutes: number;
 	focusMode: boolean;
+	welcomeHidden: boolean; // Willkommenskarte auf der Startseite ausgeblendet
 	agents: AiAgent[];
 	defaultAgentId: string | null;
 }

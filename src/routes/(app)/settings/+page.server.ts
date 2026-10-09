@@ -55,6 +55,7 @@ export const actions: Actions = {
 		if (isLang(language)) settings.language = language;
 		if (THEMES.includes(theme)) settings.theme = theme;
 		settings.focusMode = form.get('focusMode') === 'on';
+		settings.welcomeHidden = form.get('welcome') !== 'on';
 		if (Number.isFinite(minutes)) settings.sessionMinutes = Math.min(720, Math.max(5, Math.round(minutes)));
 		saveSettings(session.dek, settings);
 		session.idleMs = settings.sessionMinutes * 60 * 1000;

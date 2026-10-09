@@ -11,6 +11,7 @@ export function defaultSettings(): Settings {
 		theme: 'system',
 		sessionMinutes: 30,
 		focusMode: false,
+		welcomeHidden: false,
 		agents: [],
 		defaultAgentId: null
 	};

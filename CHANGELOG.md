@@ -4,6 +4,13 @@ All notable changes to ediurnum are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [Semantic Versioning](https://semver.org).
 The topmost version without a date is still in development.
 
+## [0.1.0-beta.4]
+
+### Added
+
+- "Your first steps" on the dashboard: write the first entry, fill in About me, switch on reminders, set a PIN and
+  download a backup. Steps tick themselves off; the card can be hidden and shown again in the settings.
+
 ## [0.1.0-beta.3] - 2026-10-09
 
 ### Added
@@ -69,6 +76,7 @@ First public beta of ediurnum – a private, self-hosted, encrypted journal for 
 - Optional focus mode while writing, German and English, light and dark theme, installable web app,
   Docker Compose setup for self-hosting.
 
+[0.1.0-beta.4]: https://github.com/ZZELAV/ediurnum/compare/v0.1.0-beta.3...HEAD
 [0.1.0-beta.3]: https://github.com/ZZELAV/ediurnum/compare/v0.1.0-beta.2...v0.1.0-beta.3
 [0.1.0-beta.2]: https://github.com/ZZELAV/ediurnum/compare/v0.1.0-beta.1...v0.1.0-beta.2
 [0.1.0-beta.1]: https://github.com/ZZELAV/ediurnum/releases/tag/v0.1.0-beta.1

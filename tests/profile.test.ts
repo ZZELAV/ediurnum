@@ -59,3 +59,9 @@ test('Changelog: Abschnitt der aktuellen Version', () => {
 	assert.doesNotMatch(section.body, /^\[[^\]]+\]: http/m);
 	assert.doesNotMatch(md, /\[Unreleased\]/);
 });
+
+test('Willkommenskarte: alle Texte existieren', () => {
+	const steps = ['entry', 'profile', 'reminders', 'pin', 'backup'];
+	const keys = steps.flatMap((s) => [`welcome.${s}`, `welcome.${s}.hint`]);
+	assert.deepEqual(keys.filter((k) => !(k in de)), []);
+});

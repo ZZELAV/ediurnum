@@ -1,4 +1,6 @@
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
+import { loadSettings, saveSettings } from '$lib/server/settings';
+import { welcomeProgress } from '$lib/server/welcome';
 import { addYears, todayIso } from '$lib/dates';
 import { getEntry, listEntryMeta, moodSeries } from '$lib/server/entries';
 import { pinnedAnalysis } from '$lib/server/analyses';
@@ -29,7 +31,12 @@ export const load: PageServerLoad = ({ locals }) => {
 	const pinned = pinnedAnalysis(session.dek);
 	const focusMood = pinned ? { from: pinned.from, to: today, points: moodSeries(session, pinned.from, today) } : null;
 
+	// Willkommenskarte, bis sie ausgeblendet wird oder alle Schritte erledigt sind
+	const steps = welcomeProgress(metas);
+	const welcome = !locals.settings?.welcomeHidden && Object.values(steps).some((done) => !done) ? steps : null;
+
 	return {
+		welcome,
 		focusMood,
 		todayMeta: byDate.get(today) ?? null,
 		suggestions: suggestionsFor(today, metas, loadReminders()),
@@ -41,4 +48,13 @@ export const load: PageServerLoad = ({ locals }) => {
 		total: metas.length,
 		hour: new Date().getHours()
 	};
+};
+
+export const actions: Actions = {
+	/** Willkommenskarte ausblenden (in den Einstellungen wieder einblendbar). */
+	hideWelcome: ({ locals }) => {
+		const session = locals.session!;
+		saveSettings(session.dek, { ...loadSettings(session.dek), welcomeHidden: true });
+		return { ok: true };
+	}
 };

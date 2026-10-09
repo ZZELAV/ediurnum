@@ -536,5 +536,23 @@ export const en: Record<string, string> = {
 	'mood.chartTitle': 'Mood over time',
 	'mood.chartAverage': 'Average {value} over {count} days',
 	'mood.chartAverage.one': 'Average {value} from 1 day',
-	'mood.chartEmpty': 'You did not record a mood in this period.'
+	'mood.chartEmpty': 'You did not record a mood in this period.',
+
+	// Welcome card
+	'welcome.title': 'Your first steps',
+	'welcome.progress': '{done} of {total} done',
+	'welcome.hide': 'Hide',
+	'welcome.done': 'done',
+	'welcome.entry': 'Write your first entry',
+	'welcome.entry.hint': 'Five to ten minutes are enough. ediurnum will suggest weekly and monthly reviews later on.',
+	'welcome.profile': 'Tell us about yourself',
+	'welcome.profile.hint': 'The self-assessment gives the AI background for your insights.',
+	'welcome.reminders': 'Switch on reminders',
+	'welcome.reminders.hint': 'Notifications on your phone or computer remind you of reviews and your own reminders.',
+	'welcome.pin': 'Set a PIN for locked entries',
+	'welcome.pin.hint': 'It additionally protects single entries from curious eyes.',
+	'welcome.backup': 'Download a backup',
+	'welcome.backup.hint': 'Encrypted and only readable with your recovery key – ideally on a regular basis.',
+	'settings.welcome': 'Show first steps on the dashboard',
+	'settings.welcomeHint': 'The card disappears by itself once all steps are done.'
 };

@@ -3,6 +3,7 @@
 	import { fmtDate, t } from '$lib/i18n/t';
 	import { dismiss, isDismissed } from '$lib/suggest';
 	import MoodChart from '$lib/components/MoodChart.svelte';
+	import WelcomeCard from '$lib/components/WelcomeCard.svelte';
 	import type { SectionKind } from '$lib/types';
 
 	let { data } = $props();
@@ -39,6 +40,8 @@
 
 	<div class="split">
 		<div class="stack">
+			{#if data.welcome}<WelcomeCard steps={data.welcome} today={data.today} />{/if}
+
 			<section class="card today">
 				<div>
 					<h2>{t('dashboard.todayEntry')}</h2>

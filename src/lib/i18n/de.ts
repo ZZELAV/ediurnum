@@ -552,5 +552,23 @@ export const de: Record<string, string> = {
 	'mood.chartTitle': 'Stimmungsverlauf',
 	'mood.chartAverage': 'Durchschnitt {value} aus {count} Tagen',
 	'mood.chartAverage.one': 'Durchschnitt {value} aus 1 Tag',
-	'mood.chartEmpty': 'In diesem Zeitraum hast du keine Stimmung angegeben.'
+	'mood.chartEmpty': 'In diesem Zeitraum hast du keine Stimmung angegeben.',
+
+	// Willkommenskarte
+	'welcome.title': 'Deine ersten Schritte',
+	'welcome.progress': '{done} von {total} erledigt',
+	'welcome.hide': 'Ausblenden',
+	'welcome.done': 'erledigt',
+	'welcome.entry': 'Den ersten Eintrag schreiben',
+	'welcome.entry.hint': 'Fünf bis zehn Minuten genügen. Rückblicke auf Woche und Monat schlägt ediurnum dir später selbst vor.',
+	'welcome.profile': 'Über dich erzählen',
+	'welcome.profile.hint': 'Die Selbsteinschätzung gibt der KI Hintergrund für deine Einsichten.',
+	'welcome.reminders': 'Erinnerungen einschalten',
+	'welcome.reminders.hint': 'Benachrichtigungen auf deinem Handy oder Computer erinnern dich an Rückblicke und eigene Erinnerungen.',
+	'welcome.pin': 'PIN für gesperrte Einträge festlegen',
+	'welcome.pin.hint': 'Damit schützt du einzelne Einträge zusätzlich vor neugierigen Blicken.',
+	'welcome.backup': 'Ein Backup herunterladen',
+	'welcome.backup.hint': 'Verschlüsselt und nur mit deinem Wiederherstellungsschlüssel lesbar – am besten regelmässig.',
+	'settings.welcome': 'Erste Schritte auf der Startseite zeigen',
+	'settings.welcomeHint': 'Die Karte verschwindet von selbst, sobald alle Schritte erledigt sind.'
 };

@@ -10,7 +10,8 @@
 		compact = false
 	}: { points: { date: string; mood: number }[]; from: string; to: string; compact?: boolean } = $props();
 
-	let width = $state(600);
+	// Breite erst nach dem Messen bekannt – vorher nichts zeichnen, sonst ragt die Grafik auf dem Handy kurz hinaus
+	let width = $state(0);
 	// kompakt (z. B. in der Seitenspalte): niedriger, Beschriftung nur bei 1, 3 und 5
 	const height = $derived(compact ? 140 : 190);
 	const pad = $derived({ top: 12, right: 12, bottom: 26, left: compact ? 66 : 74 });
@@ -42,7 +43,8 @@
 	{#if sorted.length === 0}
 		<p class="faint">{t('mood.chartEmpty')}</p>
 	{:else}
-		<div class="plot">
+		<div class="plot" style:min-height="{height}px">
+			{#if width > 0}
 			<svg {width} {height} role="img" aria-label={t('mood.chartTitle')}>
 				{#each [1, 2, 3, 4, 5] as m (m)}
 					<line class="grid" x1={pad.left} x2={width - pad.right} y1={y(m)} y2={y(m)} />
@@ -79,6 +81,7 @@
 					<strong>{t(`mood.${hover.mood}`)}</strong>
 					<span>{fmtDate(hover.date, 'dayMonth')}</span>
 				</div>
+			{/if}
 			{/if}
 		</div>
 		<table class="visually-hidden">

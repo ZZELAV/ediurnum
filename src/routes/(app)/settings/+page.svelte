@@ -92,6 +92,13 @@
 					</label>
 					<p class="faint">{t('settings.focusModeHint')}</p>
 				</div>
+				<div class="field check">
+					<label class="switch-label">
+						<input type="checkbox" role="switch" name="welcome" checked={!data.settings.welcomeHidden} />
+						<span>{t('settings.welcome')}</span>
+					</label>
+					<p class="faint">{t('settings.welcomeHint')}</p>
+				</div>
 				<div><button class="btn">{t('common.save')}</button></div>
 			</form>
 		</section>
