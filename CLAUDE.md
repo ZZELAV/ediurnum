@@ -1,0 +1,43 @@
+# ediurnum – Hinweise für Claude
+
+Privates, verschlüsseltes Tagebuch. SvelteKit 2 + Svelte 5 (Runes), TypeScript, `node:sqlite`, Node ≥ 24.7.
+Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ statt „ß“).
+
+## Befehle
+
+- `npm run dev` – Entwicklungsserver (Daten in `./data`)
+- `npm run check` – Typprüfung (svelte-check)
+- `npm test` – Unit-Tests (`node --test`, Dateien in `tests/`)
+- `npm run build` – Produktions-Build nach `build/`
+
+## Versionierung (Pflicht bei jeder Änderung)
+
+1. **Semantic Versioning** in `package.json`:
+   - `PATCH` für Fehlerbehebungen, `MINOR` für neue Funktionen, `MAJOR` für inkompatible Änderungen
+     (z. B. Änderungen am Datenbankschema ohne Migration oder am Backup-Format).
+   - Beta-Phase: Vorabversionen `0.1.0-beta.N` (Tag `v0.1.0-beta.N`), die fertige Version wird `0.1.0`.
+2. **CHANGELOG.md** im Format *Keep a Changelog* pflegen:
+   - Seit dem ersten Release (`v0.1.0-beta.1`): jede Änderung zuerst unter `## [Unreleased]` in der passenden Kategorie (`Added`, `Changed`, `Fixed`, `Security`, `Removed`, `Deprecated`) eintragen – **auf Englisch** (öffentliches Repo), aus Sicht des Nutzers, kurz.
+   - Beim Release: `[Unreleased]` in `## [x.y.z] - JJJJ-MM-TT` umbenennen, neuen leeren `[Unreleased]`-Abschnitt anlegen, Vergleichslinks unten aktualisieren, Version in `package.json` (und `package-lock.json` via `npm version --no-git-tag-version x.y.z`) setzen.
+3. **Commits** nach *Conventional Commits* (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `security:`) auf Englisch, Git-Tag `vX.Y.Z` pro Release.
+4. Die Version erscheint automatisch im Footer der App (`__APP_VERSION__` aus `package.json`).
+5. **Öffentliches Repo auf GitHub** (`ZZELAV/ediurnum`): README, CHANGELOG, Commits und `docs/DEPLOYMENT.md` auf Englisch; App-Texte in beiden Sprachen. Nie Testdaten, `.env` oder persönliche Daten committen.
+
+## Architektur
+
+- `src/lib/server/crypto.ts` – AES-256-GCM, Argon2id, Wiederherstellungsschlüssel-Format. Datensätze sind per AAD an ihre ID gebunden.
+- `src/lib/server/vault.ts` – Hauptschlüssel nur im RAM pro Sitzung; PIN → Sperr-Schlüssel (HKDF aus Hauptschlüssel + PIN-Schlüssel).
+- `src/lib/server/entries.ts` – ein Eintrag pro Tag; Versionen werden archiviert, wenn eine Bearbeitung > 10 min nach Beginn der aktuellen Version erfolgt.
+- `src/lib/server/ai/` – Prompt-Aufbau (`buildChatMarkdown` für die Markdown-Datei, `parseResponse` für zurückkopierte Antworten) und Anbieter-Adapter für KI-Agenten mit API-Schlüssel (in der Oberfläche vorerst ausgeblendet, kommt in einem späteren Release).
+- `src/lib/reminders.ts` – Fälligkeit der Rückblicke (gemeinsam für App-Hinweise und Push); `src/lib/server/reminders.ts` – Zeitplan, VAPID, Geräte, Planer (läuft minütlich, gestartet in `hooks.server.ts` → `init`); `src/service-worker.ts` – nur Push, bewusst ohne Offline-Cache.
+- `src/lib/templates.ts` – geführte Fragen. **Feld-IDs nie umbenennen** (alte Antworten hängen daran).
+- Checkboxen erscheinen global als Schalter (`app.css`, Abschnitt Formulare) – keine eigenen Checkbox-Stile bauen; für Ein/Aus-Optionen `role="switch"` setzen.
+- Rückfragen („Wirklich löschen?“) immer mit `ask()` aus `src/lib/confirm.svelte.ts`, **nie `window.confirm()`** – Browser-Dialoge werden in eingebetteten Browsern und manchen Web-Apps unterdrückt.
+- `src/lib/i18n/{de,en}.ts` – alle Texte; jeder Schlüssel muss in beiden Sprachen existieren (`npm test` prüft das).
+
+## Sicherheitsregeln
+
+- Niemals Inhalte im Klartext in die Datenbank, in Logs oder in Fehlermeldungen schreiben.
+- Klartext-Metadaten bleiben auf das Nötigste beschränkt (Datum, Zeitstempel, Flags, Abschnittsarten).
+- Änderungen am Schema: neue Migration in `db.ts` (`SCHEMA_VERSION` erhöhen), nie bestehende Migrationen ändern.
+- Änderungen am Backup-Format: Versionsnummer im Backup erhöhen und alte Versionen weiterhin lesen können.

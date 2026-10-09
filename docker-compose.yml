@@ -1,0 +1,32 @@
+services:
+  ediurnum:
+    build: .
+    image: ediurnum:latest
+    container_name: ediurnum
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+      PORT: 3000
+    volumes:
+      - ./data:/data
+    # Option A: publish the port on the host; in NGINX Proxy Manager forward to "<host IP>:3000".
+    # Use a firewall so that only the proxy can reach this port.
+    ports:
+      - "3000:3000"
+    # Option B (recommended if NGINX Proxy Manager runs in Docker on the same host):
+    # remove "ports", enable the lines below and forward to "ediurnum", port 3000.
+    # networks:
+    #   - proxy
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+# networks:
+#   proxy:
+#     external: true
+#     name: nginx-proxy-manager_default   # check the name with "docker network ls"

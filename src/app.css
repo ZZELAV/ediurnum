@@ -1,0 +1,653 @@
+/*
+ * ediurnum – Gestaltung: ruhig, klar, funktional.
+ * Warme, helle Flächen, eine Schreibspalte mit angenehmer Lesebreite,
+ * Serifenschrift zum Schreiben, serifenlose Schrift für die Bedienung.
+ *
+ * Farbrollen:  --desk = Hintergrund · --paper = Flächen (Karten) · --paper-2 = Felder
+ *              --paper-edge = Linien · --ink* = Text · --accent = Salbeigrün
+ */
+
+:root {
+	--desk: #f4f1ea;
+	--paper: #fffdf8;
+	--paper-2: #f6f2ea;
+	--paper-edge: #e7e1d5;
+	--ink: #2b2723;
+	--ink-soft: #645b52;
+	--ink-faint: #958b80;
+	--rule: #ece6db;
+	--accent: #5b7a62;
+	--accent-strong: #46624d;
+	--accent-soft: #e4ece3;
+	--dusk: #4f6a8a;
+	--dusk-soft: #e5ebf2;
+	--gold: #c39a52;
+	--danger: #a4553f;
+	--danger-soft: #f6e6df;
+	--shadow: 0 1px 2px rgba(50, 40, 25, 0.05), 0 4px 16px -6px rgba(50, 40, 25, 0.1);
+	--radius: 14px;
+	--font-serif: 'Lora Variable', 'Lora', Georgia, 'Times New Roman', serif;
+	--font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--sidebar-w: 236px;
+	--tabbar-h: 62px;
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) {
+		--desk: #16181c;
+		--paper: #1e2025;
+		--paper-2: #25282e;
+		--paper-edge: #2e3138;
+		--ink: #ebe6dc;
+		--ink-soft: #b2aa9c;
+		--ink-faint: #81796d;
+		--rule: #2a2d33;
+		--accent: #8fb196;
+		--accent-strong: #a8c6ae;
+		--accent-soft: #263129;
+		--dusk: #8fa9c9;
+		--dusk-soft: #242b35;
+		--gold: #d4b67c;
+		--danger: #e08f76;
+		--danger-soft: #3a2723;
+		--shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px -8px rgba(0, 0, 0, 0.5);
+		color-scheme: dark;
+	}
+}
+
+:root[data-theme='dark'] {
+	--desk: #16181c;
+	--paper: #1e2025;
+	--paper-2: #25282e;
+	--paper-edge: #2e3138;
+	--ink: #ebe6dc;
+	--ink-soft: #b2aa9c;
+	--ink-faint: #81796d;
+	--rule: #2a2d33;
+	--accent: #8fb196;
+	--accent-strong: #a8c6ae;
+	--accent-soft: #263129;
+	--dusk: #8fa9c9;
+	--dusk-soft: #242b35;
+	--gold: #d4b67c;
+	--danger: #e08f76;
+	--danger-soft: #3a2723;
+	--shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px -8px rgba(0, 0, 0, 0.5);
+	color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	min-height: 100dvh;
+	/* nichts darf seitliches Scrollen auslösen (clip statt hidden, damit sticky funktioniert) */
+	overflow-x: clip;
+	font-family: var(--font-sans);
+	font-size: 15px;
+	line-height: 1.55;
+	color: var(--ink);
+	background: var(--desk);
+}
+
+a {
+	color: var(--accent-strong);
+}
+
+h1,
+h2,
+h3,
+h4 {
+	font-family: var(--font-serif);
+	font-weight: 500;
+	line-height: 1.25;
+	margin: 0 0 0.5em;
+	color: var(--ink);
+}
+
+h1 {
+	font-size: clamp(1.55rem, 1.25rem + 1.2vw, 2.1rem);
+}
+h2 {
+	font-size: 1.25rem;
+}
+h3 {
+	font-size: 1.08rem;
+}
+
+p {
+	margin: 0 0 0.8em;
+}
+
+:focus-visible {
+	outline: 2px solid var(--dusk);
+	outline-offset: 2px;
+}
+
+.skip-link {
+	position: absolute;
+	left: -9999px;
+}
+.skip-link:focus {
+	left: 1rem;
+	top: 1rem;
+	z-index: 100;
+	background: var(--paper);
+	padding: 0.5rem 1rem;
+}
+
+/* ---------- Seitenaufbau ---------- */
+
+/* Inhalt einer Ansicht */
+.view {
+	width: 100%;
+	max-width: 1120px;
+	margin: 0 auto;
+}
+.view.narrow {
+	max-width: 760px;
+}
+
+.view-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 0.75rem 1.5rem;
+	margin-bottom: 1.5rem;
+}
+.view-head h1 {
+	margin: 0;
+}
+
+/* Hauptspalte + Seitenspalte; auf schmalen Bildschirmen untereinander */
+.split {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 1.25rem;
+	align-items: start;
+}
+@media (min-width: 1100px) {
+	.split {
+		grid-template-columns: minmax(0, 1fr) 320px;
+		gap: 1.75rem;
+	}
+	/* Seitenspalte immer rechts, egal ob sie im Markup vor oder nach dem Hauptinhalt steht */
+	.split > .side {
+		grid-column: 2;
+		grid-row: 1;
+		position: sticky;
+		top: 1.5rem;
+	}
+}
+@media (max-width: 1099px) {
+	/* optional: Seitenspalte auf schmalen Bildschirmen zuerst zeigen */
+	.split.side-first > .side {
+		order: -1;
+	}
+}
+
+.stack {
+	display: grid;
+	gap: 1rem;
+	min-width: 0;
+}
+
+.grid-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+	gap: 1rem;
+	align-items: start;
+}
+
+.card {
+	background: var(--paper);
+	border: 1px solid var(--paper-edge);
+	border-radius: var(--radius);
+	padding: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+	box-shadow: var(--shadow);
+	min-width: 0;
+}
+.card > :last-child {
+	margin-bottom: 0;
+}
+.card.flat {
+	box-shadow: none;
+	background: var(--paper-2);
+}
+
+.card-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+.card-title h2,
+.card-title h3 {
+	margin: 0;
+}
+
+.eyebrow {
+	font-family: var(--font-sans);
+	font-size: 0.72rem;
+	font-weight: 500;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--ink-faint);
+	margin: 0 0 0.35rem;
+}
+
+.muted {
+	color: var(--ink-soft);
+}
+.faint {
+	color: var(--ink-faint);
+	font-size: 0.88rem;
+}
+
+/* ---------- Formulare ---------- */
+
+label {
+	display: block;
+	font-size: 0.9rem;
+	color: var(--ink-soft);
+	margin-bottom: 0.3rem;
+}
+
+.question {
+	font-family: var(--font-serif);
+	font-size: 1.04rem;
+	color: var(--ink);
+	margin-bottom: 0.4rem;
+}
+
+input[type='text'],
+input[type='password'],
+input[type='date'],
+input[type='time'],
+input[type='number'],
+input[type='url'],
+input[type='file'],
+select,
+textarea {
+	width: 100%;
+	font: inherit;
+	color: var(--ink);
+	background: var(--paper-2);
+	border: 1px solid var(--paper-edge);
+	border-radius: 10px;
+	padding: 0.6rem 0.75rem;
+	transition:
+		border-color 0.15s,
+		background 0.15s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+	outline: none;
+	border-color: var(--accent);
+	background: var(--paper);
+}
+
+
+/* Checkboxen erscheinen immer als Schalter (wie bei den eigenen Erinnerungen).
+ * Für Ein/Aus-Optionen zusätzlich role="switch" setzen. */
+input[type='checkbox'] {
+	appearance: none;
+	-webkit-appearance: none;
+	flex: none;
+	width: 2.4rem;
+	height: 1.4rem;
+	margin: 0;
+	vertical-align: middle;
+	border-radius: 999px;
+	border: 1px solid var(--paper-edge);
+	background-color: var(--paper-2);
+	background-image: radial-gradient(circle, var(--ink-faint) 0.5rem, transparent calc(0.5rem + 0.5px));
+	background-size: 1.2rem 1.2rem;
+	background-repeat: no-repeat;
+	background-position: 0.1rem center;
+	cursor: pointer;
+	transition:
+		background-position 0.15s,
+		background-color 0.15s,
+		border-color 0.15s;
+}
+input[type='checkbox']:checked {
+	background-color: var(--accent);
+	border-color: var(--accent);
+	background-image: radial-gradient(circle, var(--paper) 0.5rem, transparent calc(0.5rem + 0.5px));
+	background-position: calc(100% - 0.1rem) center;
+}
+input[type='checkbox']:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+input[type='checkbox']:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+/* Handy: Felder mindestens 16 px, sonst zoomt iOS beim Antippen hinein und die Seite verrutscht seitlich */
+@media (max-width: 899px) {
+	input[type='text'],
+	input[type='password'],
+	input[type='date'],
+	input[type='time'],
+	input[type='number'],
+	input[type='url'],
+	select,
+	textarea {
+		font-size: max(1rem, 16px);
+	}
+}
+
+/* Schreibfelder: ruhig, ohne Rahmen, Serifenschrift */
+:is(input, textarea).write {
+	font-family: var(--font-serif);
+	font-size: 1.05rem;
+	line-height: 1.7;
+	border-color: transparent;
+	resize: none;
+	field-sizing: content;
+}
+textarea.write {
+	min-height: 4.6rem;
+}
+.write::placeholder {
+	color: var(--ink-faint);
+	font-style: italic;
+}
+
+.field {
+	margin-bottom: 1.25rem;
+}
+.field:last-child {
+	margin-bottom: 0;
+}
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.45rem;
+	font: inherit;
+	font-weight: 500;
+	font-size: 0.92rem;
+	padding: 0.55rem 1.1rem;
+	border-radius: 10px;
+	border: 1px solid transparent;
+	background: var(--accent);
+	color: #fff;
+	cursor: pointer;
+	text-decoration: none;
+	transition:
+		background 0.15s,
+		transform 0.1s;
+	white-space: nowrap;
+}
+:root[data-theme='dark'] .btn:not(.ghost):not(.quiet):not(.danger) {
+	color: #12161a;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) .btn:not(.ghost):not(.quiet):not(.danger) {
+		color: #12161a;
+	}
+}
+.btn:hover {
+	background: var(--accent-strong);
+}
+.btn:active {
+	transform: translateY(1px);
+}
+.btn:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+.btn.ghost {
+	background: transparent;
+	color: var(--accent-strong);
+	border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.btn.ghost:hover {
+	background: var(--accent-soft);
+}
+.btn.quiet {
+	background: transparent;
+	color: var(--ink-soft);
+	padding-inline: 0.6rem;
+}
+.btn.quiet:hover {
+	background: var(--paper-2);
+	color: var(--ink);
+}
+.btn.danger {
+	background: transparent;
+	color: var(--danger);
+	border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+}
+.btn.danger:hover {
+	background: var(--danger-soft);
+}
+.btn.small {
+	font-size: 0.82rem;
+	padding: 0.35rem 0.75rem;
+}
+.btn.icon {
+	padding: 0.45rem;
+	width: 2.25rem;
+	height: 2.25rem;
+}
+.btn.block {
+	width: 100%;
+}
+
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem;
+	align-items: center;
+}
+
+.notice {
+	border-radius: 10px;
+	padding: 0.75rem 1rem;
+	background: var(--accent-soft);
+	color: var(--ink);
+	font-size: 0.92rem;
+	margin-bottom: 1rem;
+}
+.notice.error {
+	background: var(--danger-soft);
+	color: var(--danger);
+}
+.notice.info {
+	background: var(--dusk-soft);
+}
+
+.chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	font-size: 0.78rem;
+	padding: 0.15rem 0.6rem;
+	border-radius: 999px;
+	background: var(--accent-soft);
+	color: var(--accent-strong);
+	border: 1px solid transparent;
+}
+.chip.dusk {
+	background: var(--dusk-soft);
+	color: var(--dusk);
+}
+.chip.gold {
+	background: color-mix(in srgb, var(--gold) 20%, transparent);
+	color: color-mix(in srgb, var(--gold) 55%, var(--ink));
+}
+
+.prose {
+	font-family: var(--font-serif);
+	font-size: 1.02rem;
+	line-height: 1.75;
+}
+.prose h2,
+.prose h3,
+.prose h4 {
+	margin-top: 1.5em;
+}
+.prose ul,
+.prose ol {
+	padding-left: 1.3rem;
+}
+.prose li {
+	margin-bottom: 0.3em;
+}
+
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+/* ---------- Fokusmodus ----------
+ * Beim Schreiben treten Navigation und Seitenspalte zurück; es bleibt die Schreibspalte.
+ * Gesteuert über data-focus am <html> (src/lib/focus.ts).
+ */
+:is(.sidebar, .mobile-top, .tabbar, .pinbar, .daynav, .focus-exit, .focus-hint) {
+	transition: opacity 0.8s ease;
+}
+.content {
+	transition: margin-left 0.8s ease;
+}
+:root[data-focus] :is(.sidebar, .mobile-top, .tabbar, .pinbar, .entry-view .daynav) {
+	opacity: 0;
+	pointer-events: none;
+}
+:root[data-focus] .content {
+	margin-left: 0;
+}
+:root[data-focus] .entry-view :is(.entry-head, .split) {
+	max-width: 46rem;
+	margin-inline: auto;
+}
+:root[data-focus] .entry-view .entry-head {
+	padding-inline: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+}
+:root[data-focus] .entry-view .split {
+	grid-template-columns: minmax(0, 1fr);
+}
+:root[data-focus] .entry-view .split > .side {
+	display: none;
+}
+:root[data-focus] .entry-view .card {
+	background: transparent;
+	border-color: transparent;
+	box-shadow: none;
+}
+:root[data-focus] .entry-view :is(input, textarea).write {
+	font-size: 1.15rem;
+}
+.focus-exit,
+.focus-hint {
+	position: fixed;
+	top: 0.75rem;
+	right: 0.75rem;
+	z-index: 40;
+	margin: 0;
+	opacity: 0;
+	pointer-events: none;
+}
+.focus-hint {
+	font-size: 0.8rem;
+	color: var(--ink-faint);
+}
+/* Mit Tastatur genügt der Hinweis auf Esc; auf Touch-Geräten gibt es einen Knopf */
+@media (hover: hover) and (pointer: fine) {
+	:root[data-focus] .focus-hint {
+		opacity: 0.8;
+	}
+}
+@media not ((hover: hover) and (pointer: fine)) {
+	:root[data-focus] .focus-exit {
+		opacity: 0.8;
+		pointer-events: auto;
+	}
+}
+
+/* ---------- Wechsel zwischen Tagen (View Transitions) ----------
+ * Vorwärts gleitet der alte Tag nach links hinaus und der neue kommt von rechts,
+ * rückwärts umgekehrt. Gesteuert über data-flip in (app)/+layout.svelte.
+ */
+.entry-view {
+	view-transition-name: entry-view;
+}
+
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-group(entry-view) {
+	animation: none;
+}
+
+::view-transition-old(entry-view) {
+	animation: day-out 0.22s ease-in both;
+}
+::view-transition-new(entry-view) {
+	animation: day-in 0.28s ease-out 0.08s both;
+}
+:root[data-flip='backward']::view-transition-old(entry-view) {
+	animation-name: day-out-back;
+}
+:root[data-flip='backward']::view-transition-new(entry-view) {
+	animation-name: day-in-back;
+}
+
+@keyframes day-out {
+	to {
+		opacity: 0;
+		transform: translateX(-28px);
+	}
+}
+@keyframes day-in {
+	from {
+		opacity: 0;
+		transform: translateX(28px);
+	}
+}
+@keyframes day-out-back {
+	to {
+		opacity: 0;
+		transform: translateX(28px);
+	}
+}
+@keyframes day-in-back {
+	from {
+		opacity: 0;
+		transform: translateX(-28px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+	}
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
+	}
+}

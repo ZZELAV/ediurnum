@@ -1,0 +1,17 @@
+node_modules
+/build
+/.svelte-kit
+/data
+.env
+.env.*
+!.env.example
+*.ediurnum
+.DS_Store
+Thumbs.db
+
+# Local tool configuration
+/.claude/
+
+# Internal working notes (local only)
+/docs/STAND.md
+/docs/KONZEPT.md

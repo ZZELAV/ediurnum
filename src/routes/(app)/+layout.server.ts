@@ -1,0 +1,18 @@
+import { redirect } from '@sveltejs/kit';
+import type { LayoutServerLoad } from './$types';
+import { hasPin } from '$lib/server/vault';
+import { pinnedAnalysis } from '$lib/server/analyses';
+import { todayIso } from '$lib/dates';
+
+export const load: LayoutServerLoad = ({ locals }) => {
+	const session = locals.session;
+	if (!session) redirect(303, '/login');
+	const pinned = pinnedAnalysis(session.dek);
+	return {
+		today: todayIso(),
+		hasPin: hasPin(),
+		focusMode: locals.settings?.focusMode ?? false,
+		pinUnlockedUntil: session.lockKey ? session.lockUntil : 0,
+		focus: pinned ? { id: pinned.id, createdAt: pinned.createdAt, points: pinned.focusPoints } : null
+	};
+};

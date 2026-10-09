@@ -1,0 +1,50 @@
+import { error, type Cookies, type RequestEvent } from '@sveltejs/kit';
+import { dev } from '$app/environment';
+import { env } from '$env/dynamic/private';
+import { createSession, destroySession, type Session } from './vault';
+import { loadSettings } from './settings';
+
+export const SESSION_COOKIE = 'ediurnum_session';
+
+function secureCookies(): boolean {
+	if (env.COOKIE_SECURE) return env.COOKIE_SECURE !== 'false';
+	return !dev && (env.ORIGIN ?? '').startsWith('https://');
+}
+
+export function startSession(cookies: Cookies, dek: Buffer): Session {
+	const settings = loadSettings(dek);
+	const session = createSession(dek, settings.sessionMinutes);
+	cookies.set(SESSION_COOKIE, session.token, {
+		path: '/',
+		httpOnly: true,
+		sameSite: 'strict',
+		secure: secureCookies()
+	});
+	cookies.set('lang', settings.language, { path: '/', httpOnly: false, sameSite: 'strict', secure: secureCookies(), maxAge: 60 * 60 * 24 * 365 });
+	return session;
+}
+
+export function endSession(cookies: Cookies) {
+	const token = cookies.get(SESSION_COOKIE);
+	if (token) destroySession(token);
+	cookies.delete(SESSION_COOKIE, { path: '/' });
+}
+
+export function setLangCookie(cookies: Cookies, lang: string) {
+	cookies.set('lang', lang, { path: '/', httpOnly: false, sameSite: 'strict', secure: secureCookies(), maxAge: 60 * 60 * 24 * 365 });
+}
+
+/** Für API-Routen: liefert die Sitzung oder bricht mit 401 ab. */
+export function requireSession(event: RequestEvent): Session {
+	const s = event.locals.session;
+	if (!s) error(401, 'unauthorized');
+	return s;
+}
+
+export function clientKey(event: RequestEvent): string {
+	try {
+		return event.getClientAddress();
+	} catch {
+		return 'unknown';
+	}
+}
