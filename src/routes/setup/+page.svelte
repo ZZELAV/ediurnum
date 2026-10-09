@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms';
 	import Cover from '$lib/components/Cover.svelte';
+	import PasswordInput from '$lib/components/PasswordInput.svelte';
 	import { t } from '$lib/i18n/t';
 
 	let { form } = $props();
@@ -11,10 +12,13 @@
 	let confirmed = $state(false);
 	let copied = $state(false);
 	let error = $state<string | null>(null);
+	let name = $state('');
 
 	$effect(() => {
 		if (form?.error) {
 			error = form.error;
+			const f = form as { name?: string };
+			if (f.name) name = f.name;
 			if ((form as { mode?: string }).mode === 'restore') mode = 'restore';
 		}
 	});
@@ -53,7 +57,7 @@
 			<input type="checkbox" bind:checked={confirmed} />
 			{t('setup.keyConfirm')}
 		</label>
-		<a class="btn" href="/" aria-disabled={!confirmed} class:disabled={!confirmed} data-sveltekit-reload>{t('setup.start')}</a>
+		<a class="btn" href="/profile?welcome" aria-disabled={!confirmed} class:disabled={!confirmed} data-sveltekit-reload>{t('setup.start')}</a>
 	{:else}
 		<h1>{t('setup.title')}</h1>
 		<div class="tabs" role="tablist">
@@ -82,13 +86,21 @@
 				}}
 			>
 				<div class="field">
+					<label for="name">{t('setup.name')}</label>
+					<input id="name" name="name" type="text" autocomplete="given-name" maxlength="60" required bind:value={name} />
+					<p class="faint">{t('setup.nameHint')}</p>
+				</div>
+				<!-- Für Passwortmanager: der Name dient als Benutzername, damit Speichern und Ausfüllen zuverlässig klappt -->
+				<input class="visually-hidden" type="text" name="username" value={name} autocomplete="username" tabindex="-1" aria-hidden="true" readonly />
+				<p class="faint pm">{t('setup.passwordManager')}</p>
+				<div class="field">
 					<label for="pw">{t('setup.password')}</label>
-					<input id="pw" name="password" type="password" autocomplete="new-password" required minlength="10" />
+					<PasswordInput id="pw" name="password" autocomplete="new-password" required minlength={10} />
 					<p class="faint">{t('setup.passwordHint')}</p>
 				</div>
 				<div class="field">
 					<label for="pw2">{t('setup.passwordConfirm')}</label>
-					<input id="pw2" name="confirm" type="password" autocomplete="new-password" required minlength="10" />
+					<PasswordInput id="pw2" name="confirm" autocomplete="new-password" required minlength={10} />
 				</div>
 				<button class="btn" disabled={busy}>{busy ? t('setup.creating') : t('setup.create')}</button>
 			</form>
@@ -117,12 +129,12 @@
 				</div>
 				<div class="field">
 					<label for="rpw">{t('setup.newPassword')}</label>
-					<input id="rpw" name="password" type="password" autocomplete="new-password" required minlength="10" />
+					<PasswordInput id="rpw" name="password" autocomplete="new-password" required minlength={10} />
 					<p class="faint">{t('setup.passwordHint')}</p>
 				</div>
 				<div class="field">
 					<label for="rpw2">{t('setup.passwordConfirm')}</label>
-					<input id="rpw2" name="confirm" type="password" autocomplete="new-password" required minlength="10" />
+					<PasswordInput id="rpw2" name="confirm" autocomplete="new-password" required minlength={10} />
 				</div>
 				<button class="btn" disabled={busy}>{busy ? t('setup.restoring') : t('setup.restore')}</button>
 			</form>
@@ -176,6 +188,9 @@
 	}
 	.check input {
 		margin-top: 0.05rem;
+	}
+	.pm {
+		margin: -0.5rem 0 1.25rem;
 	}
 	a.disabled {
 		pointer-events: none;

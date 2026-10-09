@@ -5,6 +5,7 @@
 	import { api } from '$lib/client';
 	import { t } from '$lib/i18n/t';
 	import type { PublicAiAgent } from '$lib/types';
+	import PasswordInput from './PasswordInput.svelte';
 
 	let { agent, onclose }: { agent: PublicAiAgent | null; onclose: () => void } = $props();
 
@@ -93,7 +94,7 @@
 			{#if !p.needsKey}<span class="faint">({t('common.optional')})</span>{/if}
 			{#if initial?.hasApiKey}<span class="chip">{t('settings.aiApiKeyStored')}</span>{/if}
 		</label>
-		<input id="ag-key" name="apiKey" type="password" autocomplete="off" bind:value={apiKey} />
+		<PasswordInput id="ag-key" name="apiKey" autocomplete="off" bind:value={apiKey} />
 		{#if initial?.hasApiKey}<p class="faint">{t('settings.aiApiKeyKeep')}</p>{/if}
 	</div>
 

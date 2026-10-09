@@ -161,24 +161,45 @@ export function nextOccurrence(s: ReminderSchedule, today: string, nowMinutes: n
 	return null;
 }
 
-function doneBetween(metas: EntryMeta[], kind: SectionKind, from: string, to: string): boolean {
-	return metas.some((m) => m.kinds.includes(kind) && m.date >= from && m.date <= to);
+/**
+ * Mindestabstand in Tagen zum letzten Rückblick derselben Art (ohne Rückblick: zum ersten Eintrag).
+ * Ein Wochenrückblick wird also erst angeboten, wenn rund eine Woche keiner geschrieben wurde,
+ * ein Monatsrückblick erst nach rund einem Monat. Etwas Spielraum, damit ein leicht verspäteter
+ * Rückblick den nächsten nicht um eine ganze Woche bzw. einen ganzen Monat verschiebt.
+ */
+export const WEEKLY_GAP_DAYS = 6;
+export const MONTHLY_GAP_DAYS = 25;
+
+/** Letzter Tag (am oder vor `date`) mit diesem Abschnitt – ohne Rückblick der erste Eintrag überhaupt. */
+function lastReviewOrStart(metas: EntryMeta[], kind: SectionKind, date: string): string | null {
+	let last: string | null = null;
+	let first: string | null = null;
+	for (const m of metas) {
+		if (m.date > date) continue;
+		if (m.kinds.includes(kind) && (!last || m.date > last)) last = m.date;
+		if (!first || m.date < first) first = m.date;
+	}
+	return last ?? first;
 }
 
 /**
- * Fällig, wenn seit dem letzten Erinnerungstag (mit 3 bzw. 5 Tagen Vorlauf,
- * damit man es auch etwas früher erledigen kann) kein entsprechender Abschnitt geschrieben wurde.
+ * Fällig ab dem eingestellten Erinnerungstag, wenn seit dem letzten Rückblick mindestens `gap` Tage
+ * vergangen sind. Ein Rückblick am Erinnerungstag oder danach gilt als erledigt.
  */
+function isReviewDue(date: string, metas: EntryMeta[], kind: SectionKind, scheduled: string, gap: number): boolean {
+	const since = lastReviewOrStart(metas, kind, date);
+	if (!since || since >= scheduled) return false;
+	return daysBetween(since, scheduled) >= gap;
+}
+
 export function isGefuehlDue(date: string, metas: EntryMeta[], cfg: ReminderConfig): boolean {
 	if (!cfg.gefuehl.enabled) return false;
-	const occurrence = lastWeekdayOnOrBefore(date, cfg.gefuehl.weekday);
-	return !doneBetween(metas, 'gefuehl', addDays(occurrence, -3), date);
+	return isReviewDue(date, metas, 'gefuehl', lastWeekdayOnOrBefore(date, cfg.gefuehl.weekday), WEEKLY_GAP_DAYS);
 }
 
 export function isWachstumDue(date: string, metas: EntryMeta[], cfg: ReminderConfig): boolean {
 	if (!cfg.wachstum.enabled) return false;
-	const due = lastMonthlyDueOnOrBefore(date, cfg.wachstum.day);
-	return !doneBetween(metas, 'wachstum', addDays(due, -5), date);
+	return isReviewDue(date, metas, 'wachstum', lastMonthlyDueOnOrBefore(date, cfg.wachstum.day), MONTHLY_GAP_DAYS);
 }
 
 export interface Suggestions {

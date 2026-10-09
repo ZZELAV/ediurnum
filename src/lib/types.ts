@@ -52,6 +52,7 @@ export interface AiAgent {
 export type PublicAiAgent = Omit<AiAgent, 'apiKey'> & { hasApiKey: boolean };
 
 export interface Settings {
+	name: string; // Vorname für die Begrüssung (kein Login-Name)
 	language: Lang;
 	theme: Theme;
 	sessionMinutes: number;
@@ -73,4 +74,5 @@ export interface Analysis {
 	body: string; // Markdown ohne Fokus-Block
 	focusPoints: string[];
 	pinned: boolean; // aktuelle Fokuspunkte auf dem Dashboard
+	moods?: { date: string; mood: number }[]; // Stimmungsverlauf im Zeitraum (ab 0.1.0-beta.2)
 }

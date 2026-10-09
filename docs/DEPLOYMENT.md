@@ -31,6 +31,8 @@ nano .env
 - `ORIGIN` – the exact public address, e.g. `https://journal.example.com` (no trailing slash).
   It is used for cross-site protection, secure cookies and as the sender for push services.
 - `TZ` – your time zone (`Europe/Zurich`, …). “Today” and all reminder times use it.
+- `LOG_LEVEL` (optional) – `info` by default: start-up, opening and closing the journal, failed attempts, backups,
+  push notifications and errors. `debug` additionally logs every request. Logs never contain journal content.
 - Leave the other values as they are unless you know you need something else.
 
 ## 3. Prepare the data folder
@@ -138,18 +140,20 @@ docker compose logs ediurnum | grep -i push
 
 ## 9. Test AI insights
 
-ediurnum does not call an AI itself (yet). It creates a Markdown file with instructions and your entries that you
-give to the AI chat of your choice – no API key needed.
+ediurnum never sends anything to an AI on its own. It creates a Markdown file with instructions and your entries that
+you give to the AI chat of your choice – no API key needed.
 
-1. Write a few entries. Each entry has the switch *Allowed for AI analyses* (on by default).
+1. Write a few entries with a mood. Each entry has the switch *Allowed for AI analyses* (on by default).
+   Optionally fill in *Settings → About me* – the self-assessment is added to the file as background.
 2. Open *Insights*, choose the period, the tone and the number of focus points, optionally a question, and click
    **Create Markdown file**.
 3. **Download (.md)** and upload the file in an AI chat (ChatGPT, Claude, Gemini, …) – or **Copy text** and paste it.
 4. Copy the AI’s complete answer, paste it into **Save the AI’s answer** and save.
-   The focus points from the answer’s last section (“## Focus points”) appear on the dashboard.
+   The focus points from the answer’s last section (“## Focus points”) appear on the dashboard,
+   the review shows a chart of your mood in that period.
 
 The file contains your entries in plaintext. Only give it to an AI service you trust and delete it afterwards.
-Built-in AI agents with your own API key are planned for a later release.
+AI agents with your own API key are planned for a later release – they will also only run when you start them.
 
 ## 10. Updates
 

@@ -11,6 +11,7 @@ import {
 } from '$lib/server/vault';
 import { clientKey, startSession } from '$lib/server/auth';
 import { validateNewPassword } from '$lib/server/validation';
+import { log } from '$lib/server/log';
 
 export const actions: Actions = {
 	default: async (event) => {
@@ -36,6 +37,7 @@ export const actions: Actions = {
 		registerSuccess(key);
 		await setPassword(dek, password);
 		destroyAllSessions();
+		log.info('password reset with recovery key');
 		startSession(event.cookies, dek);
 		redirect(303, '/');
 	}

@@ -5,8 +5,12 @@
 	import { dev } from '$app/environment';
 	import { t } from '$lib/i18n/t';
 	import PinBar from '$lib/components/PinBar.svelte';
+	import { watchIdle } from '$lib/idle';
 
 	let { data, children } = $props();
+
+	// Nach der eingestellten Zeit ohne Aktivität schliesst sich das Tagebuch auch auf dem Bildschirm.
+	$effect(() => watchIdle(data.sessionMinutes));
 
 	// Service Worker (nur für Push, ohne Cache) früh registrieren – damit ist ediurnum
 	// auch in Browsern installierbar, die dafür einen Service Worker verlangen.

@@ -11,6 +11,7 @@ import {
 	type KdfParams
 } from './crypto';
 import { getMeta, nowIso, setMeta, transaction } from './db';
+import { log } from './log';
 
 /**
  * Tresor: verwaltet den Hauptschlüssel. Er existiert entschlüsselt nur im
@@ -105,6 +106,7 @@ export function getSession(token: string | undefined): Session | null {
 	if (!s) return null;
 	const now = Date.now();
 	if (now - s.lastSeen > s.idleMs || now - s.createdAt > ABSOLUTE_MAX_MS) {
+		log.info('journal closed automatically', { reason: now - s.createdAt > ABSOLUTE_MAX_MS ? 'max-duration' : 'inactivity' });
 		destroySession(token);
 		return null;
 	}
@@ -206,6 +208,7 @@ export function registerFailure(key: string) {
 	// Ab dem 5. Fehlversuch: 30 s, 60 s, 120 s … (max. 1 h)
 	a.until = a.count >= 5 ? Date.now() + Math.min(3600, 30 * 2 ** (a.count - 5)) * 1000 : 0;
 	attempts.set(key, a);
+	log.warn('failed attempt', { key, count: a.count, blockedSeconds: a.until ? Math.ceil((a.until - Date.now()) / 1000) : 0 });
 }
 
 export function registerSuccess(key: string) {

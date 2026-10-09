@@ -2,10 +2,12 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { registerFailure, registerSuccess, throttleRemaining, unlockWithPassword } from '$lib/server/vault';
 import { clientKey, startSession } from '$lib/server/auth';
+import { log } from '$lib/server/log';
 
 export const actions: Actions = {
 	default: async (event) => {
-		const key = `login:${clientKey(event)}`;
+		const ip = clientKey(event);
+		const key = `login:${ip}`;
 		const wait = throttleRemaining(key);
 		if (wait > 0) return fail(429, { error: 'error.throttled', seconds: wait });
 
@@ -17,6 +19,7 @@ export const actions: Actions = {
 		}
 		registerSuccess(key);
 		startSession(event.cookies, dek);
+		log.info('journal opened', { ip });
 		redirect(303, '/');
 	}
 };

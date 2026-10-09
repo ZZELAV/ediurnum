@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { complete } from './providers';
 import { SECTIONS } from '$lib/templates';
 import { translate } from '$lib/i18n';
+import { isEmptyProfile, profileMarkdown, type Profile } from '$lib/profile';
 import type { AiAgent, Analysis, Entry, Lang } from '$lib/types';
 
 const TONES: Record<AiAgent['tone'], Record<Lang, string>> = {
@@ -145,22 +146,36 @@ export function parseResponse(text: string): { body: string; focusPoints: string
 	return { body: (text.slice(0, heading.index) + rest).trim(), focusPoints };
 }
 
-/** Markdown-Datei für einen beliebigen KI-Chat: Auftrag und Einträge in einem Dokument. */
+/** Markdown-Datei für einen beliebigen KI-Chat: Auftrag, Selbsteinschätzung und Einträge in einem Dokument. */
 export function buildChatMarkdown(params: {
 	options: PromptOptions;
 	lang: Lang;
+	profile?: { profile: Profile; name: string } | null;
 	entries: Entry[];
 	from: string;
 	to: string;
 	question: string;
 }): string {
-	const { options, lang, entries, from, to, question } = params;
+	const { options, lang, profile, entries, from, to, question } = params;
 	const en = lang === 'en';
+	const about =
+		profile && (!isEmptyProfile(profile.profile) || profile.name.trim())
+			? profileMarkdown(profile.profile, profile.name, (key) => translate(lang, key))
+			: '';
 	return [
 		en ? '# ediurnum – journal review' : '# ediurnum – Tagebuch-Auswertung',
 		en ? '## Your task' : '## Dein Auftrag',
 		// Vorgegebene Antwort-Überschriften als Liste, damit sie die Gliederung der Datei nicht stören
 		buildSystemPrompt(options, lang, 'chat').replace(/^## (.+)$/gm, '- `## $1`'),
+		...(about
+			? [
+					en ? '## About me (self-assessment)' : '## Über mich (Selbsteinschätzung)',
+					en
+						? 'Use this as background to understand me and to tailor your feedback. Do not judge it or repeat it back; refer to it where it helps.'
+						: 'Nutze das als Hintergrund, um mich zu verstehen und deine Rückmeldung darauf abzustimmen. Bewerte es nicht und wiederhole es nicht; beziehe dich darauf, wo es hilft.',
+					about
+				]
+			: []),
 		en ? '## My journal entries' : '## Meine Tagebucheinträge',
 		buildUserPrompt(entries, lang, from, to, question)
 	].join('\n\n');

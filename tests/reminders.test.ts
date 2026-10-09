@@ -42,21 +42,43 @@ test('Monatliche Fälligkeit: Monatsletzter und fixer Tag', () => {
 	assert.equal(lastMonthlyDueOnOrBefore('2026-10-20', 15), '2026-10-15');
 });
 
-test('Gefühl: fällig am Sonntag, erledigt wenn kurz vorher geschrieben', () => {
-	assert.equal(isGefuehlDue('2026-10-11', [], cfg), true);
-	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-09', ['erlebt', 'gefuehl'])], cfg), false);
-	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-04', ['gefuehl'])], cfg), true);
+const start = meta('2026-09-01', ['erlebt']); // Tagebuch läuft schon länger
+
+test('Gefühl: fällig am Sonntag, wenn seit rund einer Woche kein Rückblick', () => {
+	assert.equal(isGefuehlDue('2026-10-11', [start], cfg), true);
+	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-04', ['gefuehl']), start], cfg), true);
+	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-05', ['gefuehl']), start], cfg), true); // einen Tag zu spät geschrieben
+});
+
+test('Gefühl: nicht fällig, wenn der letzte Rückblick weniger als eine Woche zurückliegt', () => {
+	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-09', ['erlebt', 'gefuehl']), start], cfg), false);
+	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-06', ['gefuehl']), start], cfg), false);
+	// … dafür am Sonntag darauf
+	assert.equal(isGefuehlDue('2026-10-18', [meta('2026-10-06', ['gefuehl']), start], cfg), true);
+});
+
+test('Neues Tagebuch: Wochenrückblick erst nach der ersten Woche', () => {
+	assert.equal(isGefuehlDue('2026-10-11', [], cfg), false);
+	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-08', ['erlebt'])], cfg), false);
+	assert.equal(isGefuehlDue('2026-10-18', [meta('2026-10-08', ['erlebt'])], cfg), true);
 });
 
 test('Gefühl: bleibt nach dem Sonntag fällig, bis es geschrieben ist', () => {
-	assert.equal(isGefuehlDue('2026-10-13', [meta('2026-10-04', ['gefuehl'])], cfg), true);
-	assert.equal(isGefuehlDue('2026-10-13', [meta('2026-10-12', ['gefuehl'])], cfg), false);
+	assert.equal(isGefuehlDue('2026-10-13', [meta('2026-10-04', ['gefuehl']), start], cfg), true);
+	assert.equal(isGefuehlDue('2026-10-13', [meta('2026-10-12', ['gefuehl']), start], cfg), false);
 });
 
-test('Weiterentwicklung: fällig am Monatsletzten, nicht wenn in den Tagen davor geschrieben', () => {
-	assert.equal(isWachstumDue('2026-10-31', [], cfg), true);
-	assert.equal(isWachstumDue('2026-10-31', [meta('2026-10-28', ['wachstum'])], cfg), false);
-	assert.equal(isWachstumDue('2026-10-31', [meta('2026-10-10', ['wachstum'])], cfg), true);
+test('Weiterentwicklung: fällig am Monatsletzten, wenn seit rund einem Monat kein Rückblick', () => {
+	assert.equal(isWachstumDue('2026-10-31', [start], cfg), true);
+	assert.equal(isWachstumDue('2026-10-31', [meta('2026-09-30', ['wachstum']), start], cfg), true);
+	assert.equal(isWachstumDue('2026-10-31', [meta('2026-10-28', ['wachstum']), start], cfg), false);
+	assert.equal(isWachstumDue('2026-10-31', [meta('2026-10-10', ['wachstum']), start], cfg), false);
+	assert.equal(isWachstumDue('2026-11-30', [meta('2026-10-10', ['wachstum']), start], cfg), true);
+});
+
+test('Neues Tagebuch: Monatsrückblick erst nach rund einem Monat', () => {
+	assert.equal(isWachstumDue('2026-10-31', [meta('2026-10-20', ['erlebt'])], cfg), false);
+	assert.equal(isWachstumDue('2026-11-30', [meta('2026-10-20', ['erlebt'])], cfg), true);
 });
 
 test('Ausgeschaltete Erinnerungen sind nie fällig', () => {

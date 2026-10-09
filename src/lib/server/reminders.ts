@@ -5,6 +5,7 @@ import { listEntryMeta } from './entries';
 import { isLang, translate } from '$lib/i18n';
 import { todayIso } from '$lib/dates';
 import { randomUUID } from 'node:crypto';
+import { log } from './log';
 import {
 	defaultReminders,
 	isGefuehlDue,
@@ -176,10 +177,14 @@ export async function sendToAll(payload: { title: string; body: string; url: str
 			sent++;
 		} catch (e) {
 			const status = (e as { statusCode?: number }).statusCode;
-			if (status === 404 || status === 410) removeDevice(r.endpoint);
-			else console.error('Push fehlgeschlagen', status ?? (e as Error).message, (e as { body?: string }).body ?? '');
+			if (status === 404 || status === 410) {
+				removeDevice(r.endpoint);
+				log.info('push device expired and removed');
+			}
+			else log.error('push failed', { status: status ?? (e as Error).message, body: (e as { body?: string }).body ?? '' });
 		}
 	}
+	log.info('push sent', { tag: payload.tag.replace(/^custom-.*/, 'custom'), devices: sent, of: rows.length });
 	return sent;
 }
 
@@ -233,7 +238,7 @@ const globalKey = Symbol.for('ediurnum.reminderTimer');
 export function startReminderScheduler() {
 	const g = globalThis as unknown as Record<symbol, ReturnType<typeof setInterval> | undefined>;
 	if (g[globalKey]) clearInterval(g[globalKey]);
-	const run = () => reminderTick().catch((e) => console.error('Erinnerungen:', (e as Error).message));
+	const run = () => reminderTick().catch((e) => log.error('reminder check failed', { error: (e as Error).message }));
 	g[globalKey] = setInterval(run, 60_000);
 	g[globalKey].unref?.();
 	setTimeout(run, 5_000).unref?.();

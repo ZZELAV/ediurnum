@@ -6,6 +6,7 @@ const AAD = 'ediurnum/settings';
 
 export function defaultSettings(): Settings {
 	return {
+		name: '',
 		language: 'de',
 		theme: 'system',
 		sessionMinutes: 30,

@@ -15,7 +15,7 @@ import type { Entry, Lang } from '$lib/types';
  */
 
 const AAD = 'ediurnum/backup/v1';
-const META_KEYS = ['created_at', 'settings', 'pin_kdf', 'pin_check', 'reminders'];
+const META_KEYS = ['created_at', 'settings', 'profile', 'pin_kdf', 'pin_check', 'reminders'];
 
 interface BackupHeader {
 	format: 'ediurnum-backup';

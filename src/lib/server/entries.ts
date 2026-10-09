@@ -203,6 +203,10 @@ export function setAiAllowed(date: string, allowed: boolean) {
 	getDb().prepare('UPDATE entries SET ai_allowed = ? WHERE date = ?').run(allowed ? 1 : 0, date);
 }
 
+export function isLocked(date: string): boolean {
+	return rowByDate(date)?.locked === 1;
+}
+
 export function deleteEntry(date: string) {
 	getDb().prepare('DELETE FROM entries WHERE date = ?').run(date);
 }
@@ -250,4 +254,19 @@ export function entriesForAi(
 		entries.push({ ...toMeta(r), content: decryptJson<EntryContent>(key, r.payload, aad(r.id, r.revision)) });
 	}
 	return { entries, skippedLocked };
+}
+
+/** Stimmung pro Tag in einem Zeitraum (für den Verlauf in den Einsichten). Gesperrte Einträge nur mit PIN. */
+export function moodSeries(session: Session, from: string, to: string): { date: string; mood: number }[] {
+	const rows = getDb()
+		.prepare('SELECT * FROM entries WHERE date >= ? AND date <= ? ORDER BY date ASC')
+		.all(from, to) as unknown as EntryRow[];
+	const out: { date: string; mood: number }[] = [];
+	for (const r of rows) {
+		const key = keyFor(session, r.locked === 1);
+		if (!key) continue;
+		const mood = decryptJson<EntryContent>(key, r.payload, aad(r.id, r.revision)).mood;
+		if (typeof mood === 'number' && mood >= 1 && mood <= 5) out.push({ date: r.date, mood });
+	}
+	return out;
 }

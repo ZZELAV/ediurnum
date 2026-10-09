@@ -9,6 +9,7 @@
 	import { fmtDate, fmtTime, t } from '$lib/i18n/t';
 	import { emptyContent, sanitizeContent, SECTIONS, sectionDef } from '$lib/templates';
 	import type { Suggestions } from '$lib/reminders';
+	import { dismiss, isDismissed } from '$lib/suggest';
 	import type { Entry, EntryMeta, SectionKind } from '$lib/types';
 	import PinDialog from './PinDialog.svelte';
 	import EntryView from './EntryView.svelte';
@@ -108,17 +109,18 @@
 	}
 
 	// ---- Vorschläge für Rückblicke ----
-	// Fällige Rückblicke erscheinen als eigene Karte; „Heute nicht“ wird pro Tag im Browser gemerkt.
+	// Fällige Rückblicke erscheinen als eigene Karte; „Heute nicht“ wird pro Tag im Browser gemerkt
+	// (gleich wie auf der Startseite, siehe $lib/suggest).
 	let dismissed = $state<Partial<Record<SectionKind, boolean>>>({});
-	const dismissKey = (kind: SectionKind) => `ediurnum:suggest-later:${date}:${kind}`;
 
 	onMount(() => {
-		for (const s of optional) {
-			try {
-				if (localStorage.getItem(dismissKey(s.kind))) dismissed[s.kind] = true;
-			} catch {
-				// Speicher nicht verfügbar – Vorschlag bleibt sichtbar
-			}
+		for (const s of optional) if (isDismissed(date, s.kind)) dismissed[s.kind] = true;
+		// „Jetzt schreiben“ auf der Startseite öffnet den Eintrag mit ?add=<Abschnitt>
+		const add = page.url.searchParams.get('add');
+		const def = optional.find((s) => s.kind === add);
+		if (def && readable && content.sections[def.kind] === undefined) {
+			editing = true;
+			addSection(def.kind);
 		}
 	});
 
@@ -136,11 +138,7 @@
 
 	function later(kind: SectionKind) {
 		dismissed[kind] = true;
-		try {
-			localStorage.setItem(dismissKey(kind), '1');
-		} catch {
-			// nur für diese Sitzung ausgeblendet
-		}
+		dismiss(date, kind);
 	}
 
 	async function addSection(kind: SectionKind) {
@@ -184,11 +182,18 @@
 
 	async function remove() {
 		if (!(await ask(t('entry.deleteConfirm'), { confirmLabel: t('common.delete'), danger: true }))) return;
-		const res = await api(`/api/entry/${date}`, 'DELETE');
-		if (res.ok) {
-			lastSaved = JSON.stringify(content);
-			await goto('/', { invalidateAll: true });
-		}
+		const run = async () => {
+			const res = await api(`/api/entry/${date}`, 'DELETE');
+			if (res.ok) {
+				lastSaved = JSON.stringify(content);
+				await goto('/', { invalidateAll: true });
+			} else {
+				message = res.error;
+			}
+		};
+		// Gesperrte Einträge lassen sich nur mit PIN löschen
+		if (meta?.locked) withPin(run);
+		else run();
 	}
 
 	const weekday = $derived(fmtDate(date, 'long').split(',')[0]);

@@ -27,8 +27,9 @@ sw.addEventListener('push', (event) => {
 	event.waitUntil(
 		sw.registration.showNotification(data.title ?? 'ediurnum', {
 			body: data.body ?? '',
-			icon: '/favicon.svg',
-			badge: '/favicon.svg',
+			// PNG statt SVG: viele Systeme zeigen SVG in Benachrichtigungen nicht an
+			icon: '/icon-192.png',
+			badge: '/icon-192.png',
 			tag: data.tag,
 			data: { url: data.url ?? '/' }
 		})

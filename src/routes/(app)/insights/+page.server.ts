@@ -2,7 +2,10 @@ import { fail } from '@sveltejs/kit';
 import { randomUUID } from 'node:crypto';
 import type { Actions, PageServerLoad } from './$types';
 import { isIsoDate } from '$lib/dates';
-import { entriesForAi } from '$lib/server/entries';
+import { entriesForAi, moodSeries } from '$lib/server/entries';
+import { loadProfile } from '$lib/server/profile';
+import { isEmptyProfile } from '$lib/profile';
+import { log } from '$lib/server/log';
 import { loadSettings } from '$lib/server/settings';
 import { deleteAnalysis, listAnalyses, pinAnalysis, saveAnalysis } from '$lib/server/analyses';
 import { buildChatMarkdown, parseResponse } from '$lib/server/ai/analyze';
@@ -17,7 +20,13 @@ import type { AiAgent } from '$lib/types';
 export const load: PageServerLoad = ({ locals }) => {
 	const session = locals.session!;
 	return {
-		analyses: listAnalyses(session.dek).map((a) => ({ ...a, html: renderMarkdown(a.body) }))
+		analyses: listAnalyses(session.dek).map((a) => ({
+			...a,
+			// ältere Auswertungen ohne gespeicherten Verlauf: aus den aktuellen Einträgen berechnen
+			moods: a.moods ?? moodSeries(session, a.from, a.to),
+			html: renderMarkdown(a.body)
+		})),
+		hasProfile: !isEmptyProfile(loadProfile(session.dek))
 	};
 };
 
@@ -40,19 +49,24 @@ export const actions: Actions = {
 		if (entries.length === 0) return fail(400, { error: 'insights.noEntries' });
 
 		const tone = form.get('tone') as AiAgent['tone'];
+		const settings = loadSettings(session.dek);
+		const withProfile = form.get('profile') === 'on';
 		const markdown = buildChatMarkdown({
 			options: {
 				tone: TONES.includes(tone) ? tone : 'balanced',
 				persona: '',
 				maxFocusPoints: Math.min(7, Math.max(1, Number(form.get('focusCount')) || 4))
 			},
-			lang: loadSettings(session.dek).language,
+			lang: settings.language,
+			profile: withProfile ? { profile: loadProfile(session.dek), name: settings.name } : null,
 			entries,
 			...range,
 			question: String(form.get('question') ?? '').slice(0, 2000)
 		});
+		log.info('AI file created', { entries: entries.length, profile: withProfile });
 		return {
 			markdown,
+			moods: moodSeries(session, range.from, range.to),
 			count: entries.length,
 			...range,
 			filename: `ediurnum-${range.from}_${range.to}.md`
@@ -80,7 +94,8 @@ export const actions: Actions = {
 			question: String(form.get('question') ?? '').slice(0, 2000),
 			body,
 			focusPoints,
-			pinned: false
+			pinned: false,
+			moods: moodSeries(session, range.from, range.to)
 		};
 		saveAnalysis(session.dek, analysis);
 		if (focusPoints.length) pinAnalysis(session.dek, analysis.id);

@@ -12,16 +12,22 @@ with optional AI feedback for personal growth.
   - **Feelings** (about weekly): energy, emotions, what gives and drains energy
   - **Learning & growth** (about monthly): what you learned, what you’re proud of, your next focus
   - **Free thoughts** and a mood scale in every entry
-  - Due weekly and monthly reviews are suggested right inside the entry (“Write it now” / “Not today”)
+  - Weekly and monthly reviews are suggested once about a week or a month has passed without one – in the entry
+    and on the dashboard (“Write it now” / “Not today”)
+- **About me**: a short self-assessment as your first entry (journaling experience, life satisfaction, personality
+  based on the Big Five, values, strengths, goals) – the background for AI insights, editable any time
+- **On this day**: the entry from one year ago appears on the dashboard
 - **Past days open read-only** – edit them with the pencil; every entry keeps a **version history**
 - **Reminders**: weekly and monthly reviews plus your own reminders (once, daily, on chosen weekdays or monthly),
   shown in the app and as **push notifications** on registered devices
 - **Optional focus mode**: while you write, navigation and side column fade out; press Esc to return
-- **All content encrypted at rest**, with a recovery key shown once at setup
+- **All content encrypted at rest**, with a recovery key shown once at setup; the journal locks itself after a set
+  time without activity
 - **Locked entries** with an additional PIN
 - **AI insights without API keys**: ediurnum turns the entries of a period into a Markdown file for the AI chat of your
-  choice (ChatGPT, Claude, Gemini, …). Paste the answer back to keep it – its focus points for the coming weeks appear
-  on the dashboard. Built-in AI agents with API keys are planned for a later release.
+  choice (ChatGPT, Claude, Gemini, …), optionally with your self-assessment. Paste the answer back to keep it – its
+  focus points for the coming weeks and a chart of your mood appear on the dashboard. ediurnum never sends anything
+  to an AI on its own; AI agents with your own API key are planned for a later release.
 - **Encrypted backup**, readable export (Markdown/JSON) and **delete journal** (all entries, or a complete reset)
 - German and English, light and dark theme (follows your device unless you choose one), installable as a web app
 
@@ -29,7 +35,7 @@ with optional AI feedback for personal growth.
 
 | What | How |
 |---|---|
-| Entries, settings, AI reviews | AES-256-GCM with a random 256-bit master key |
+| Entries, settings, self-assessment, AI reviews | AES-256-GCM with a random 256-bit master key |
 | Master key | stored encrypted with your password (Argon2id, 64 MiB); decrypted only in memory during a session |
 | Recovery key | is the master key itself (56 characters incl. checksum); shown only once |
 | Locked entries | additionally encrypted with a key derived from master key + PIN |

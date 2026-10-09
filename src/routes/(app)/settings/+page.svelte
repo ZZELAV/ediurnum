@@ -2,7 +2,9 @@
 	import { onMount } from 'svelte';
 	import { ask } from '$lib/confirm.svelte';
 	import { enhance } from '$app/forms';
-	import { t } from '$lib/i18n/t';
+	import { fmtDate, t } from '$lib/i18n/t';
+	import { CHANGELOG_URL } from '$lib/changelog';
+	import PasswordInput from '$lib/components/PasswordInput.svelte';
 
 	let { data, form } = $props();
 
@@ -47,6 +49,7 @@
 
 		<nav class="toc" aria-label={t('settings.title')}>
 			<a href="#general">{t('settings.general')}</a>
+			<a href="#profile">{t('profile.title')}</a>
 			<a href="#security">{t('settings.security')}</a>
 			<a href="#backup">{t('settings.backup')}</a>
 			<a href="#danger">{t('settings.danger')}</a>
@@ -58,6 +61,10 @@
 			<h2>{t('settings.general')}</h2>
 			{@render feedback('general')}
 			<form method="POST" action="?/general" use:enhance={keepValues} class="grid">
+				<div class="field">
+					<label for="name">{t('settings.name')}</label>
+					<input id="name" name="name" type="text" autocomplete="given-name" maxlength="60" value={data.settings.name} />
+				</div>
 				<div class="field">
 					<label for="lang">{t('settings.language')}</label>
 					<select id="lang" name="language" value={data.settings.language}>
@@ -89,6 +96,18 @@
 			</form>
 		</section>
 
+		<!-- Über mich -->
+		<section id="profile" class="card">
+			<h2>{t('profile.title')}</h2>
+			<p class="faint">{t('settings.profileIntro')}</p>
+			{#if data.profile.filled}
+				<p>{t('profile.updated', { date: fmtDate(data.profile.updatedAt, 'medium') })}</p>
+			{:else}
+				<p>{t('settings.profileEmpty')}</p>
+			{/if}
+			<a class="btn ghost" href="/profile">{data.profile.filled ? t('settings.profileEdit') : t('settings.profileFill')}</a>
+		</section>
+
 		<!-- Sicherheit -->
 		<section id="security" class="card">
 			<h2>{t('settings.security')}</h2>
@@ -97,17 +116,19 @@
 			<h3>{t('settings.changePassword')}</h3>
 			{@render feedback('password')}
 			<form method="POST" action="?/password" use:enhance class="grid">
+				<!-- Für Passwortmanager: der Vorname als Benutzername -->
+				<input class="visually-hidden" type="text" name="username" value={data.settings.name} autocomplete="username" tabindex="-1" aria-hidden="true" readonly />
 				<div class="field">
 					<label for="cur">{t('settings.currentPassword')}</label>
-					<input id="cur" name="current" type="password" autocomplete="current-password" required />
+					<PasswordInput id="cur" name="current" autocomplete="current-password" required />
 				</div>
 				<div class="field">
 					<label for="npw">{t('settings.newPassword')}</label>
-					<input id="npw" name="password" type="password" autocomplete="new-password" minlength="10" required />
+					<PasswordInput id="npw" name="password" autocomplete="new-password" minlength={10} required />
 				</div>
 				<div class="field">
 					<label for="npw2">{t('settings.newPasswordConfirm')}</label>
-					<input id="npw2" name="confirm" type="password" autocomplete="new-password" minlength="10" required />
+					<PasswordInput id="npw2" name="confirm" autocomplete="new-password" minlength={10} required />
 				</div>
 				<div><button class="btn">{t('settings.changePassword')}</button></div>
 			</form>
@@ -120,16 +141,16 @@
 				{#if data.hasPin}
 					<div class="field">
 						<label for="cpin">{t('settings.currentPin')}</label>
-						<input id="cpin" name="current" type="password" inputmode="numeric" autocomplete="off" required />
+						<PasswordInput id="cpin" name="current" inputmode="numeric" autocomplete="off" required />
 					</div>
 				{/if}
 				<div class="field">
 					<label for="npin">{t('settings.newPin')}</label>
-					<input id="npin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{'{'}4,12{'}'}" autocomplete="off" required />
+					<PasswordInput id="npin" name="pin" inputmode="numeric" pattern={'[0-9]{4,12}'} autocomplete="off" required />
 				</div>
 				<div class="field">
 					<label for="npin2">{t('settings.newPinConfirm')}</label>
-					<input id="npin2" name="confirm" type="password" inputmode="numeric" autocomplete="off" required />
+					<PasswordInput id="npin2" name="confirm" inputmode="numeric" autocomplete="off" required />
 				</div>
 				<div><button class="btn">{data.hasPin ? t('settings.pinChange') : t('settings.pinSet')}</button></div>
 			</form>
@@ -170,7 +191,7 @@
 			>
 				<div class="field purge-pw">
 					<label for="purge-pw">{t('settings.currentPassword')}</label>
-					<input id="purge-pw" name="password" type="password" autocomplete="current-password" required />
+					<PasswordInput id="purge-pw" name="password" autocomplete="current-password" required />
 				</div>
 				<div class="purge-option">
 					<button class="btn danger" name="mode" value="content">{t('settings.purgeContent')}</button>
@@ -187,10 +208,18 @@
 		<section id="about" class="card">
 			<h2>{t('settings.about')}</h2>
 			<p>{t('common.version')} {data.version}</p>
-			<details>
-				<summary>{t('settings.changelog')}</summary>
-				<div class="prose changelog">{@html data.changelogHtml}</div>
-			</details>
+			{#if data.changelog}
+				<details>
+					<summary>
+						{t('settings.changelogLatest', { version: data.changelog.version })}
+						{#if data.changelog.date}<span class="faint">· {fmtDate(data.changelog.date, 'medium')}</span>{/if}
+					</summary>
+					<div class="prose changelog">{@html data.changelog.html}</div>
+				</details>
+			{/if}
+			<p class="faint" style="margin-top: 0.75rem">
+				<a href={CHANGELOG_URL} target="_blank" rel="noopener noreferrer">{t('settings.changelogAll')} ↗</a>
+			</p>
 		</section>
 </div>
 

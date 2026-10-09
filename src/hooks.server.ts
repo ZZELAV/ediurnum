@@ -1,19 +1,39 @@
-import { json, redirect, type Handle, type ServerInit } from '@sveltejs/kit';
+import { json, redirect, type Handle, type HandleServerError, type ServerInit } from '@sveltejs/kit';
+import { dev } from '$app/environment';
+import { env } from '$env/dynamic/private';
 import { startReminderScheduler } from '$lib/server/reminders';
 import { getSession, isInitialized } from '$lib/server/vault';
 import { loadSettings } from '$lib/server/settings';
+import { dataDir } from '$lib/server/db';
+import { log } from '$lib/server/log';
 import { isLang, pickLang } from '$lib/i18n';
 import { SESSION_COOKIE } from '$lib/server/auth';
 
 const PUBLIC_PATHS = ['/setup', '/login', '/recover'];
 
-/** Beim Serverstart: Planer für Erinnerungen (Push) starten. */
+/** Ältere Geräte fragen eigene Namen für das Symbol ab (z. B. „-precomposed“ oder mit Grösse). */
+const TOUCH_ICON_ALIAS = /^\/apple-touch-icon(-\d+x\d+)?(-precomposed)?\.png$/;
+
+/** Beim Serverstart: Angaben ins Log schreiben und den Planer für Erinnerungen (Push) starten. */
 export const init: ServerInit = () => {
+	log.info('ediurnum started', {
+		version: __APP_VERSION__,
+		node: process.version,
+		origin: env.ORIGIN || '(not set)',
+		dataDir: dataDir(),
+		tz: process.env.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+		initialized: isInitialized()
+	});
+	if (!env.ORIGIN && !dev) log.warn('ORIGIN is not set – form submissions behind a reverse proxy will fail');
 	startReminderScheduler();
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
+	const started = Date.now();
 	const path = event.url.pathname;
+
+	if (TOUCH_ICON_ALIAS.test(path)) redirect(301, '/apple-touch-icon.png');
+
 	const session = getSession(event.cookies.get(SESSION_COOKIE));
 	event.locals.session = session;
 	event.locals.settings = session ? loadSettings(session.dek) : null;
@@ -43,11 +63,29 @@ export const handle: Handle = async ({ event, resolve }) => {
 	});
 
 	response.headers.set('X-Content-Type-Options', 'nosniff');
-	response.headers.set('Referrer-Policy', 'no-referrer');
+	// "same-origin" statt "no-referrer": Bei "no-referrer" senden Browser bei normalen Formularen
+	// "Origin: null" – SvelteKit lehnt solche POST-Anfragen als Cross-Site ab (z. B. beim Schliessen).
+	response.headers.set('Referrer-Policy', 'same-origin');
 	response.headers.set('X-Frame-Options', 'DENY');
 	response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()');
 	if (!response.headers.has('Cache-Control') && !path.startsWith('/_app/')) {
 		response.headers.set('Cache-Control', 'no-store');
 	}
+	if (log.isDebug()) log.debug(`${event.request.method} ${path}`, { status: response.status, ms: Date.now() - started });
 	return response;
+};
+
+/** Unerwartete Fehler ins Log schreiben (ohne Anfrageinhalte); 404 nur im Debug-Modus. */
+export const handleError: HandleServerError = ({ error, event, status, message }) => {
+	if (status === 404) {
+		log.debug('not found', { method: event.request.method, path: event.url.pathname });
+	} else {
+		log.error('request failed', {
+			method: event.request.method,
+			path: event.url.pathname,
+			status,
+			error: error instanceof Error ? (error.stack ?? error.message) : String(error)
+		});
+	}
+	return { message };
 };

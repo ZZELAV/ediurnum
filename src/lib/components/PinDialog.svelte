@@ -2,6 +2,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { api } from '$lib/client';
 	import { t } from '$lib/i18n/t';
+	import PasswordInput from './PasswordInput.svelte';
 
 	let { open = $bindable(false), onunlocked }: { open?: boolean; onunlocked?: () => void } = $props();
 
@@ -45,13 +46,12 @@
 		<p class="faint">{t('pin.intro')}</p>
 		{#if error}<p class="notice error" role="alert">{t(error, { seconds })}</p>{/if}
 		<label for="pin-input" class="visually-hidden">{t('pin.label')}</label>
-		<input
+		<PasswordInput
 			id="pin-input"
-			type="password"
 			inputmode="numeric"
 			autocomplete="off"
 			pattern="[0-9]*"
-			maxlength="12"
+			maxlength={12}
 			bind:value={pin}
 			class="pin"
 		/>
@@ -76,7 +76,7 @@
 		background: rgba(20, 16, 10, 0.45);
 		backdrop-filter: blur(3px);
 	}
-	.pin {
+	.pin-dialog :global(.pin) {
 		font-size: 1.6rem;
 		letter-spacing: 0.5em;
 		text-align: center;

@@ -5,6 +5,7 @@
 	import { api } from '$lib/client';
 	import { addDays } from '$lib/dates';
 	import PinDialog from '$lib/components/PinDialog.svelte';
+	import MoodChart from '$lib/components/MoodChart.svelte';
 	import { fmtDate, fmtDateTime, t } from '$lib/i18n/t';
 
 	let { data } = $props();
@@ -20,7 +21,15 @@
 	let preview = $state<{ send: number; locked: number; pinOpen: boolean; excluded: number } | null>(null);
 
 	// Schritt 1: erstellte Markdown-Datei; Schritt 2: Antwort aus dem Chat
-	let result = $state<{ markdown: string; count: number; from: string; to: string; filename: string } | null>(null);
+	let result = $state<{
+		markdown: string;
+		moods: { date: string; mood: number }[];
+		count: number;
+		from: string;
+		to: string;
+		filename: string;
+	} | null>(null);
+	let withProfile = $state(true);
 	let answer = $state('');
 	let error = $state<string | null>(null);
 	let notice = $state<string | null>(null);
@@ -145,6 +154,17 @@
 				<textarea id="q" name="question" rows="2" placeholder={t('insights.questionHint')} bind:value={question}></textarea>
 			</div>
 
+			<div class="field check">
+				<label class="switch-label">
+					<input type="checkbox" role="switch" name="profile" bind:checked={withProfile} />
+					<span>{t('insights.withProfile')}</span>
+				</label>
+				<p class="faint">
+					{data.hasProfile ? t('insights.withProfileHint') : t('insights.withProfileEmpty')}
+					<a href="/profile">{t('profile.title')} →</a>
+				</p>
+			</div>
+
 			{#if preview}
 				<div class="preview card">
 					<p>{t('insights.preview', { count: preview.send })}</p>
@@ -170,6 +190,7 @@
 			<!-- Datei bereit: herunterladen oder kopieren -->
 			<div class="ready">
 				<p><strong>{t('insights.fileReady', { count: result.count })}</strong></p>
+				<MoodChart points={result.moods} from={result.from} to={result.to} />
 				<div class="row">
 					<button type="button" class="btn" onclick={download}>{t('insights.download')}</button>
 					<button type="button" class="btn ghost" onclick={copy}>{t('insights.copy')}</button>
@@ -233,6 +254,7 @@
 					</span>
 				</summary>
 				{#if a.question}<p class="faint"><em>„{a.question}“</em></p>{/if}
+				<MoodChart points={a.moods} from={a.from} to={a.to} />
 				{#if a.focusPoints.length}
 					<div class="focus card">
 						<p class="eyebrow">{t('insights.focusPoints')}</p>
@@ -368,5 +390,15 @@
 	}
 	.actions {
 		margin-top: 1rem;
+	}
+	.check p {
+		margin: 0.2rem 0 0 calc(2.4rem + 0.55rem);
+	}
+	.switch-label {
+		display: flex;
+		align-items: center;
+		gap: 0.55rem;
+		color: var(--ink);
+		margin: 0;
 	}
 </style>

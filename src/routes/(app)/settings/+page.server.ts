@@ -4,6 +4,10 @@ import type { Actions, PageServerLoad } from './$types';
 import changelog from '../../../../CHANGELOG.md?raw';
 import { isLang } from '$lib/i18n';
 import { renderMarkdown } from '$lib/markdown';
+import { changelogSection } from '$lib/changelog';
+import { isEmptyProfile } from '$lib/profile';
+import { loadProfile } from '$lib/server/profile';
+import { log } from '$lib/server/log';
 import { presetById } from '$lib/ai-presets';
 import { SESSION_COOKIE, setLangCookie } from '$lib/server/auth';
 import { purgeContent, resetAll } from '$lib/server/purge';
@@ -27,10 +31,13 @@ import type { AiAgent, Theme } from '$lib/types';
 
 export const load: PageServerLoad = ({ locals }) => {
 	const settings = loadSettings(locals.session!.dek);
+	const profile = loadProfile(locals.session!.dek);
+	const latest = changelogSection(changelog, __APP_VERSION__);
 	return {
 		settings: { ...settings, agents: settings.agents.map(publicAgent) },
 		lockedCount: countLocked(),
-		changelogHtml: renderMarkdown(changelog)
+		profile: { filled: !isEmptyProfile(profile), updatedAt: profile.updatedAt },
+		changelog: latest ? { version: latest.version, date: latest.date, html: renderMarkdown(latest.body) } : null
 	};
 };
 
@@ -44,6 +51,7 @@ export const actions: Actions = {
 		const language = form.get('language');
 		const theme = form.get('theme') as Theme;
 		const minutes = Number(form.get('sessionMinutes'));
+		settings.name = String(form.get('name') ?? '').trim().slice(0, 60);
 		if (isLang(language)) settings.language = language;
 		if (THEMES.includes(theme)) settings.theme = theme;
 		settings.focusMode = form.get('focusMode') === 'on';
@@ -70,10 +78,12 @@ export const actions: Actions = {
 		dek.fill(0);
 		if (mode === 'all') {
 			resetAll();
+			log.info('journal reset completely');
 			cookies.delete(SESSION_COOKIE, { path: '/' });
 			redirect(303, '/setup');
 		}
 		purgeContent();
+		log.info('all entries deleted');
 		return { section: 'danger', success: 'settings.purgeDone' };
 	},
 
@@ -92,6 +102,7 @@ export const actions: Actions = {
 		}
 		registerSuccess('password-change');
 		await setPassword(dek, next);
+		log.info('password changed');
 		return { section: 'password', success: 'settings.passwordChanged' };
 	},
 
@@ -119,6 +130,7 @@ export const actions: Actions = {
 			commit();
 		});
 		unlockPinForSession(session, lockKey);
+		log.info('PIN changed');
 		return { section: 'pin', success: 'settings.pinSaved' };
 	},
 

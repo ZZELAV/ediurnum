@@ -27,3 +27,11 @@ export function daysBetween(a: string, b: string): number {
 export function monthKey(iso: string): string {
 	return iso.slice(0, 7);
 }
+
+/** Gleicher Kalendertag `years` Jahre früher oder später (29. Februar → 28. Februar). */
+export function addYears(iso: string, years: number): string {
+	const y = Number(iso.slice(0, 4)) + years;
+	const md = iso.slice(5);
+	const candidate = `${String(y).padStart(4, '0')}-${md}`;
+	return isIsoDate(candidate) ? candidate : `${String(y).padStart(4, '0')}-02-28`;
+}
