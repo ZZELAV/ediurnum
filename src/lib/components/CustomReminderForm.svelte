@@ -121,7 +121,7 @@
 	}
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
 		gap: 0 1rem;
 	}
 	.grid .field:last-child {

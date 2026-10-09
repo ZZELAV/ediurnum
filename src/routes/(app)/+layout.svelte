@@ -267,7 +267,7 @@
 			inset: auto 0 0 0;
 			z-index: 30;
 			display: grid;
-			grid-template-columns: repeat(5, 1fr);
+			grid-template-columns: repeat(5, minmax(0, 1fr));
 			height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
 			padding-bottom: env(safe-area-inset-bottom);
 			background: var(--paper);

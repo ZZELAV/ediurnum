@@ -5,3 +5,7 @@ data
 .git
 .env
 *.ediurnum
+.claude
+.github
+docs
+tests

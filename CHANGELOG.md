@@ -4,6 +4,19 @@ All notable changes to ediurnum are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [Semantic Versioning](https://semver.org).
 The topmost version without a date is still in development.
 
+## [0.1.0-beta.3] - 2026-10-09
+
+### Added
+
+- Ready-made Docker image on Docker Hub (`zzelav/ediurnum`, amd64 and arm64): installing no longer needs
+  `git clone` – `docker-compose.yml` and `.env.example` are enough. Pin a version with `EDIURNUM_VERSION`.
+
+### Fixed
+
+- On iPhone, the next date of a review reminder overlapped the time field above it.
+- On iPhone and other narrow screens, input fields (e.g. the three gratitude lines), long buttons and long words in
+  the changelog or AI reviews no longer reach beyond the right edge.
+
 ## [0.1.0-beta.2] - 2026-10-09
 
 ### Added
@@ -56,5 +69,6 @@ First public beta of ediurnum – a private, self-hosted, encrypted journal for 
 - Optional focus mode while writing, German and English, light and dark theme, installable web app,
   Docker Compose setup for self-hosting.
 
+[0.1.0-beta.3]: https://github.com/ZZELAV/ediurnum/compare/v0.1.0-beta.2...v0.1.0-beta.3
 [0.1.0-beta.2]: https://github.com/ZZELAV/ediurnum/compare/v0.1.0-beta.1...v0.1.0-beta.2
 [0.1.0-beta.1]: https://github.com/ZZELAV/ediurnum/releases/tag/v0.1.0-beta.1

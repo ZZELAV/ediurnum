@@ -138,7 +138,7 @@
 	}
 	.item {
 		display: grid;
-		grid-template-columns: auto 1fr auto;
+		grid-template-columns: auto minmax(0, 1fr) auto;
 		gap: 0.85rem;
 		align-items: start;
 		padding: 0.8rem 0;
@@ -211,7 +211,7 @@
 	}
 	@media (max-width: 560px) {
 		.item {
-			grid-template-columns: auto 1fr;
+			grid-template-columns: auto minmax(0, 1fr);
 		}
 		.actions {
 			grid-column: 2;

@@ -55,11 +55,15 @@ with optional AI feedback for personal growth.
 ediurnum runs as a single Docker container behind a reverse proxy that provides HTTPS
 (for example NGINX Proxy Manager).
 
+The image is on Docker Hub: [`zzelav/ediurnum`](https://hub.docker.com/r/zzelav/ediurnum) (amd64, arm64).
+
 ```bash
-git clone https://github.com/ZZELAV/ediurnum.git && cd ediurnum
+mkdir ediurnum && cd ediurnum
+curl -fsSLO https://raw.githubusercontent.com/ZZELAV/ediurnum/main/docker-compose.yml
+curl -fsSLO https://raw.githubusercontent.com/ZZELAV/ediurnum/main/.env.example
 cp .env.example .env            # set ORIGIN to your public https address
 mkdir -p data && sudo chown 1000:1000 data
-docker compose up -d --build
+docker compose up -d
 ```
 
 The full step-by-step guide – reverse proxy, push notifications, AI insights, updates and backups – is in

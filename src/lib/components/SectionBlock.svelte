@@ -111,6 +111,10 @@
 		align-items: center;
 		gap: 0.6rem;
 	}
+	.lines input {
+		flex: 1 1 0;
+		min-width: 0;
+	}
 	.num {
 		flex: none;
 		width: 1.2rem;

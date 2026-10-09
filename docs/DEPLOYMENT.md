@@ -8,18 +8,33 @@ and walks you through installing the app, testing push notifications and AI insi
 - A Linux server with **Docker** and the **Compose plugin** (`docker compose version` works)
 - **NGINX Proxy Manager** (or another reverse proxy that terminates HTTPS)
 - A **domain or subdomain** pointing to the server, e.g. `journal.example.com` (DNS A/AAAA record)
-- `git`
+- `curl` (or `git`, if you build from source)
 
 HTTPS is required: browsers only allow push notifications and installing the web app on secure origins.
 
-## 1. Get the code
+## 1. Get the files
+
+ediurnum is published as a ready-made image on Docker Hub
+([zzelav/ediurnum](https://hub.docker.com/r/zzelav/ediurnum), for amd64 and arm64). You only need two files:
+
+```bash
+mkdir ediurnum && cd ediurnum
+curl -fsSLO https://raw.githubusercontent.com/ZZELAV/ediurnum/main/docker-compose.yml
+curl -fsSLO https://raw.githubusercontent.com/ZZELAV/ediurnum/main/.env.example
+```
+
+<details>
+<summary>Build from source instead</summary>
 
 ```bash
 git clone https://github.com/ZZELAV/ediurnum.git
 cd ediurnum
+git checkout v0.1.0-beta.3      # optional: a specific release
 ```
 
-To run a specific release instead of the latest code, check out its tag, e.g. `git checkout v0.1.0-beta.1`.
+In step 5 and for updates, add `-f docker-compose.yml -f docker-compose.build.yml` and `--build` to
+`docker compose up`, e.g. `docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build`.
+</details>
 
 ## 2. Configure
 
@@ -31,6 +46,7 @@ nano .env
 - `ORIGIN` – the exact public address, e.g. `https://journal.example.com` (no trailing slash).
   It is used for cross-site protection, secure cookies and as the sender for push services.
 - `TZ` – your time zone (`Europe/Zurich`, …). “Today” and all reminder times use it.
+- `EDIURNUM_VERSION` (optional) – pin a release, e.g. `0.1.0-beta.3`. Without it, the newest release (`latest`) is used.
 - `LOG_LEVEL` (optional) – `info` by default: start-up, opening and closing the journal, failed attempts, backups,
   push notifications and errors. `debug` additionally logs every request. Logs never contain journal content.
 - Leave the other values as they are unless you know you need something else.
@@ -59,16 +75,15 @@ docker network ls      # find the network of NGINX Proxy Manager, e.g. nginx-pro
 In `docker-compose.yml`: remove the `ports:` block, enable the `networks:` lines under the service and at the
 bottom, and set the network name you found. The proxy then forwards to host `ediurnum`, port `3000`.
 
-## 5. Build and start
+## 5. Start
 
 ```bash
-docker compose up -d --build
+docker compose up -d
 docker compose ps          # after ~20 s the status should be "healthy"
 docker compose logs -f     # Ctrl+C to stop following the logs
 ```
 
-The first build takes a few minutes. If the container keeps restarting, check the logs – most often the
-`data` folder is not writable (step 3).
+If the container keeps restarting, check the logs – most often the `data` folder is not writable (step 3).
 
 ## 6. Set up the proxy host (NGINX Proxy Manager)
 
@@ -159,11 +174,17 @@ AI agents with your own API key are planned for a later release – they will al
 
 ```bash
 cd ediurnum
-git pull                       # or: git fetch --tags && git checkout <new tag>
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
 
-Database migrations run automatically on start. Download a backup before larger updates.
+With `EDIURNUM_VERSION` pinned, change it in `.env` first. New releases are listed in the
+[changelog](https://github.com/ZZELAV/ediurnum/blob/main/CHANGELOG.md). Database migrations run automatically on start.
+Download a backup before larger updates.
+
+**Switching from a source installation** (`git clone`): run `git pull` once – `docker-compose.yml` then uses the
+image from Docker Hub – and continue with `docker compose pull && docker compose up -d`. Your `.env` and `data`
+stay as they are.
 
 ## 11. Backups
 

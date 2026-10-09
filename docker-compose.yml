@@ -1,7 +1,8 @@
 services:
   ediurnum:
-    build: .
-    image: ediurnum:latest
+    # Ready-made image from Docker Hub. Pin a version with EDIURNUM_VERSION in .env (e.g. 0.1.0-beta.3);
+    # without it, "latest" is used. To build from source instead, see docs/DEPLOYMENT.md.
+    image: zzelav/ediurnum:${EDIURNUM_VERSION:-latest}
     container_name: ediurnum
     restart: unless-stopped
     env_file: .env

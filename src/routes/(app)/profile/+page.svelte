@@ -222,7 +222,7 @@
 	}
 	.poles {
 		display: grid;
-		grid-template-columns: 1fr auto 1fr;
+		grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 		align-items: center;
 		gap: 0.75rem;
 	}
@@ -256,7 +256,7 @@
 	@media (max-width: 520px) {
 		/* Pole über und unter den Punkten, damit nichts seitlich überläuft */
 		.poles {
-			grid-template-columns: 1fr 1fr;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 		.poles > span:first-child {
 			text-align: left;

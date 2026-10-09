@@ -90,11 +90,11 @@
 	}
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
 		gap: 0 1rem;
 	}
 	.next {
-		margin: 0.5rem 0 0.9rem;
+		margin: 0.75rem 0 0.9rem;
 		font-size: 0.85rem;
 	}
 </style>

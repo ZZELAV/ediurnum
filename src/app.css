@@ -281,6 +281,9 @@ input[type='file'],
 select,
 textarea {
 	width: 100%;
+	/* Felder dürfen in Flex-Zeilen und Rastern schrumpfen – iOS gibt ihnen sonst eine feste Mindestbreite,
+	 * und sie ragen rechts hinaus (z. B. neben den Nummern bei „Wofür bin ich dankbar?“) */
+	min-width: 0;
 	font: inherit;
 	color: var(--ink);
 	background: var(--paper-2);
@@ -301,13 +304,19 @@ input[type='time'] {
 	display: block;
 	min-width: 0;
 	max-width: 100%;
-	min-height: 2.75rem;
+	/* feste Höhe wie die übrigen Felder (Zeilenhöhe + Innenabstand + Rahmen) – iOS zeichnet den Wert
+	 * sonst höher als das Feld, er ragt dann über darunterliegende Hinweise */
+	height: calc(1.55em + 1.2rem + 2px);
+	line-height: 1.55;
 	text-align: left;
 }
 input[type='date']::-webkit-date-and-time-value,
 input[type='time']::-webkit-date-and-time-value {
 	text-align: left;
 	margin: 0;
+	padding: 0;
+	min-height: 0;
+	line-height: 1.55;
 }
 input:focus,
 select:focus,
@@ -414,6 +423,14 @@ textarea.write {
 		background 0.15s,
 		transform 0.1s;
 	white-space: nowrap;
+	max-width: 100%;
+}
+/* Schmale Bildschirme: lange Beschriftungen umbrechen statt über den Rand zu ragen */
+@media (max-width: 599px) {
+	.btn {
+		white-space: normal;
+		text-align: center;
+	}
 }
 :root[data-theme='dark'] .btn:not(.ghost):not(.quiet):not(.danger) {
 	color: #12161a;
@@ -518,6 +535,8 @@ textarea.write {
 	font-family: var(--font-serif);
 	font-size: 1.02rem;
 	line-height: 1.75;
+	/* lange Wörter, Pfade oder Links umbrechen statt seitlich überzulaufen */
+	overflow-wrap: anywhere;
 }
 .prose h2,
 .prose h3,
@@ -532,10 +551,15 @@ textarea.write {
 	margin-bottom: 0.3em;
 }
 
+/* !important, weil die Feldregeln (z. B. input[type=text] mit width: 100 %) sonst stärker sind
+ * und ein verstecktes Feld die Seite seitlich verbreitert */
 .visually-hidden {
-	position: absolute;
-	width: 1px;
-	height: 1px;
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	min-width: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
 	overflow: hidden;
 	clip: rect(0 0 0 0);
 	white-space: nowrap;

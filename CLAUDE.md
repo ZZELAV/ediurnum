@@ -19,7 +19,7 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 2. **CHANGELOG.md** im Format *Keep a Changelog* pflegen:
    - **Kein `[Unreleased]`-Abschnitt.** Mit der ersten Änderung nach einem Release wird die nächste Version angelegt: `## [x.y.z]` (noch ohne Datum) im CHANGELOG und dieselbe Version in `package.json`/`package-lock.json` (`npm version --no-git-tag-version x.y.z`). Die Einstellungen zeigen genau diesen Abschnitt (passend zur Version in `package.json`).
    - Jede Änderung dort in der passenden Kategorie (`Added`, `Changed`, `Fixed`, `Security`, `Removed`, `Deprecated`) eintragen – **auf Englisch** (öffentliches Repo), aus Sicht des Nutzers, kurz.
-   - Beim Release: Datum ergänzen (`## [x.y.z] - JJJJ-MM-TT`), Vergleichslinks unten aktualisieren (`compare/vVORHER...vx.y.z` bzw. `releases/tag/…`), committen, Tag `vx.y.z` setzen.
+   - Beim Release: Datum ergänzen (`## [x.y.z] - JJJJ-MM-TT`), Vergleichslinks unten aktualisieren (`compare/vVORHER...vx.y.z` bzw. `releases/tag/…`), committen, Tag `vx.y.z` setzen und pushen. Der Tag löst den Workflow `.github/workflows/docker.yml` aus, der das Image `zzelav/ediurnum:<version>` und `:latest` auf Docker Hub veröffentlicht.
 3. **Commits** nach *Conventional Commits* (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `security:`) auf Englisch, Git-Tag `vX.Y.Z` pro Release.
 4. Die Version erscheint automatisch im Footer der App (`__APP_VERSION__` aus `package.json`).
 5. **Vor jedem Release: Aufräumen.** Alle Dateien durchgehen (`npm run check`, `npm test`, `npm run build`, toter Code, ungenutzte Texte/Importe, veraltete Kommentare und Doku, README/DEPLOYMENT/CHANGELOG aktuell). Gefundene Fehler beheben und **mögliche Anpassungen dem Nutzer melden**, statt sie ungefragt umzubauen.
@@ -38,6 +38,7 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 - `src/lib/templates.ts` – geführte Fragen. **Feld-IDs nie umbenennen** (alte Antworten hängen daran).
 - Checkboxen erscheinen global als Schalter (`app.css`, Abschnitt Formulare) – keine eigenen Checkbox-Stile bauen; für Ein/Aus-Optionen `role="switch"` setzen.
 - Passwort- und PIN-Felder immer mit `PasswordInput.svelte` (Auge zum Anzeigen).
+- Handy/iPhone: Raster immer mit `minmax(0, 1fr)` bzw. `minmax(min(100%, Xpx), 1fr)`, Felder in Flex-Zeilen mit `min-width: 0` – iOS gibt Eingabefeldern sonst eine Mindestbreite und sie ragen rechts hinaus. Nach Layout-Änderungen alle Seiten bei 320 px Breite auf `scrollWidth` prüfen.
 - `Referrer-Policy` bleibt `same-origin`: Bei `no-referrer` senden Browser bei normalen Formularen `Origin: null`, SvelteKit lehnt das als Cross-Site ab.
 - Rückfragen („Wirklich löschen?“) immer mit `ask()` aus `src/lib/confirm.svelte.ts`, **nie `window.confirm()`** – Browser-Dialoge werden in eingebetteten Browsern und manchen Web-Apps unterdrückt.
 - `src/lib/i18n/{de,en}.ts` – alle Texte; jeder Schlüssel muss in beiden Sprachen existieren (`npm test` prüft das).

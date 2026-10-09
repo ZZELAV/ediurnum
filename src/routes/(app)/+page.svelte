@@ -221,7 +221,7 @@
 	}
 	.recent a {
 		display: grid;
-		grid-template-columns: auto 5rem 1fr;
+		grid-template-columns: auto 5rem minmax(0, 1fr);
 		gap: 0.7rem;
 		align-items: baseline;
 		padding: 0.6rem 0.4rem;
