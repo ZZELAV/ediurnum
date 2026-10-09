@@ -1,0 +1,82 @@
+# ediurnum
+
+**A private, self-hosted journal for daily reflection** – all content encrypted at rest, with guided questions,
+weekly and monthly reviews, reminders and optional AI insights through the AI chat of your choice.
+
+*diurnum* (Latin for “diary”) + *e* for digital. Source code, documentation and changelog:
+**[github.com/ZZELAV/ediurnum](https://github.com/ZZELAV/ediurnum)** · License: AGPL-3.0
+
+> **Status: beta.** Usable, but expect changes. Keep encrypted backups.
+
+## Features
+
+- One entry per day in 5–10 minutes: guided questions (experienced, feelings, learning & growth), free thoughts, mood
+- Weekly and monthly reviews, your own reminders and **push notifications** (also on iPhone as an installed web app)
+- **About me**: a short self-assessment (personality, values, goals) as background for AI insights
+- **AI insights without API keys**: a Markdown file for ChatGPT, Claude, Gemini, … – ediurnum never sends anything to
+  an AI on its own; focus points and a mood chart appear on the dashboard
+- Version history per entry, “on this day”, focus mode, German and English, light and dark theme, installable web app
+- **Encryption**: AES-256-GCM with a random master key (= recovery key), password via Argon2id, PIN-locked entries,
+  encrypted backups; the journal locks itself after inactivity
+
+## Quick start
+
+ediurnum needs a reverse proxy with **HTTPS** in front of it (e.g. NGINX Proxy Manager) – browsers only allow push
+notifications and installing the app on secure origins.
+
+```bash
+mkdir ediurnum && cd ediurnum
+curl -fsSLO https://raw.githubusercontent.com/ZZELAV/ediurnum/main/docker-compose.yml
+curl -fsSLO https://raw.githubusercontent.com/ZZELAV/ediurnum/main/.env.example
+cp .env.example .env            # set ORIGIN to your public https address
+mkdir -p data && sudo chown 1000:1000 data
+docker compose up -d
+```
+
+Then open your address and create the journal. **Store the recovery key safely** – without password and recovery key
+your entries cannot be recovered.
+
+Step-by-step guide (proxy, push notifications, updates, backups):
+[docs/DEPLOYMENT.md](https://github.com/ZZELAV/ediurnum/blob/main/docs/DEPLOYMENT.md)
+
+## Tags
+
+| Tag | Meaning |
+|---|---|
+| `latest` | newest release |
+| `0.1.0-beta.3`, … | a specific release – see the [changelog](https://github.com/ZZELAV/ediurnum/blob/main/CHANGELOG.md) |
+
+Images are built for `linux/amd64` and `linux/arm64` (e.g. Raspberry Pi 4/5). Pin a version in `.env` with
+`EDIURNUM_VERSION=0.1.0-beta.3`.
+
+## Configuration
+
+| Variable | Required | Description |
+|---|---|---|
+| `ORIGIN` | yes | Exact public address, e.g. `https://journal.example.com` (cross-site protection, secure cookies, push sender) |
+| `TZ` | recommended | Time zone for “today” and reminder times, default `Europe/Zurich` |
+| `ADDRESS_HEADER`, `XFF_DEPTH` | behind a proxy | Real client IP from the proxy, e.g. `X-Forwarded-For` and `1` (slows down password guessing) |
+| `BODY_SIZE_LIMIT` | no | Maximum upload size for restoring a backup, default `50M` |
+| `VAPID_SUBJECT` | no | Sender for push services (`mailto:` or `https:`), defaults to `ORIGIN` |
+| `LOG_LEVEL` | no | `error`, `warn`, `info` (default) or `debug` (every request). Logs never contain journal content |
+
+| Container | |
+|---|---|
+| Port | `3000` (HTTP – put the HTTPS proxy in front) |
+| Volume | `/data` – the encrypted SQLite database; owned by user `1000` |
+| User | runs as non-root user `node` (1000); works with `read_only: true` and `cap_drop: ALL` |
+| Health check | built in (`/login`) |
+
+## Updates
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+Database migrations run automatically. Download an encrypted backup in the app before larger updates.
+
+## Privacy
+
+Plaintext on disk is limited to dates, timestamps, flags and which sections an entry contains. To send reminders while
+the journal is closed, the reminder schedule and the push addresses of your devices are stored unencrypted;
+notifications never contain journal content.
