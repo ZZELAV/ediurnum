@@ -1,28 +1,39 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { api } from '$lib/client';
 	import { currentLang, fmtDate, t } from '$lib/i18n/t';
 	import { locale } from '$lib/i18n';
 	import PinDialog from '$lib/components/PinDialog.svelte';
+	import type { SearchHit } from '$lib/search';
 
 	let { data } = $props();
 
-	// Suche: sucht beim Tippen (kurz verzögert) und hält den Begriff in der Adresse (?q=…)
-	let query = $state(untrack(() => data.search?.query ?? ''));
+	// Suche beim Tippen (kurz verzögert). Der Begriff geht per POST an den Server und steht nie in der
+	// Adresse – sonst landete er im Browserverlauf und in den Protokollen des Reverse-Proxys.
+	type Result = { date: string; mood: number | null; locked: boolean } & SearchHit;
+	let query = $state('');
+	let search = $state<{ query: string; results: Result[]; skippedLocked: number } | null>(null);
 	let pinDialog = $state(false);
 	let timer: ReturnType<typeof setTimeout> | undefined;
+	let latest = 0;
 
-	function search(value: string, delay = 250) {
+	function runSearch(value: string, delay = 250) {
 		clearTimeout(timer);
-		timer = setTimeout(() => {
-			const q = value.trim();
-			goto(q ? `?q=${encodeURIComponent(q)}` : '?', { keepFocus: true, noScroll: true, replaceState: true });
+		const q = value.trim();
+		if (!q) {
+			latest++;
+			search = null;
+			return;
+		}
+		timer = setTimeout(async () => {
+			const id = ++latest;
+			const res = await api<{ results: Result[]; skippedLocked: number }>('/api/search', 'POST', { query: q });
+			if (res.ok && id === latest) search = { query: q, ...res.data };
 		}, delay);
 	}
 
 	function clear() {
 		query = '';
-		search('', 0);
+		runSearch('');
 	}
 
 	function monthTitle(month: string) {
@@ -50,7 +61,7 @@
 
 <svelte:head><title>{t('archive.title')} · ediurnum</title></svelte:head>
 
-<PinDialog bind:open={pinDialog} />
+<PinDialog bind:open={pinDialog} onunlocked={() => runSearch(query, 0)} />
 
 <div class="view">
 	<header class="view-head">
@@ -66,36 +77,35 @@
 			<a class="btn" href="/entry/{data.today}">{t('dashboard.write')}</a>
 			</div>
 		{:else}
-			<form class="search" role="search" onsubmit={(e) => (e.preventDefault(), search(query, 0))}>
+			<form class="search" role="search" onsubmit={(e) => (e.preventDefault(), runSearch(query, 0))}>
 				<label for="q" class="visually-hidden">{t('search.label')}</label>
 				<input
 					id="q"
 					type="search"
-					name="q"
 					autocomplete="off"
 					placeholder={t('search.placeholder')}
 					bind:value={query}
-					oninput={() => search(query)}
+					oninput={() => runSearch(query)}
 					onkeydown={(e) => e.key === 'Escape' && query && (e.preventDefault(), clear())}
 				/>
 			</form>
 		{/if}
 
-		{#if data.search}
+		{#if search}
 			<section class="card results" aria-live="polite">
 				<p class="faint count">
-					{data.search.results.length
-						? t('search.count', { count: data.search.results.length })
-						: t('search.none', { query: data.search.query })}
+					{search.results.length
+						? t('search.count', { count: search.results.length })
+						: t('search.none', { query: search.query })}
 				</p>
-				{#if data.search.skippedLocked > 0}
+				{#if search.skippedLocked > 0}
 					<p class="faint">
-						{t('search.lockedSkipped', { count: data.search.skippedLocked })}
+						{t('search.lockedSkipped', { count: search.skippedLocked })}
 						<button type="button" class="btn quiet small" onclick={() => (pinDialog = true)}>{t('pin.title')}</button>
 					</p>
 				{/if}
 				<ul>
-					{#each data.search.results as r (r.date)}
+					{#each search.results as r (r.date)}
 						<li>
 							<a href="/entry/{r.date}">
 								<span class="when">
@@ -122,7 +132,7 @@
 			</ul>
 		{/if}
 
-		{#if !data.search}
+		{#if !search}
 		<div class="grid-cards">
 			{#each data.months as m (m.month)}
 				{@const byDate = new Map(m.days.map((d) => [d.date, d]))}

@@ -14,18 +14,21 @@ with optional AI feedback for personal growth.
   - **Free thoughts** and a mood scale in every entry
   - Weekly and monthly reviews are suggested once about a week or a month has passed without one – in the entry
     and on the dashboard (“Write it now” / “Not today”)
+- **Your first steps** on the dashboard: a short checklist (first entry, About me, reminders, PIN, backup) that
+  ticks itself off
 - **About me**: a short self-assessment as your first entry (journaling experience, life satisfaction, personality
   based on the Big Five, values, strengths, goals) – the background for AI insights, editable any time
 - **On this day**: the entry from one year ago appears on the dashboard
-- **Past days open read-only** – edit them with the pencil; every entry keeps a **version history**
+- **Past days open read-only** – edit them with “Edit”; every entry keeps a **version history** (one version per day)
+- **Search** all entries from “All entries” (ignores case and accents); the calendar shows your mood per day
 - **Reminders**: weekly and monthly reviews plus your own reminders (once, daily, on chosen weekdays or monthly),
   shown in the app and as **push notifications** on registered devices
 - **Optional focus mode**: while you write, navigation and side column fade out; press Esc to return
-- **All content encrypted at rest**, with a recovery key shown once at setup; the journal locks itself after a set
+- **All content encrypted at rest**, with a recovery key shown once at setup (and testable in the settings); the journal locks itself after a set
   time without activity
 - **Locked entries** with an additional PIN
 - **AI insights without API keys**: ediurnum turns the entries of a period into a Markdown file for the AI chat of your
-  choice (ChatGPT, Claude, Gemini, …), optionally with your self-assessment. Paste the answer back to keep it – its
+  choice (ChatGPT, Claude, Gemini, …), optionally with your self-assessment. The instructions for the AI can be customised. Paste the answer back to keep it – its
   focus points for the coming weeks and a chart of your mood appear on the dashboard. ediurnum never sends anything
   to an AI on its own; AI agents with your own API key are planned for a later release.
 - **Encrypted backup**, readable export (Markdown/JSON) and **delete journal** (all entries, or a complete reset)

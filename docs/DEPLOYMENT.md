@@ -45,7 +45,7 @@ nano .env
 
 - `ORIGIN` – the exact public address, e.g. `https://journal.example.com` (no trailing slash).
   It is used for cross-site protection, secure cookies and as the sender for push services.
-- `TZ` – your time zone (`Europe/Zurich`, …). “Today” and all reminder times use it.
+- `TZ` – your time zone (`Europe/Zurich`, …). “Today”, the version history (one version per day) and all reminder times use it.
 - `EDIURNUM_VERSION` (optional) – pin a release, e.g. `0.1.0-beta.3`. Without it, the newest release (`latest`) is used.
 - `LOG_LEVEL` (optional) – `info` by default: start-up, opening and closing the journal, failed attempts, backups,
   push notifications and errors. `debug` additionally logs every request. Logs never contain journal content.
