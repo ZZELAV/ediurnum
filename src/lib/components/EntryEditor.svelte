@@ -62,11 +62,9 @@
 		const current = JSON.stringify(content);
 		if (current === lastSaved || !readable) return;
 		status = 'saving';
-		const newRevision = startRevision;
-		const res = await api<{ meta: EntryMeta | null }>(`/api/entry/${date}`, 'POST', { content: $state.snapshot(content), newRevision });
+		const res = await api<{ meta: EntryMeta | null }>(`/api/entry/${date}`, 'POST', { content: $state.snapshot(content) });
 		if (res.ok) {
 			lastSaved = current;
-			if (newRevision) startRevision = false;
 			if (res.data.meta) meta = res.data.meta;
 			status = JSON.stringify(content) === lastSaved ? 'saved' : 'dirty';
 			message = null;
@@ -78,9 +76,7 @@
 
 	function flushWithBeacon() {
 		if (JSON.stringify(content) === lastSaved) return;
-		const blob = new Blob([JSON.stringify({ content: $state.snapshot(content), newRevision: startRevision })], {
-			type: 'application/json'
-		});
+		const blob = new Blob([JSON.stringify({ content: $state.snapshot(content) })], { type: 'application/json' });
 		navigator.sendBeacon(`/api/entry/${date}`, blob);
 	}
 
@@ -105,13 +101,6 @@
 
 	// Vergangene Tage öffnen sich zum Lesen; bearbeitet wird erst nach Klick auf den Stift.
 	let editing = $state(untrack(() => date === today));
-	// Jede Bearbeitung eines vergangenen Tages beginnt beim ersten Speichern eine neue Version
-	let startRevision = false;
-
-	function startEditing() {
-		editing = true;
-		startRevision = !!meta;
-	}
 
 	async function finishEditing() {
 		await save();
@@ -242,7 +231,7 @@
 				{#if editing}
 					<button type="button" class="btn small" onclick={finishEditing}>✓ {t('entry.editDone')}</button>
 				{:else}
-					<button type="button" class="btn ghost small" onclick={startEditing}>{@render pencil()} {t('entry.edit')}</button>
+					<button type="button" class="btn ghost small" onclick={() => (editing = true)}>{@render pencil()} {t('entry.edit')}</button>
 				{/if}
 			{/if}
 			<a class="btn ghost icon" href="/entry/{prev}" aria-label={t('entry.prevDay')} title={t('entry.prevDay')}>←</a>

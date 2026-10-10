@@ -29,7 +29,7 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 
 - `src/lib/server/crypto.ts` – AES-256-GCM, Argon2id, Wiederherstellungsschlüssel-Format. Datensätze sind per AAD an ihre ID gebunden.
 - `src/lib/server/vault.ts` – Hauptschlüssel nur im RAM pro Sitzung; PIN → Sperr-Schlüssel (HKDF aus Hauptschlüssel + PIN-Schlüssel).
-- `src/lib/server/entries.ts` – ein Eintrag pro Tag; Versionen werden archiviert, wenn eine Bearbeitung > 10 min nach Beginn der aktuellen Version erfolgt.
+- `src/lib/server/entries.ts` – ein Eintrag pro Tag; höchstens eine Version pro Kalendertag (TZ): Die erste Bearbeitung an einem neuen Tag archiviert die bisherige Fassung.
 - `src/lib/server/ai/` – Prompt-Aufbau (`buildChatMarkdown` für die Markdown-Datei, `parseResponse` für zurückkopierte Antworten) und Anbieter-Adapter für KI-Agenten mit API-Schlüssel (in der Oberfläche vorerst ausgeblendet, kommt in einem späteren Release).
 - `src/lib/reminders.ts` – Fälligkeit der Rückblicke (gemeinsam für App-Hinweise und Push); `src/lib/server/reminders.ts` – Zeitplan, VAPID, Geräte, Planer (läuft minütlich, gestartet in `hooks.server.ts` → `init`); `src/service-worker.ts` – nur Push, bewusst ohne Offline-Cache.
 - `src/lib/profile.ts` – Selbsteinschätzung „Über mich“ (verschlüsselt in `meta.profile`, im Backup enthalten, optional in der KI-Datei). **Feld-IDs nie umbenennen.**

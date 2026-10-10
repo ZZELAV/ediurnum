@@ -24,11 +24,12 @@ The topmost version without a date is still in development.
 - Collapsible boxes show an arrow on the right.
 - The default AI instructions no longer ask for Swiss spelling.
 - The focus points of an analysis are now labelled "Your focus points".
+- Version history: at most one version per day. All changes made on the same day are kept together; editing an
+  entry on a later day starts a new version.
 
 ### Fixed
 
 - Text fields and drop-downs next to each other now have the same height, so their labels line up.
-- Editing a past day with "Edit" now always creates a new version, even shortly after the last change.
 
 ## [0.1.0-beta.3] - 2026-10-09
 

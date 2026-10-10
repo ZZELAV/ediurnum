@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { decryptJson, encryptJson } from './crypto';
 import { getDb, nowIso, transaction } from './db';
+import { todayIso } from '$lib/dates';
 import type { Session } from './vault';
 import { filledKinds, isEmptyContent } from '$lib/templates';
 import type { Entry, EntryContent, EntryMeta, RevisionInfo, SectionKind } from '$lib/types';
 
 /** Änderungen innerhalb dieses Zeitfensters werden in derselben Version zusammengefasst. */
-const REVISION_WINDOW_MS = 10 * 60 * 1000;
 
 interface EntryRow {
 	id: string;
@@ -85,9 +85,9 @@ export function getEntry(session: Session, date: string): Entry | null {
 }
 
 /**
- * Speichert den Eintrag eines Tages. Jede Bearbeitung, die mehr als
- * REVISION_WINDOW_MS nach Beginn der aktuellen Version stattfindet,
- * archiviert die bisherige Fassung als eigene Version.
+ * Speichert den Eintrag eines Tages. Pro Kalendertag (Zeitzone TZ) gibt es höchstens eine Version:
+ * Die erste Bearbeitung an einem neuen Tag archiviert die bisherige Fassung als eigene Version,
+ * alle weiteren Änderungen am selben Tag landen in derselben Version.
  */
 export function saveEntry(
 	session: Session,
@@ -117,7 +117,7 @@ export function saveEntry(
 	if (JSON.stringify(previous) === JSON.stringify(content)) return toMeta(row);
 
 	const startNew =
-		opts.forceNewRevision || Date.now() - new Date(row.rev_started_at).getTime() > REVISION_WINDOW_MS;
+		opts.forceNewRevision || todayIso(new Date(row.rev_started_at)) !== todayIso();
 
 	transaction(() => {
 		if (startNew) {
