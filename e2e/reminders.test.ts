@@ -69,7 +69,7 @@ describe('Geräte', () => {
 		const dev = push.device('/push/phone');
 		assert.equal((await c.api('/api/push', { subscription: dev.subscription, label: 'iPhone' })).status, 200);
 		assert.equal(deviceCount(), 1);
-		assert.match(server.output(), /push device registered service=127\.0\.0\.1/);
+		assert.match(await server.waitForOutput(/push device registered service=127\.0\.0\.1/), /push device registered service=127\.0\.0\.1/);
 		const bad = { ...dev.subscription, endpoint: 'http://127.0.0.1/x' };
 		assert.equal((await c.api('/api/push', { subscription: bad })).status, 400);
 		assert.equal((await c.api('/api/push', { subscription: { endpoint: 'https://x' } })).status, 400);
@@ -103,8 +103,8 @@ describe('Geräte', () => {
 		const r = await c.api('/api/push/test', {});
 		assert.equal(r.json.sent, 1);
 		assert.equal(deviceCount(), 2, 'abgelaufenes entfernt, fehlerhaftes bleibt');
-		assert.match(server.output(), /push device expired and removed/);
-		assert.match(server.output(), /push failed status=500/);
+		assert.match(await server.waitForOutput(/push device expired and removed/), /push device expired and removed/);
+		assert.match(await server.waitForOutput(/push failed status=500/), /push failed status=500/);
 		await c.api('/api/push', { endpoint: broken.subscription.endpoint }, 'DELETE');
 		assert.equal(deviceCount(), 1);
 	});
@@ -120,7 +120,8 @@ describe('Planer', () => {
 		assert.ok(m, 'Erinnerung gesendet');
 		assert.deepEqual(m.payload, { title: 'Wasser trinken', body: 'Ein Glas', url: '/reminders', tag: 'custom-r1' });
 		assert.equal(JSON.parse(readMeta('reminder_sent_custom')!).r1, date);
-		assert.match(server.output(), /push sent tag=custom devices=1 of=1/);
+		// Die Log-Zeile kommt erst nach der Antwort des Push-Dienstes
+		assert.match(await server.waitForOutput(/push sent tag=custom devices=1 of=1/), /push sent tag=custom devices=1 of=1/);
 		// Neustart am selben Tag: nicht nochmals
 		push.messages.length = 0;
 		await restart();

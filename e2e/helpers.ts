@@ -31,6 +31,11 @@ export interface TestServer {
 	dataDir: string;
 	/** Bisherige Ausgabe des Servers (für Prüfungen am Log) */
 	output(): string;
+	/**
+	 * Wartet, bis das Log die Zeile enthält (höchstens `ms`), und gibt das Log zurück. Nötig, weil die Ausgabe
+	 * des Servers über eine Pipe kommt und eine HTTP-Antwort sie überholen kann.
+	 */
+	waitForOutput(re: RegExp, ms?: number): Promise<string>;
 	/** Beendet den Server; der Datenordner wird gelöscht, ausser mit keepData. */
 	stop(opts?: { keepData?: boolean }): Promise<void>;
 }
@@ -80,6 +85,11 @@ export async function startServer(env: Record<string, string | undefined> = {}, 
 		url,
 		dataDir,
 		output: () => out,
+		waitForOutput: async (re, ms = 5_000) => {
+			const until = Date.now() + ms;
+			while (!re.test(out) && Date.now() < until) await new Promise((r) => setTimeout(r, 50));
+			return out;
+		},
 		stop: async ({ keepData = false } = {}) => {
 			if (child.exitCode === null) {
 				const exited = new Promise((r) => child.once('exit', r));

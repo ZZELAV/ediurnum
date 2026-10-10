@@ -150,7 +150,7 @@ describe('Sperren mit PIN', () => {
 	test('PIN festlegen, Eintrag samt Versionen sperren', async () => {
 		const r = await c.action('/settings?/pin', { pin: PIN, confirm: PIN });
 		assert.equal(r.type, 'success');
-		assert.match(server.output(), /PIN set/);
+		assert.match(await server.waitForOutput(/PIN set/), /PIN set/);
 		// nach dem Festlegen ist die PIN in dieser Sitzung 10 Minuten offen
 		assert.equal((await c.api(`/api/entry/${DAY}/lock`, { locked: true })).status, 200);
 		const locked = row(DAY)!;
@@ -205,7 +205,7 @@ describe('Sperren mit PIN', () => {
 		assert.equal(wrong.data?.error, 'error.wrongPin');
 		const r = await c.action('/settings?/pin', { current: PIN, pin: '135790', confirm: '135790' });
 		assert.equal(r.type, 'success');
-		assert.match(server.output(), /PIN changed/);
+		assert.match(await server.waitForOutput(/PIN changed/), /PIN changed/);
 		await c.api('/api/pin', undefined, 'DELETE');
 		assert.equal((await c.api('/api/pin', { pin: PIN })).status, 403, 'alte PIN gilt nicht mehr');
 		assert.equal((await c.api('/api/pin', { pin: '135790' })).status, 200);

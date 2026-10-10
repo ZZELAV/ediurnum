@@ -63,7 +63,7 @@ describe('Widget', () => {
 		assert.equal((await widget(server, TOKEN.slice(1))).status, 401);
 		for (let i = 0; i < 5; i++) await widget(server, 'Bearer falsch');
 		assert.equal((await widget(server, `Bearer ${TOKEN}`)).status, 429, 'auch mit richtigem Token vorübergehend gesperrt');
-		assert.match(server.output(), /failed attempt key=widget:/);
+		assert.match(await server.waitForOutput(/failed attempt key=widget:/), /failed attempt key=widget:/);
 		assert.doesNotMatch(server.output(), new RegExp(TOKEN));
 	});
 });
@@ -90,7 +90,7 @@ describe('Docker-Log', () => {
 			await client.api('/api/entry/2026-05-01', { content: { mood: 3, sections: {}, free: 'Log-Geheimnis' } });
 			await client.api('/api/search', { query: 'Log-Geheimnis' });
 			await client.action('/logout', {});
-			const out = server.output();
+			const out = await server.waitForOutput(/journal closed/);
 			assert.match(out, /INFO  ediurnum started version=\S+ node=v\d+/);
 			assert.match(out, /journal created/);
 			assert.match(out, /journal closed/);
@@ -108,7 +108,7 @@ describe('Docker-Log', () => {
 			await client.api('/api/entry/2026-05-01', { content: { mood: 3, sections: {}, free: 'Debug-Geheimnis' } });
 			await client.get('/api/export/plain?format=json');
 			await client.get('/gibt-es-nicht');
-			const out = server.output();
+			const out = await server.waitForOutput(/GET \/gibt-es-nicht status=404/);
 			assert.match(out, /DEBUG POST \/api\/entry\/2026-05-01 status=200 ms=\d+/);
 			assert.match(out, /DEBUG GET \/api\/export\/plain status=200/);
 			assert.doesNotMatch(out, /plain\?format/, 'keine Suchparameter der Adresse');

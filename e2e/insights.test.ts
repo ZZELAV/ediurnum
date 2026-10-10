@@ -85,7 +85,7 @@ describe('KI-Datei', () => {
 	});
 
 	test('Inhalte landen nicht im Log', async () => {
-		assert.match(server.output(), /AI file created/);
+		assert.match(await server.waitForOutput(/AI file created/), /AI file created/);
 		assert.doesNotMatch(server.output(), /Normaler Tag|Wie geht es mir/);
 	});
 });

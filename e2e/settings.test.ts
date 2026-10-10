@@ -92,7 +92,7 @@ describe('Passwort ändern', () => {
 		assert.equal(r.type, 'success');
 		assert.equal((await other.api('/api/session')).status, 401, 'anderes Gerät gesperrt');
 		assert.equal((await c.api('/api/session')).status, 200, 'eigene Sitzung bleibt');
-		assert.match(server.output(), /password changed otherSessionsClosed=1/);
+		assert.match(await server.waitForOutput(/password changed otherSessionsClosed=1/), /password changed otherSessionsClosed=1/);
 		assert.equal((await login(PASSWORD)).ok, false, 'altes Passwort gilt nicht mehr');
 		assert.equal((await login('Neues-Passwort-123')).ok, true);
 		// zurück, damit die weiteren Tests das Standardpasswort verwenden können
@@ -164,7 +164,7 @@ describe('Export', () => {
 		const json = (await c.api('/api/export/plain?format=json')).json as { skippedLocked: number; entries: unknown[] };
 		assert.equal(json.skippedLocked, 1);
 		assert.equal(json.entries.length, 1);
-		assert.match(server.output(), /readable export downloaded format=json skippedLocked=1/);
+		assert.match(await server.waitForOutput(/readable export downloaded format=json skippedLocked=1/), /readable export downloaded format=json skippedLocked=1/);
 		assert.equal((await new Client(server.url).get('/api/export/plain')).status, 401);
 		assert.equal((await new Client(server.url).get('/api/export/backup')).status, 401);
 	});
@@ -201,7 +201,7 @@ describe('Tagebuch löschen', () => {
 		db.close();
 		assert.match(await (await c.get('/profile')).text(), /Mehr lesen/);
 		assert.equal((await settings()).name, 'Testperson');
-		assert.match(server.output(), /all entries deleted/);
+		assert.match(await server.waitForOutput(/all entries deleted/), /all entries deleted/);
 	});
 
 	test('Komplett zurücksetzen: alles weg, alle Sitzungen beendet, weiter zur Einrichtung', async () => {

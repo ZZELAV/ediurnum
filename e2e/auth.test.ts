@@ -59,7 +59,7 @@ describe('Einrichten, Anmelden, Abmelden', () => {
 		assert.doesNotMatch(session, /Secure/i, 'über http:// ohne Secure, sonst schickt der Browser es nicht');
 		assert.match(session, /Path=\//);
 		assert.equal((await r.client.get('/')).status, 200);
-		assert.match(server.output(), /journal created/);
+		assert.match(await server.waitForOutput(/journal created/), /journal created/);
 	});
 
 	test('Zweite Einrichtung ist nicht möglich', async () => {
@@ -198,7 +198,7 @@ describe('Bremse gegen Durchprobieren', () => {
 		assert.equal(r.status, 429);
 		assert.equal(r.data?.error, 'error.throttled');
 		assert.ok(Number(r.data?.seconds) > 0 && Number(r.data?.seconds) <= 30);
-		assert.match(server.output(), /failed attempt/);
+		assert.match(await server.waitForOutput(/failed attempt/), /failed attempt/);
 		assert.doesNotMatch(server.output(), /falsch-/, 'Passwörter erscheinen nie im Log');
 	});
 });
