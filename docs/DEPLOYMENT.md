@@ -51,9 +51,36 @@ nano .env
 - `EDIURNUM_VERSION` (optional) – pin a release, e.g. `0.1.0-beta.5`. Without it, the newest release (`latest`) is used.
 - `LOG_LEVEL` (optional) – `info` by default: start-up, opening and closing the journal, failed attempts, backups,
   push notifications and errors. `debug` additionally logs every request. Logs never contain journal content.
-- `WIDGET_TOKEN` (optional) – enables `/api/widget` for dashboards such as Homepage: it returns the number of entries
-  and the date of the latest entry (never content) for requests with `Authorization: Bearer <token>`. Use at least
-  16 characters, e.g. from `openssl rand -hex 32`. Without it, the endpoint is off.
+- `WIDGET_TOKEN` (optional) – enables `/api/widget` for dashboards such as Homepage: it returns the number of entries,
+  the date of the latest entry, whether today is written and the current writing streak (never content) for requests
+  with `Authorization: Bearer <token>`. Use at least 16 characters, e.g. from `openssl rand -hex 32`. Without it, the
+  endpoint is off. Example for Homepage (`services.yaml`):
+
+  ```yaml
+  - ediurnum:
+      href: https://journal.example.com
+      widget:
+        type: customapi
+        url: http://ediurnum:3000/api/widget
+        headers:
+          Authorization: Bearer {{HOMEPAGE_VAR_EDIURNUM_TOKEN}}
+        mappings:
+          - field: writtenToday
+            label: Today
+            remap:
+              - value: true
+                to: ✓
+              - any: true
+                to: –
+          - field: streak
+            label: Streak
+            suffix: " days"
+          - field: entries
+            label: Entries
+          - field: lastEntry
+            label: Latest
+            format: date
+  ```
 - Leave the other values as they are unless you know you need something else.
 
 ## 3. Prepare the data folder

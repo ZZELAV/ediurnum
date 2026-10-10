@@ -6,6 +6,12 @@ The topmost version without a date is still in development.
 
 ## [0.1.0-beta.6]
 
+### Added
+
+- The dashboard endpoint `/api/widget` also returns whether today's entry is written (`writtenToday`) and the
+  current writing streak in days (`streak`; counts up to yesterday until today is written). DEPLOYMENT.md has a
+  Homepage example.
+
 ### Changed
 
 - Dates and numbers follow the regional format of your browser when it matches the app language (e.g. "3,3" in

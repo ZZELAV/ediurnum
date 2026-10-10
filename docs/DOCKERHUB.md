@@ -61,7 +61,7 @@ Images are built for `linux/amd64` and `linux/arm64` (e.g. Raspberry Pi 4/5). Pi
 | `BODY_SIZE_LIMIT` | no | Maximum upload size for restoring a backup, default `50M` |
 | `VAPID_SUBJECT` | no | Sender for push services (`mailto:` or `https:`), defaults to `ORIGIN` |
 | `LOG_LEVEL` | no | `error`, `warn`, `info` (default) or `debug` (every request). Logs never contain journal content |
-| `WIDGET_TOKEN` | no | Enables `/api/widget` for dashboards (number of entries, date of the latest entry); at least 16 characters, sent as `Authorization: Bearer <token>` |
+| `WIDGET_TOKEN` | no | Enables `/api/widget` for dashboards (number of entries, date of the latest entry, written today, current streak); at least 16 characters, sent as `Authorization: Bearer <token>` |
 
 | Container | |
 |---|---|

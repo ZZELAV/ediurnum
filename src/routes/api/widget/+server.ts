@@ -3,6 +3,8 @@ import type { RequestHandler } from './$types';
 import { WIDGET_TOKEN } from '$app/env/private';
 import { clientKey } from '#lib/server/auth.ts';
 import { listEntryMeta } from '#lib/server/entries.ts';
+import { todayIso } from '#lib/dates.ts';
+import { currentStreak } from '#lib/streak.ts';
 import { registerFailure, registerSuccess, throttleRemaining } from '#lib/server/vault.ts';
 
 const digest = (s: string) => createHash('sha256').update(s).digest();
@@ -10,7 +12,7 @@ const digest = (s: string) => createHash('sha256').update(s).digest();
 /**
  * Kennzahlen für ein Dashboard (z. B. Homepage, Widget "customapi"). Nur aktiv mit WIDGET_TOKEN;
  * Abfrage mit "Authorization: Bearer <token>". Liefert ausschliesslich unverschlüsselte Metadaten
- * (Anzahl Einträge, Datum des neuesten Eintrags) – nie Inhalte.
+ * (Anzahl Einträge, Datum des neuesten Eintrags, heute geschrieben, aktuelle Serie) – nie Inhalte.
  */
 export const GET: RequestHandler = (event) => {
 	const token = WIDGET_TOKEN ?? '';
@@ -28,8 +30,14 @@ export const GET: RequestHandler = (event) => {
 	registerSuccess(key);
 
 	const metas = listEntryMeta(); // neuester Tag zuerst
+	const today = todayIso();
 	return Response.json(
-		{ entries: metas.length, lastEntry: metas[0]?.date ?? null },
+		{
+			entries: metas.length,
+			lastEntry: metas[0]?.date ?? null,
+			writtenToday: metas[0]?.date === today,
+			streak: currentStreak(metas.map((m) => m.date), today)
+		},
 		{ headers: { 'cache-control': 'no-store' } }
 	);
 };
