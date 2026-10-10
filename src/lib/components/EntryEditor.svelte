@@ -58,7 +58,14 @@
 		return () => clearTimeout(timer);
 	});
 
-	async function save() {
+	// Speichervorgänge laufen nacheinander – sonst könnte eine ältere Fassung nach einer neueren ankommen
+	let queue: Promise<void> = Promise.resolve();
+	function save(): Promise<void> {
+		queue = queue.then(saveNow);
+		return queue;
+	}
+
+	async function saveNow() {
 		const current = JSON.stringify(content);
 		if (current === lastSaved || !readable) return;
 		status = 'saving';

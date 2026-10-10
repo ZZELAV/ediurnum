@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 import { requireSession } from '#lib/server/auth.ts';
-import { fail } from '#lib/server/api.ts';
+import { fail, readJson } from '#lib/server/api.ts';
 import {
 	hasPin,
 	registerFailure,
@@ -17,7 +17,7 @@ export const POST: RequestHandler = async (event) => {
 	if (!hasPin()) return fail('error.noPin');
 	const wait = throttleRemaining('pin');
 	if (wait > 0) return fail('error.throttled', 429, { seconds: wait });
-	const { pin } = await event.request.json();
+	const { pin } = await readJson(event.request);
 	const lockKey = await verifyPin(session.dek, String(pin ?? ''));
 	if (!lockKey) {
 		registerFailure('pin');

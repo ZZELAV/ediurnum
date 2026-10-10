@@ -12,7 +12,7 @@ import {
 } from './crypto';
 import { getMeta, nowIso, setMeta, transaction } from './db';
 import { log } from './log';
-import { MAX_PASSWORD } from './validation';
+import { MAX_PASSWORD, validatePin } from './validation';
 
 /**
  * Tresor: verwaltet den Hauptschlüssel. Er existiert entschlüsselt nur im
@@ -33,7 +33,21 @@ export interface Session {
 	lockUntil: number;
 }
 
-const sessions = new Map<string, Session>();
+/**
+ * Zustand im Arbeitsspeicher. Liegt auf globalThis, damit er ein Neuladen des Server-Codes übersteht:
+ * Der Dev-Server lädt die Module bei jeder Änderung neu – sonst wäre man nach jedem Speichern abgemeldet.
+ * Im Produktivbetrieb werden die Module nur einmal geladen.
+ */
+interface VaultState {
+	sessions: Map<string, Session>;
+	attempts: Map<string, { count: number; until: number }>;
+	sweeper?: ReturnType<typeof setInterval>;
+}
+const state: VaultState = ((globalThis as unknown as Record<symbol, VaultState>)[Symbol.for('ediurnum.vault')] ??= {
+	sessions: new Map(),
+	attempts: new Map()
+});
+const sessions = state.sessions;
 const ABSOLUTE_MAX_MS = 12 * 60 * 60 * 1000;
 export const PIN_UNLOCK_MS = 10 * 60 * 1000;
 
@@ -134,7 +148,8 @@ export function destroyAllSessions() {
 	for (const token of [...sessions.keys()]) destroySession(token);
 }
 
-setInterval(() => {
+if (state.sweeper) clearInterval(state.sweeper);
+state.sweeper = setInterval(() => {
 	for (const token of [...sessions.keys()]) getSession(token);
 }, 60_000).unref();
 
@@ -155,7 +170,8 @@ async function lockKeyFromPin(dek: Buffer, pin: string, params: KdfParams): Prom
 export async function verifyPin(dek: Buffer, pin: string): Promise<Buffer | null> {
 	const kdf = getMeta('pin_kdf');
 	const check = getMeta('pin_check');
-	if (!kdf || !check) return null;
+	// Ungültiges Format gar nicht erst ableiten (spart Argon2 bei unsinnigen Eingaben)
+	if (!kdf || !check || validatePin(pin) !== null) return null;
 	const lockKey = await lockKeyFromPin(dek, pin, JSON.parse(kdf) as KdfParams);
 	try {
 		const ok = decrypt(lockKey, Buffer.from(check, 'base64'), PIN_CHECK_AAD).toString('utf8') === PIN_CHECK_TEXT;
@@ -196,7 +212,7 @@ export function relockSession(session: Session) {
 // Einfache Bremse gegen das Durchprobieren von Passwort/PIN
 // --------------------------------------------------------------------------
 
-const attempts = new Map<string, { count: number; until: number }>();
+const attempts = state.attempts;
 
 /** Gibt die verbleibende Sperrzeit in Sekunden zurück (0 = erlaubt). */
 export function throttleRemaining(key: string): number {

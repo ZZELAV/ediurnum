@@ -49,19 +49,62 @@ export function diffWords(before: string, after: string): DiffPart[] {
 	return merge(parts);
 }
 
-/** Fasst benachbarte Teile gleicher Art zusammen; Leerraum zwischen zwei Änderungen zählt zur Änderung. */
+const isSpace = (p: DiffPart) => p.kind === 'same' && /^\s+$/.test(p.text);
+
+/** Gemeinsamer Leerraum zweier Texte am Anfang bzw. Ende (`pick` liefert den Leerraum eines Textes). */
+function commonSpace(a: string, b: string, pick: (s: string) => string): string {
+	const x = pick(a);
+	const y = pick(b);
+	return x === y ? x : '';
+}
+
+/**
+ * Fasst Änderungen zu Blöcken zusammen: Eine Folge von Streichungen und Ergänzungen, nur durch
+ * Leerraum getrennt, wird zu „alles Gestrichene“ gefolgt von „alles Neue“ (statt Wort für Wort
+ * abwechselnd). Der Leerraum dazwischen gehört zu beiden Blöcken, damit sich Vorher- und
+ * Nachher-Text exakt zurückgewinnen lassen.
+ */
 function merge(parts: DiffPart[]): DiffPart[] {
 	const out: DiffPart[] = [];
-	for (let k = 0; k < parts.length; k++) {
-		const p = parts[k];
+	const push = (text: string, kind: DiffPart['kind']) => {
+		if (!text) return;
 		const prev = out[out.length - 1];
-		const next = parts[k + 1];
-		const kind =
-			p.kind === 'same' && /^\s+$/.test(p.text) && prev && prev.kind !== 'same' && next && next.kind === prev.kind
-				? prev.kind
-				: p.kind;
-		if (prev && prev.kind === kind) prev.text += p.text;
-		else out.push({ text: p.text, kind });
+		if (prev && prev.kind === kind) prev.text += text;
+		else out.push({ text, kind });
+	};
+	let k = 0;
+	while (k < parts.length) {
+		if (parts[k].kind === 'same') {
+			push(parts[k++].text, 'same');
+			continue;
+		}
+		// Ende des Änderungsblocks: letzte Änderung, auf die nur noch Leerraum + weitere Änderungen folgen
+		let end = k;
+		for (let j = k + 1; j < parts.length; j++) {
+			if (parts[j].kind !== 'same') end = j;
+			else if (!isSpace(parts[j])) break;
+		}
+		let del = '';
+		let add = '';
+		for (let j = k; j <= end; j++) {
+			const p = parts[j];
+			if (p.kind !== 'add') del += p.text;
+			if (p.kind !== 'del') add += p.text;
+		}
+		const block = parts.slice(k, end + 1);
+		if (block.some((p) => p.kind === 'del') && block.some((p) => p.kind === 'add')) {
+			// Leerraum, der in beiden Fassungen gleich am Rand steht, bleibt unverändert
+			const lead = commonSpace(del, add, (s) => s.match(/^\s*/)![0]);
+			const trail = commonSpace(del.slice(lead.length), add.slice(lead.length), (s) => s.match(/\s*$/)![0]);
+			push(lead, 'same');
+			push(del.slice(lead.length, del.length - trail.length), 'del');
+			push(add.slice(lead.length, add.length - trail.length), 'add');
+			push(trail, 'same');
+		} else {
+			// Nur Ergänzungen oder nur Streichungen: Teile einzeln übernehmen (Leerraum bleibt unverändert)
+			for (const p of block) push(p.text, p.kind);
+		}
+		k = end + 1;
 	}
 	return out;
 }

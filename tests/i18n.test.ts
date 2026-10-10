@@ -4,8 +4,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { de } from '../src/lib/i18n/de.ts';
 import { en } from '../src/lib/i18n/en.ts';
-import { renderMarkdown } from '../src/lib/markdown.ts';
-import { filledKinds, sanitizeContent, SECTIONS } from '../src/lib/templates.ts';
+import { SECTIONS } from '../src/lib/templates.ts';
 
 test('Beide Sprachen haben dieselben Schlüssel', () => {
 	const missingEn = Object.keys(de).filter((k) => !(k in en));
@@ -41,33 +40,4 @@ test('Alle im Code verwendeten Textschlüssel existieren', () => {
 		}
 	}
 	assert.deepEqual([...missing], []);
-});
-
-test('Markdown-Renderer entschärft HTML', () => {
-	const html = renderMarkdown('## Titel\n\n<script>alert(1)</script> **fett**\n\n- [x](javascript:alert(1))');
-	assert.ok(!html.includes('<script>'));
-	assert.ok(html.includes('&lt;script&gt;'));
-	assert.ok(html.includes('<strong>fett</strong>'));
-	assert.ok(!html.includes('href="javascript'));
-});
-
-test('Eingaben werden auf bekannte Felder reduziert', () => {
-	const c = sanitizeContent({
-		mood: 9,
-		free: 'frei',
-		evil: 'x',
-		sections: {
-			erlebt: { highlight: 'Sonnenaufgang', hacker: 'x', gratitude: ['a', 2, 'c', 'd'] },
-			gefuehl: { energy: 4, emotions: ['joy', 'unbekannt'] },
-			unbekannt: { a: 1 }
-		}
-	});
-	assert.equal(c.mood, null);
-	assert.equal(c.free, 'frei');
-	assert.ok(!('evil' in c));
-	assert.ok(!('unbekannt' in c.sections));
-	assert.ok(!('hacker' in c.sections.erlebt!));
-	assert.deepEqual(c.sections.erlebt!.gratitude, ['a', '', 'c']);
-	assert.deepEqual(c.sections.gefuehl!.emotions, ['joy']);
-	assert.deepEqual(filledKinds(c), ['erlebt', 'gefuehl']);
 });

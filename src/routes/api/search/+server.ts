@@ -1,5 +1,6 @@
 import type { RequestHandler } from './$types';
 import { requireSession } from '#lib/server/auth.ts';
+import { readJson } from '#lib/server/api.ts';
 import { translate } from '#lib/i18n/index.ts';
 import { matchEntry, searchTerms, type SearchHit } from '#lib/search.ts';
 import { getEntry, listEntryMeta } from '#lib/server/entries.ts';
@@ -11,7 +12,7 @@ import { getEntry, listEntryMeta } from '#lib/server/entries.ts';
 export const POST: RequestHandler = async (event) => {
 	const session = requireSession(event);
 	const lang = event.locals.settings?.language ?? 'de';
-	const { query } = await event.request.json();
+	const { query } = await readJson(event.request);
 	const terms = searchTerms(String(query ?? '').slice(0, 200));
 
 	const results: ({ date: string; mood: number | null; locked: boolean } & SearchHit)[] = [];

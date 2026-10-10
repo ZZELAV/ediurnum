@@ -14,6 +14,9 @@ The topmost version without a date is still in development.
 
 ### Changed
 
+- The version history shows connected changes as one block (all removed words, then all new ones) instead of
+  alternating word by word.
+- Unlocking an entry no longer releases it for AI insights again; that only happens when you switch it on.
 - Dates and numbers follow the regional format of your browser when it matches the app language (e.g. "3,3" in
   Germany, "3.3" in Switzerland, US date order in American English). Otherwise Swiss German or British English
   formats are used as before.
@@ -27,6 +30,7 @@ The topmost version without a date is still in development.
 
 ### Security
 
+- A PIN in the wrong format is rejected without running the key derivation.
 - Passwords are limited to 1024 characters, so very large inputs are no longer run through Argon2 (also on the
   sign-in page).
 - Two setups at the same moment can no longer overwrite each other; the second one gets a message.
@@ -34,6 +38,9 @@ The topmost version without a date is still in development.
 
 ### Fixed
 
+- Saving an entry quickly several times in a row (auto-save, Ctrl+S, leaving the page) could in rare cases store an
+  older version last.
+- Invalid requests to the API return "400 Bad Request" instead of a server error.
 - A recovery key with an invalid character (e.g. "O" or "0") showed an untranslated German error message.
 - The reminders page showed the next weekly and monthly review by schedule alone. It now shows the day the reminder
   is actually sent, taking the minimum gap into account (e.g. in a new journal the first weekly review comes after

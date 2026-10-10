@@ -1,15 +1,16 @@
 import type { RequestHandler } from './$types';
 import { requireSession } from '#lib/server/auth.ts';
-import { fail } from '#lib/server/api.ts';
+import { fail, readJson } from '#lib/server/api.ts';
 import { addDevice, removeAllDevices, removeDevice } from '#lib/server/reminders.ts';
 import { log } from '#lib/server/log.ts';
 
 /** Gerät für Push-Benachrichtigungen anmelden. */
 export const POST: RequestHandler = async (event) => {
 	requireSession(event);
-	const { subscription, label } = await event.request.json();
-	const endpoint = subscription?.endpoint;
-	const keys = subscription?.keys;
+	const { subscription, label } = await readJson(event.request);
+	const sub = (subscription ?? {}) as { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown } };
+	const endpoint = sub.endpoint;
+	const keys = sub.keys;
 	if (typeof endpoint !== 'string' || !/^https:\/\//.test(endpoint) || typeof keys?.p256dh !== 'string' || typeof keys?.auth !== 'string') {
 		return fail('common.error');
 	}

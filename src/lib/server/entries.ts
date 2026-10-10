@@ -6,8 +6,6 @@ import type { Session } from './vault';
 import { filledKinds, isEmptyContent } from '#lib/templates.ts';
 import type { Entry, EntryContent, EntryMeta, RevisionInfo, SectionKind } from '#lib/types.ts';
 
-/** Änderungen innerhalb dieses Zeitfensters werden in derselben Version zusammengefasst. */
-
 interface EntryRow {
 	id: string;
 	date: string;
@@ -174,7 +172,11 @@ export function restoreRevision(session: Session, date: string, revision: number
 	return true;
 }
 
-/** Sperrt bzw. entsperrt einen Eintrag inkl. aller früheren Versionen. Benötigt die PIN. */
+/**
+ * Sperrt bzw. entsperrt einen Eintrag inkl. aller früheren Versionen. Benötigt die PIN.
+ * Sperren schliesst den Eintrag von der KI aus; Entsperren lässt die Freigabe unverändert –
+ * eine Freigabe für die KI geschieht nur ausdrücklich.
+ */
 export function setLocked(session: Session, date: string, locked: boolean) {
 	const row = rowByDate(date);
 	if (!row || (row.locked === 1) === locked) return;
@@ -184,8 +186,8 @@ export function setLocked(session: Session, date: string, locked: boolean) {
 	transaction(() => {
 		const content = decryptJson<EntryContent>(from, row.payload, aad(row.id, row.revision));
 		getDb()
-			.prepare('UPDATE entries SET locked = ?, ai_allowed = ?, payload = ? WHERE id = ?')
-			.run(locked ? 1 : 0, locked ? 0 : 1, encryptJson(to, content, aad(row.id, row.revision)), row.id);
+			.prepare('UPDATE entries SET locked = ?, ai_allowed = CASE WHEN ? THEN 0 ELSE ai_allowed END, payload = ? WHERE id = ?')
+			.run(locked ? 1 : 0, locked ? 1 : 0, encryptJson(to, content, aad(row.id, row.revision)), row.id);
 		const revs = getDb()
 			.prepare('SELECT * FROM entry_revisions WHERE entry_id = ?')
 			.all(row.id) as unknown as RevisionRow[];

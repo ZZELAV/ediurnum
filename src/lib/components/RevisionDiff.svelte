@@ -202,6 +202,10 @@
 		text-decoration: line-through;
 		border-radius: 3px;
 	}
+	/* Abstand zwischen Gestrichenem und direkt folgendem Neuem – sonst kleben sie zusammen („sein.Nicht“) */
+	del + ins {
+		margin-left: 0.25em;
+	}
 	.arrow {
 		color: var(--ink-faint);
 	}
