@@ -12,6 +12,7 @@ import {
 } from './crypto';
 import { getMeta, nowIso, setMeta, transaction } from './db';
 import { log } from './log';
+import { MAX_PASSWORD } from './validation';
 
 /**
  * Tresor: verwaltet den Hauptschlüssel. Er existiert entschlüsselt nur im
@@ -51,6 +52,8 @@ export async function initialize(password: string, dek: Buffer = generateKey()):
 	const params = defaultKdfParams();
 	const kek = await deriveKey(password, params);
 	transaction(() => {
+		// Nochmals prüfen: Während der Ableitung könnte eine zweite Einrichtung zuvorgekommen sein
+		if (isInitialized()) throw new Error('already-initialized');
 		storeWrappedKey(dek, kek, params);
 		setMeta('key_fp', keyFingerprint(dek));
 		setMeta('created_at', nowIso());
@@ -61,7 +64,7 @@ export async function initialize(password: string, dek: Buffer = generateKey()):
 export async function unlockWithPassword(password: string): Promise<Buffer | null> {
 	const kdf = getMeta('kdf');
 	const wrapped = getMeta('wrapped_dek');
-	if (!kdf || !wrapped) return null;
+	if (!kdf || !wrapped || password.length > MAX_PASSWORD) return null;
 	const kek = await deriveKey(password, JSON.parse(kdf) as KdfParams);
 	try {
 		return decrypt(kek, Buffer.from(wrapped, 'base64'), WRAP_AAD);

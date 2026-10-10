@@ -27,10 +27,14 @@ The topmost version without a date is still in development.
 
 ### Security
 
+- Passwords are limited to 1024 characters, so very large inputs are no longer run through Argon2 (also on the
+  sign-in page).
+- Two setups at the same moment can no longer overwrite each other; the second one gets a message.
 - Resolves the advisory for the `cookie` package (not exploitable in ediurnum, as cookie names and paths are fixed).
 
 ### Fixed
 
+- A recovery key with an invalid character (e.g. "O" or "0") showed an untranslated German error message.
 - The reminders page showed the next weekly and monthly review by schedule alone. It now shows the day the reminder
   is actually sent, taking the minimum gap into account (e.g. in a new journal the first weekly review comes after
   about a week).

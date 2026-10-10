@@ -143,7 +143,7 @@ function base32Decode(str: string): Buffer {
 	const out: number[] = [];
 	for (const ch of str) {
 		const idx = B32.indexOf(ch);
-		if (idx === -1) throw new Error('Ungültiges Zeichen im Schlüssel');
+		if (idx === -1) throw new Error('recovery.invalidChars');
 		value = (value << 5) | idx;
 		bits += 5;
 		if (bits >= 8) {

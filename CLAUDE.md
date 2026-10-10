@@ -7,7 +7,9 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 
 - `npm run dev` – Entwicklungsserver (Daten in `./data`)
 - `npm run check` – Typprüfung (svelte-check)
-- `npm test` – Unit-Tests (`node --test`, Dateien in `tests/`)
+- `npm test` – Unit-Tests (`node --test`, Dateien in `tests/`) für reine Funktionen
+- `npm run test:e2e` – Ende-zu-Ende-Tests (`e2e/`): startet den gebauten Server (`server.js`) mit leerem Datenordner und prüft über HTTP; vorher `npm run build`
+- `npm run test:all` – Unit-Tests, Build und Ende-zu-Ende-Tests
 - `npm run build` – Produktions-Build nach `build/`
 
 ## Versionierung (Pflicht bei jeder Änderung)

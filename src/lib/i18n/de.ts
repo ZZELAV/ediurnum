@@ -70,6 +70,7 @@ export const de: Record<string, string> = {
 
 	// Fehler
 	'error.passwordTooShort': 'Das Passwort muss mindestens 10 Zeichen lang sein.',
+	'error.passwordTooLong': 'Das Passwort darf höchstens 1024 Zeichen lang sein.',
 	'error.passwordMismatch': 'Die Passwörter stimmen nicht überein.',
 	'error.nameMissing': 'Bitte gib deinen Vornamen ein.',
 	'error.wrongPassword': 'Das Passwort ist nicht korrekt.',
@@ -84,6 +85,7 @@ export const de: Record<string, string> = {
 	'error.notFound': 'Diese Seite gibt es nicht.',
 	'error.unauthorized': 'Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.',
 	'recovery.invalidLength': 'Der Schlüssel hat nicht die richtige Länge (56 Zeichen).',
+	'recovery.invalidChars': 'Der Schlüssel enthält ein ungültiges Zeichen. Erlaubt sind A–Z ohne I und O sowie 2–9.',
 	'recovery.invalidChecksum': 'Der Schlüssel enthält einen Tippfehler (Prüfsumme stimmt nicht).',
 	'recovery.wrongKey': 'Dieser Schlüssel gehört nicht zu diesem Tagebuch.',
 	'backup.invalidFile': 'Das ist keine gültige ediurnum-Backup-Datei.',

@@ -64,6 +64,7 @@ export const en: Record<string, string> = {
 	'recover.backToLogin': 'Back to sign in',
 
 	'error.passwordTooShort': 'The password must be at least 10 characters long.',
+	'error.passwordTooLong': 'The password may be at most 1024 characters long.',
 	'error.passwordMismatch': 'The passwords do not match.',
 	'error.nameMissing': 'Please enter your first name.',
 	'error.wrongPassword': 'The password is incorrect.',
@@ -78,6 +79,7 @@ export const en: Record<string, string> = {
 	'error.notFound': 'This page does not exist.',
 	'error.unauthorized': 'Your session has expired. Please sign in again.',
 	'recovery.invalidLength': 'The key does not have the right length (56 characters).',
+	'recovery.invalidChars': 'The key contains an invalid character. Allowed are A–Z without I and O, and 2–9.',
 	'recovery.invalidChecksum': 'The key contains a typo (checksum mismatch).',
 	'recovery.wrongKey': 'This key does not belong to this journal.',
 	'backup.invalidFile': 'This is not a valid ediurnum backup file.',

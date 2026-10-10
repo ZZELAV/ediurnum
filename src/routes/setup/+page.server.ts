@@ -16,6 +16,16 @@ export const load: PageServerLoad = ({ locals }) => {
 	return {};
 };
 
+/** Wie initialize(), aber null statt Fehler, wenn eine gleichzeitige Einrichtung zuvorgekommen ist. */
+async function tryInitialize(password: string, dek: Buffer): Promise<string | null> {
+	try {
+		return await initialize(password, dek);
+	} catch (e) {
+		if ((e as Error).message === 'already-initialized') return null;
+		throw e;
+	}
+}
+
 export const actions: Actions = {
 	create: async ({ request, cookies, locals }) => {
 		if (isInitialized()) return fail(400, { error: 'error.alreadyInitialized' });
@@ -27,7 +37,8 @@ export const actions: Actions = {
 		if (err) return fail(400, { error: err, name });
 
 		const dek = generateKey();
-		const recoveryKey = await initialize(password, dek);
+		const recoveryKey = await tryInitialize(password, dek);
+		if (!recoveryKey) return fail(400, { error: 'error.alreadyInitialized' });
 		saveSettings(dek, { ...defaultSettings(), name, language: locals.lang });
 		saveReminders(defaultReminders(locals.lang));
 		startSession(cookies, dek);
@@ -57,7 +68,7 @@ export const actions: Actions = {
 			log.warn('backup restore failed', { reason: (e as Error).message });
 			return fail(400, { error: (e as Error).message, mode: 'restore' });
 		}
-		await initialize(password, dek);
+		if (!(await tryInitialize(password, dek))) return fail(400, { error: 'error.alreadyInitialized', mode: 'restore' });
 		restoreBackup(data);
 		setMeta('backup_last', nowIso()); // wer aus einem Backup wiederherstellt, hat eines (Willkommenskarte)
 		startSession(cookies, dek);
