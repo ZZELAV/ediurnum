@@ -10,6 +10,8 @@ The topmost version without a date is still in development.
 
 - The version history highlights what changed compared with the previous version: added text is marked,
   removed text is struck through, unchanged fields fade into the background. Can be switched off.
+- Optional endpoint `/api/widget` for dashboards: number of entries and date of the latest entry, only active when
+  `WIDGET_TOKEN` is set (at least 16 characters) and requested with `Authorization: Bearer <token>`.
 
 ### Changed
 

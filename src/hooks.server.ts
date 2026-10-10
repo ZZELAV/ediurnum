@@ -10,6 +10,8 @@ import { isLang, pickLang } from '$lib/i18n';
 import { SESSION_COOKIE } from '$lib/server/auth';
 
 const PUBLIC_PATHS = ['/setup', '/login', '/recover'];
+/** Prüfen selbst einen Token statt der Sitzung (z. B. Dashboard-Widget). */
+const TOKEN_PATHS = ['/api/widget'];
 
 /** Ältere Geräte fragen eigene Namen für das Symbol ab (z. B. „-precomposed“ oder mit Grösse). */
 const TOUCH_ICON_ALIAS = /^\/apple-touch-icon(-\d+x\d+)?(-precomposed)?\.png$/;
@@ -50,6 +52,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 			if (isApi) return json({ error: 'error.unauthorized' }, { status: 401 });
 			redirect(303, '/setup');
 		}
+	} else if (TOKEN_PATHS.includes(path)) {
+		// Zugang über Token, siehe Endpunkt
 	} else if (!session && !isPublic) {
 		if (isApi) return json({ error: 'error.unauthorized' }, { status: 401 });
 		redirect(303, '/login');
