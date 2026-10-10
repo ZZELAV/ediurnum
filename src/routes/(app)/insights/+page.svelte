@@ -277,7 +277,7 @@
 				<button class="btn ghost" disabled={busy || !answer.trim()}>{t('insights.saveAnswer')}</button>
 			</form>
 		{:else if notice}
-			<p class="notice" role="status">{notice}</p>
+			<p class="notice saved" role="status">{notice}</p>
 		{/if}
 	</section>
 
@@ -384,7 +384,8 @@
 		margin: 0.3rem 0 0;
 		max-width: 60ch;
 	}
-	.earlier {
+	.earlier,
+	.saved {
 		margin: 1.2rem 0 0;
 	}
 	.history-title {
