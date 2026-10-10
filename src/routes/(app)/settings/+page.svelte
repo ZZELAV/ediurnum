@@ -120,6 +120,17 @@
 			<h2>{t('settings.security')}</h2>
 			<p class="faint">{t('settings.recoveryHint')}</p>
 
+			<h3>{t('settings.recoveryTest')}</h3>
+			<p class="faint">{t('settings.recoveryTestIntro')}</p>
+			{@render feedback('recovery')}
+			<form method="POST" action="?/recoveryTest" use:enhance class="grid">
+				<div class="field">
+					<label for="rk">{t('setup.recoveryKey')}</label>
+					<input id="rk" name="recoveryKey" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" required />
+				</div>
+				<div><button class="btn ghost">{t('settings.recoveryTestButton')}</button></div>
+			</form>
+
 			<h3>{t('settings.changePassword')}</h3>
 			{@render feedback('password')}
 			<form method="POST" action="?/password" use:enhance class="grid">

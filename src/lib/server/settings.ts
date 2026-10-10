@@ -12,6 +12,7 @@ export function defaultSettings(): Settings {
 		sessionMinutes: 30,
 		focusMode: false,
 		welcomeHidden: false,
+		aiInstructions: '',
 		agents: [],
 		defaultAgentId: null
 	};

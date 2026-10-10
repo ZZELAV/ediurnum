@@ -221,6 +221,11 @@
 <div class="view entry-view">
 	<button type="button" class="btn quiet small focus-exit" onclick={exitFocus}>{t('focus.exit')}</button>
 	<p class="focus-hint" aria-hidden="true">{t('focus.hint')}</p>
+	<p class="focus-intro" role="status">
+		<strong>{t('focus.introTitle')}</strong>
+		<span class="keys">{t('focus.introKeys')}</span>
+		<span class="touch">{t('focus.introTouch')}</span>
+	</p>
 	<header class="entry-head">
 		<div class="title">
 			<p class="eyebrow">{date === today ? t('entry.today') : t('entry.title')}</p>

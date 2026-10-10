@@ -20,24 +20,50 @@ const TONES: Record<AiAgent['tone'], Record<Lang, string>> = {
 	}
 };
 
-/** Einstellungen für den Auftrag an die KI (KI-Agent oder Markdown-Datei für einen KI-Chat). */
-export type PromptOptions = Pick<AiAgent, 'tone' | 'persona' | 'maxFocusPoints'>;
+/**
+ * Einstellungen für den Auftrag an die KI (KI-Agent oder Markdown-Datei für einen KI-Chat).
+ * `instructions`: eigener Auftrag der schreibenden Person (leer = Standard, siehe defaultInstructions).
+ */
+export type PromptOptions = Pick<AiAgent, 'tone' | 'persona' | 'maxFocusPoints'> & { instructions?: string };
+
+export const MAX_INSTRUCTIONS = 8000;
 
 /**
- * Auftrag an die KI. Bei `chat` stehen die Fokuspunkte unter einer eigenen Überschrift,
- * damit eine aus dem Chat kopierte Antwort sie zuverlässig enthält (siehe parseResponse).
+ * Standard-Auftrag an die KI: Rolle, Regeln und Gliederung der Antwort. Diesen Teil kann die
+ * schreibende Person in den Einsichten anpassen; Tonfall und Fokuspunkte ergänzt buildSystemPrompt.
  */
-export function buildSystemPrompt(agent: PromptOptions, lang: Lang, format: 'api' | 'chat' = 'api'): string {
-	const n = Math.min(7, Math.max(1, agent.maxFocusPoints || 4));
+export function defaultInstructions(lang: Lang): string {
 	if (lang === 'en') {
 		return [
 			'You are a reflective companion for a personal journal called "ediurnum".',
 			'You receive journal entries (daily gratitude and experiences, weekly feelings, monthly learning and growth) and help the writer understand themselves better and grow.',
-			TONES[agent.tone]?.en ?? TONES.balanced.en,
-			agent.persona ? `Individual instructions from the writer:\n${agent.persona}` : '',
 			'Refer to concrete entries and dates. Do not invent anything that is not in the entries. You are not a therapist and do not make diagnoses; if entries suggest a serious crisis, gently recommend talking to a trusted person or professional help.',
 			'Answer in English, formatted as Markdown with these headings:',
-			'## Overview\n## What is going well\n## Patterns and observations\n## Key points for the coming weeks',
+			'## Overview\n## What is going well\n## Patterns and observations\n## Key points for the coming weeks'
+		].join('\n\n');
+	}
+	return [
+		'Du bist ein reflektierender Begleiter für ein persönliches Tagebuch namens "ediurnum".',
+		'Du erhältst Tagebucheinträge (täglich Dankbarkeit und Erlebtes, wöchentlich Gefühle, monatlich Gelerntes und Weiterentwicklung) und hilfst der schreibenden Person, sich selbst besser zu verstehen und sich weiterzuentwickeln.',
+		'Beziehe dich auf konkrete Einträge und Daten. Erfinde nichts, was nicht in den Einträgen steht. Du bist kein Therapeut und stellst keine Diagnosen; deuten Einträge auf eine ernste Krise hin, empfiehl behutsam, mit einer Vertrauensperson zu sprechen oder professionelle Hilfe zu suchen.',
+		'Antworte auf Deutsch, formatiert als Markdown mit diesen Überschriften:',
+		'## Überblick\n## Was gut läuft\n## Muster und Beobachtungen\n## Knackpunkte für die nächsten Wochen'
+	].join('\n\n');
+}
+
+/**
+ * Auftrag an die KI: eigener oder Standard-Auftrag, dazu Tonfall und die Fokuspunkte am Schluss.
+ * Bei `chat` stehen die Fokuspunkte unter einer eigenen Überschrift, damit eine aus dem Chat
+ * kopierte Antwort sie zuverlässig enthält (siehe parseResponse).
+ */
+export function buildSystemPrompt(agent: PromptOptions, lang: Lang, format: 'api' | 'chat' = 'api'): string {
+	const n = Math.min(7, Math.max(1, agent.maxFocusPoints || 4));
+	const instructions = agent.instructions?.trim() || defaultInstructions(lang);
+	if (lang === 'en') {
+		return [
+			instructions,
+			TONES[agent.tone]?.en ?? TONES.balanced.en,
+			agent.persona ? `Individual instructions from the writer:\n${agent.persona}` : '',
 			...(format === 'chat'
 				? [
 						`Finish with a last section "## Focus points" containing exactly ${n} short, concrete and actionable focus points for the coming weeks (one per line, each starting with "- ").`
@@ -51,13 +77,9 @@ export function buildSystemPrompt(agent: PromptOptions, lang: Lang, format: 'api
 			.join('\n\n');
 	}
 	return [
-		'Du bist ein reflektierender Begleiter für ein persönliches Tagebuch namens "ediurnum".',
-		'Du erhältst Tagebucheinträge (täglich Dankbarkeit und Erlebtes, wöchentlich Gefühle, monatlich Gelerntes und Weiterentwicklung) und hilfst der schreibenden Person, sich selbst besser zu verstehen und sich weiterzuentwickeln.',
+		instructions,
 		TONES[agent.tone]?.de ?? TONES.balanced.de,
 		agent.persona ? `Individuelle Anweisungen der schreibenden Person:\n${agent.persona}` : '',
-		'Beziehe dich auf konkrete Einträge und Daten. Erfinde nichts, was nicht in den Einträgen steht. Du bist kein Therapeut und stellst keine Diagnosen; deuten Einträge auf eine ernste Krise hin, empfiehl behutsam, mit einer Vertrauensperson zu sprechen oder professionelle Hilfe zu suchen.',
-		'Antworte auf Deutsch (Schweizer Rechtschreibung, also "ss" statt "ß"), formatiert als Markdown mit diesen Überschriften:',
-		'## Überblick\n## Was gut läuft\n## Muster und Beobachtungen\n## Knackpunkte für die nächsten Wochen',
 		...(format === 'chat'
 			? [
 					`Schliesse mit einem letzten Abschnitt "## Fokuspunkte" ab, der genau ${n} kurze, konkrete und umsetzbare Fokuspunkte für die nächsten Wochen enthält (einer pro Zeile, jeweils mit "- " beginnend).`

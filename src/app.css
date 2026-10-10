@@ -277,6 +277,7 @@ input[type='date'],
 input[type='time'],
 input[type='number'],
 input[type='url'],
+input[type='search'],
 input[type='file'],
 select,
 textarea {
@@ -284,6 +285,8 @@ textarea {
 	/* Felder dürfen in Flex-Zeilen und Rastern schrumpfen – iOS gibt ihnen sonst eine feste Mindestbreite,
 	 * und sie ragen rechts hinaus (z. B. neben den Nummern bei „Wofür bin ich dankbar?“) */
 	min-width: 0;
+	/* Textfelder nur in der Höhe vergrösserbar – in der Breite würden sie aus der Spalte ragen */
+	resize: vertical;
 	font: inherit;
 	color: var(--ink);
 	background: var(--paper-2);
@@ -372,6 +375,7 @@ input[type='checkbox']:disabled {
 	input[type='time'],
 	input[type='number'],
 	input[type='url'],
+	input[type='search'],
 	select,
 	textarea {
 		font-size: max(1rem, 16px);
@@ -627,6 +631,48 @@ textarea.write {
 	:root[data-focus] .focus-exit {
 		opacity: 0.8;
 		pointer-events: auto;
+	}
+}
+/* Einmalige Erklärung beim allerersten Fokus (gesteuert über data-focus-intro, siehe $lib/focus.ts) */
+.focus-intro {
+	position: fixed;
+	left: 50%;
+	bottom: 1.5rem;
+	z-index: 40;
+	width: min(26rem, calc(100% - 2rem));
+	margin: 0;
+	padding: 0.8rem 1rem;
+	display: grid;
+	gap: 0.2rem;
+	font-size: 0.9rem;
+	color: var(--ink-soft);
+	background: var(--paper);
+	border: 1px solid var(--paper-edge);
+	border-left: 3px solid var(--accent);
+	border-radius: 12px;
+	box-shadow: 0 8px 28px rgb(0 0 0 / 0.18);
+	opacity: 0;
+	pointer-events: none;
+	transform: translate(-50%, 0.5rem);
+	transition:
+		opacity 0.8s ease,
+		transform 0.8s ease;
+}
+.focus-intro strong {
+	color: var(--ink);
+}
+:root[data-focus][data-focus-intro] .focus-intro {
+	opacity: 1;
+	transform: translate(-50%, 0);
+}
+@media (hover: hover) and (pointer: fine) {
+	.focus-intro .touch {
+		display: none;
+	}
+}
+@media not ((hover: hover) and (pointer: fine)) {
+	.focus-intro .keys {
+		display: none;
 	}
 }
 

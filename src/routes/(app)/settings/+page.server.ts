@@ -13,6 +13,7 @@ import { SESSION_COOKIE, setLangCookie } from '$lib/server/auth';
 import { purgeContent, resetAll } from '$lib/server/purge';
 import { countLocked, rekeyLocked } from '$lib/server/entries';
 import { transaction } from '$lib/server/db';
+import { parseRecoveryKey } from '$lib/server/crypto';
 import { loadSettings, publicAgent, saveSettings } from '$lib/server/settings';
 import { validateNewPassword, validatePin } from '$lib/server/validation';
 import {
@@ -105,6 +106,27 @@ export const actions: Actions = {
 		await setPassword(dek, next);
 		log.info('password changed');
 		return { section: 'password', success: 'settings.passwordChanged' };
+	},
+
+	/** Wiederherstellungsschlüssel prüfen, ohne etwas zu ändern. */
+	recoveryTest: async ({ request, locals }) => {
+		const form = await request.formData();
+		const wait = throttleRemaining('recovery-test');
+		if (wait > 0) return fail(429, { section: 'recovery', error: 'error.throttled', seconds: wait });
+		let key: Buffer;
+		try {
+			key = parseRecoveryKey(String(form.get('recoveryKey') ?? ''));
+		} catch (e) {
+			return fail(400, { section: 'recovery', error: (e as Error).message });
+		}
+		const ok = key.equals(locals.session!.dek);
+		key.fill(0);
+		if (!ok) {
+			registerFailure('recovery-test');
+			return fail(400, { section: 'recovery', error: 'recovery.wrongKey' });
+		}
+		registerSuccess('recovery-test');
+		return { section: 'recovery', success: 'settings.recoveryTestOk' };
 	},
 
 	pin: async ({ request, locals }) => {

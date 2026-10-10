@@ -34,6 +34,8 @@
 	let error = $state<string | null>(null);
 	let notice = $state<string | null>(null);
 	let busy = $state(false);
+	let instructions = $state(untrack(() => data.instructions.custom || data.instructions.default));
+	let instructionsNotice = $state<string | null>(null);
 
 	const from = $derived(period === 'custom' ? customFrom : addDays(data.today, -Number(period)));
 	const to = $derived(period === 'custom' ? customTo : data.today);
@@ -237,6 +239,57 @@
 		{/if}
 	</section>
 
+	<!-- Auftrag an die KI: Standard oder eigener Text -->
+	<details class="card instructions">
+		<summary>
+			<span class="title">{t('insights.instructions')}</span>
+			<span class="chip" class:gold={!!data.instructions.custom}>
+				{data.instructions.custom ? t('insights.instructionsCustom') : t('insights.instructionsDefault')}
+			</span>
+		</summary>
+		<p class="faint">{t('insights.instructionsIntro')}</p>
+		<form
+			method="POST"
+			action="?/instructions"
+			use:enhance={({ submitter }) => {
+				const reset = submitter?.getAttribute('value') === 'reset';
+				return async ({ result: r, update }) => {
+					await update({ reset: false });
+					if (r.type === 'success') {
+						instructions = data.instructions.custom || data.instructions.default;
+						instructionsNotice = t(reset ? 'insights.instructionsReset' : 'insights.instructionsSaved');
+					}
+				};
+			}}
+		>
+			<div class="field">
+				<label for="instr" class="visually-hidden">{t('insights.instructions')}</label>
+				<textarea id="instr" name="instructions" rows="12" maxlength="8000" bind:value={instructions} oninput={() => (instructionsNotice = null)}></textarea>
+			</div>
+			<p class="faint">{t('insights.instructionsFixed')}</p>
+			{#if instructionsNotice}<p class="notice" role="status">{instructionsNotice}</p>{/if}
+			<div class="row">
+				<button class="btn">{t('common.save')}</button>
+				{#if data.instructions.custom || instructions !== data.instructions.default}
+					<button
+						class="btn ghost"
+						name="reset"
+						value="reset"
+						onclick={async (e) => {
+							const button = e.currentTarget;
+							e.preventDefault();
+							if (await ask(t('insights.instructionsResetConfirm'), { confirmLabel: t('insights.instructionsResetButton') })) {
+								button.form?.requestSubmit(button);
+							}
+						}}
+					>
+						{t('insights.instructionsResetButton')}
+					</button>
+				{/if}
+			</div>
+		</form>
+	</details>
+
 	<section class="stack">
 		<h2 class="history-title">{t('insights.history')}</h2>
 		{#if data.analyses.length === 0}
@@ -362,8 +415,18 @@
 	.ready p:last-child {
 		margin: 0.6rem 0 0;
 	}
-	.analysis {
+	.analysis,
+	.instructions {
 		padding-block: 1rem;
+	}
+	.instructions summary {
+		align-items: center;
+	}
+	.instructions textarea {
+		line-height: 1.5;
+	}
+	.instructions > p:first-of-type {
+		margin-top: 0.8rem;
 	}
 	summary {
 		cursor: pointer;

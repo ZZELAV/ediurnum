@@ -10,6 +10,18 @@ The topmost version without a date is still in development.
 
 - "Your first steps" on the dashboard: write the first entry, fill in About me, switch on reminders, set a PIN and
   download a backup. Steps tick themselves off; the card can be hidden and shown again in the settings.
+- Search in "All entries": finds words in every field (ignoring case and accents) and shows where they appear.
+  Locked entries are only searched after entering the PIN.
+- Legend for the calendar colours in "All entries".
+- Test your recovery key in the security settings without changing anything.
+- Customisable instructions for the AI in Insights, with a default that can be restored at any time.
+- A short one-time explanation the first time focus mode starts.
+
+### Changed
+
+- "Today" now has a sun icon instead of a pencil.
+- Text fields can only be resized vertically.
+- The default AI instructions no longer ask for Swiss spelling.
 
 ## [0.1.0-beta.3] - 2026-10-09
 

@@ -58,6 +58,7 @@ export interface Settings {
 	sessionMinutes: number;
 	focusMode: boolean;
 	welcomeHidden: boolean; // Willkommenskarte auf der Startseite ausgeblendet
+	aiInstructions: string; // eigener Auftrag an die KI (leer = Standard aus $lib/server/ai/analyze)
 	agents: AiAgent[];
 	defaultAgentId: string | null;
 }

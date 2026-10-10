@@ -6,9 +6,9 @@ import { entriesForAi, moodSeries } from '$lib/server/entries';
 import { loadProfile } from '$lib/server/profile';
 import { isEmptyProfile } from '$lib/profile';
 import { log } from '$lib/server/log';
-import { loadSettings } from '$lib/server/settings';
+import { loadSettings, saveSettings } from '$lib/server/settings';
 import { deleteAnalysis, listAnalyses, pinAnalysis, saveAnalysis } from '$lib/server/analyses';
-import { buildChatMarkdown, parseResponse } from '$lib/server/ai/analyze';
+import { buildChatMarkdown, defaultInstructions, MAX_INSTRUCTIONS, parseResponse } from '$lib/server/ai/analyze';
 import { renderMarkdown } from '$lib/markdown';
 import type { AiAgent } from '$lib/types';
 
@@ -19,7 +19,9 @@ import type { AiAgent } from '$lib/types';
  */
 export const load: PageServerLoad = ({ locals }) => {
 	const session = locals.session!;
+	const settings = loadSettings(session.dek);
 	return {
+		instructions: { custom: settings.aiInstructions, default: defaultInstructions(settings.language) },
 		analyses: listAnalyses(session.dek).map((a) => ({
 			...a,
 			// ältere Auswertungen ohne gespeicherten Verlauf: aus den aktuellen Einträgen berechnen
@@ -55,7 +57,8 @@ export const actions: Actions = {
 			options: {
 				tone: TONES.includes(tone) ? tone : 'balanced',
 				persona: '',
-				maxFocusPoints: Math.min(7, Math.max(1, Number(form.get('focusCount')) || 4))
+				maxFocusPoints: Math.min(7, Math.max(1, Number(form.get('focusCount')) || 4)),
+				instructions: settings.aiInstructions
 			},
 			lang: settings.language,
 			profile: withProfile ? { profile: loadProfile(session.dek), name: settings.name } : null,
@@ -71,6 +74,17 @@ export const actions: Actions = {
 			...range,
 			filename: `ediurnum-${range.from}_${range.to}.md`
 		};
+	},
+
+	/** Eigenen Auftrag an die KI speichern; leer oder gleich wie der Standard = Standard verwenden. */
+	instructions: async ({ request, locals }) => {
+		const session = locals.session!;
+		const form = await request.formData();
+		const settings = loadSettings(session.dek);
+		const text = String(form.get('instructions') ?? '').replace(/\r\n/g, '\n').trim().slice(0, MAX_INSTRUCTIONS);
+		settings.aiInstructions = form.get('reset') || text === defaultInstructions(settings.language) ? '' : text;
+		saveSettings(session.dek, settings);
+		return { instructionsSaved: settings.aiInstructions ? 'custom' : 'default' };
 	},
 
 	/** Antwort aus dem KI-Chat als Auswertung speichern. */
