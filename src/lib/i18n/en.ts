@@ -472,6 +472,8 @@ export const en: Record<string, string> = {
 
 	'settings.about': 'About ediurnum',
 	'settings.changelogLatest': 'New in version {version}',
+	'settings.repo': 'ediurnum on GitHub',
+	'settings.repoHint': 'Source code (open source, AGPL-3.0), report bugs and suggest ideas.',
 	'settings.changelogAll': 'All changes on GitHub',
 	'settings.name': 'First name',
 	'settings.profileIntro': 'Your self-assessment: personality, values, goals and what the AI should know about you. It is the basis for the AI insights.',

@@ -3,7 +3,7 @@
 	import { ask } from '#lib/confirm.svelte.ts';
 	import { enhance } from '$app/forms';
 	import { fmtDate, t } from '#lib/i18n/t.ts';
-	import { CHANGELOG_URL } from '#lib/changelog.ts';
+	import { CHANGELOG_URL, REPO_URL } from '#lib/changelog.ts';
 	import PasswordInput from '#lib/components/PasswordInput.svelte';
 
 	let { data, form } = $props();
@@ -244,6 +244,10 @@
 			{/if}
 			<p class="faint" style="margin-top: 0.75rem">
 				<a href={CHANGELOG_URL} target="_blank" rel="noopener noreferrer">{t('settings.changelogAll')} ↗</a>
+			</p>
+			<p class="faint">
+				<a href={REPO_URL} target="_blank" rel="noopener noreferrer">{t('settings.repo')} ↗</a>
+				<br />{t('settings.repoHint')}
 			</p>
 		</section>
 </div>

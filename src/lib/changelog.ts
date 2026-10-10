@@ -1,4 +1,6 @@
-export const CHANGELOG_URL = 'https://github.com/ZZELAV/ediurnum/blob/main/CHANGELOG.md';
+/** Öffentliches Projekt auf GitHub (Quellcode, Fehler melden) */
+export const REPO_URL = 'https://github.com/ZZELAV/ediurnum';
+export const CHANGELOG_URL = `${REPO_URL}/blob/main/CHANGELOG.md`;
 
 /**
  * Abschnitt einer Version aus dem Changelog (ohne Linkverweise am Ende).

@@ -487,6 +487,8 @@ export const de: Record<string, string> = {
 
 	'settings.about': 'Über ediurnum',
 	'settings.changelogLatest': 'Neu in Version {version}',
+	'settings.repo': 'ediurnum auf GitHub',
+	'settings.repoHint': 'Quellcode (Open Source, AGPL-3.0), Fehler melden und Ideen einbringen.',
 	'settings.changelogAll': 'Alle Änderungen auf GitHub',
 	'settings.name': 'Vorname',
 	'settings.profileIntro': 'Deine Selbsteinschätzung: Persönlichkeit, Werte, Ziele und was die KI über dich wissen soll. Sie dient als Grundlage für die KI-Einsichten.',

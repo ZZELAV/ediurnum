@@ -14,6 +14,7 @@ The topmost version without a date is still in development.
 - The journal locks itself after you leave the app – close it, switch to another app or tab, or lock the screen.
   By default after 1 minute; adjustable in the settings (1, 5 or 15 minutes, or never). This also works when the
   app was closed completely in the meantime.
+- The settings link to the project on GitHub (source code, bug reports, ideas).
 - "All entries" shows every month from your first entry up to the current one, including months without entries,
   so you can fill in any day.
 
