@@ -8,7 +8,7 @@ import {
 	listDevices,
 	loadReminders,
 	saveCustomReminder,
-	saveReminders,
+	saveReviewSchedule,
 	setCustomReminderEnabled,
 	vapidPublicKey
 } from '#lib/server/reminders.ts';
@@ -48,7 +48,7 @@ export const actions: Actions = {
 	reviews: async ({ request, locals }) => {
 		const form = await request.formData();
 		const day = String(form.get('wachstumDay') ?? 'last');
-		saveReminders(
+		saveReviewSchedule(
 			sanitizeReminders(
 				{
 					gefuehl: {

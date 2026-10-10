@@ -75,6 +75,8 @@ The topmost version without a date is still in development.
 - Insights: lines in your entries that start with "#" no longer turn into headings in the AI file.
 - Insights: the question saved with an answer is the one from the file, even if you changed it afterwards.
 - The mood chart adapts when the screen gets narrower (e.g. turning the phone).
+- Switching a reminder back on, or changing the review schedule, after its time today no longer sends the
+  notification right away; it comes the next time instead (as when creating a reminder).
 - Search treats "ss" and "ß" as equal ("strasse" finds "Straße").
 - Search results are refreshed when the PIN expires or you lock again, so excerpts of locked entries no longer stay
   on screen. A failed search now shows an error instead of silently keeping the old results.

@@ -43,6 +43,20 @@ export function saveReminders(cfg: ReminderConfig) {
 	setMeta('reminders', JSON.stringify(cfg));
 }
 
+/**
+ * Neuer Zeitplan der Rückblicke. Fällt ein Rückblick auf heute und ist seine Uhrzeit schon vorbei,
+ * gilt er für heute als gesendet – sonst käme die Benachrichtigung sofort nach dem Speichern.
+ */
+export function saveReviewSchedule(cfg: ReminderConfig, now = new Date()) {
+	saveReminders(cfg);
+	const today = todayIso(now);
+	const minutes = now.getHours() * 60 + now.getMinutes();
+	if (now.getDay() === cfg.gefuehl.weekday && minutes >= minutesOf(cfg.gefuehl.time)) setMeta('reminder_sent_gefuehl', today);
+	if (lastMonthlyDueOnOrBefore(today, cfg.wachstum.day) === today && minutes >= minutesOf(cfg.wachstum.time)) {
+		setMeta('reminder_sent_wachstum', today);
+	}
+}
+
 export function setReminderLang(lang: Lang) {
 	saveReminders({ ...loadReminders(), lang });
 }
@@ -74,18 +88,27 @@ export function saveCustomReminder(input: unknown, now = new Date()): CustomRemi
 	cfg.custom = existing ? cfg.custom.map((c) => (c.id === saved.id ? saved : c)) : [...cfg.custom, saved];
 	saveReminders(cfg);
 
-	const today = todayIso(now);
-	const markers = sentMarkers();
-	if (occursOn(saved, today) && now.getHours() * 60 + now.getMinutes() >= minutesOf(saved.time)) markers[saved.id] = today;
-	else delete markers[saved.id];
-	setSentMarkers(markers);
+	markIfPassedToday(saved, now);
 	return saved;
 }
 
-export function setCustomReminderEnabled(id: string, enabled: boolean) {
+/** Ist die Uhrzeit heute schon vorbei, gilt die Erinnerung für heute als gesendet (sonst: zurücksetzen). */
+function markIfPassedToday(r: CustomReminder, now: Date) {
+	const today = todayIso(now);
+	const markers = sentMarkers();
+	if (occursOn(r, today) && now.getHours() * 60 + now.getMinutes() >= minutesOf(r.time)) markers[r.id] = today;
+	else delete markers[r.id];
+	setSentMarkers(markers);
+}
+
+/** Ein- oder ausschalten. Beim Einschalten nach der heutigen Uhrzeit kommt die Erinnerung erst beim nächsten Mal. */
+export function setCustomReminderEnabled(id: string, enabled: boolean, now = new Date()) {
 	const cfg = loadReminders();
+	const r = cfg.custom.find((c) => c.id === id);
+	if (!r) return;
 	cfg.custom = cfg.custom.map((c) => (c.id === id ? { ...c, enabled } : c));
 	saveReminders(cfg);
+	if (enabled) markIfPassedToday(r, now);
 }
 
 export function deleteCustomReminder(id: string) {
