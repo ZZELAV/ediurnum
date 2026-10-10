@@ -9,6 +9,7 @@ import { saveReminders } from '$lib/server/reminders';
 import { defaultReminders } from '$lib/reminders';
 import { validateNewPassword } from '$lib/server/validation';
 import { log } from '$lib/server/log';
+import { nowIso, setMeta } from '$lib/server/db';
 
 export const load: PageServerLoad = ({ locals }) => {
 	if (isInitialized()) redirect(303, locals.session ? '/' : '/login');
@@ -58,6 +59,7 @@ export const actions: Actions = {
 		}
 		await initialize(password, dek);
 		restoreBackup(data);
+		setMeta('backup_last', nowIso()); // wer aus einem Backup wiederherstellt, hat eines (Willkommenskarte)
 		startSession(cookies, dek);
 		log.info('journal restored from backup', { entries: data.entries.length });
 		redirect(303, '/');

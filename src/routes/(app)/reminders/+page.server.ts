@@ -12,14 +12,15 @@ import {
 	setCustomReminderEnabled,
 	vapidPublicKey
 } from '$lib/server/reminders';
-import { nextOccurrence, sanitizeReminders, suggestionsFor } from '$lib/reminders';
+import { nextReview, sanitizeReminders, suggestionsFor } from '$lib/reminders';
 
 export const load: PageServerLoad = () => {
 	const now = new Date();
 	const today = todayIso(now);
 	const minutes = now.getHours() * 60 + now.getMinutes();
 	const cfg = loadReminders();
-	const suggestions = suggestionsFor(today, listEntryMeta(), cfg);
+	const metas = listEntryMeta();
+	const suggestions = suggestionsFor(today, metas, cfg);
 	return {
 		now: { date: today, minutes },
 		custom: listCustomReminders(now),
@@ -27,12 +28,12 @@ export const load: PageServerLoad = () => {
 			gefuehl: {
 				...cfg.gefuehl,
 				due: suggestions.gefuehl.suggested,
-				next: nextOccurrence({ repeat: 'weekly', date: '', weekdays: [cfg.gefuehl.weekday], day: 1, time: cfg.gefuehl.time }, today, minutes)
+				next: nextReview('gefuehl', metas, cfg, today, minutes)
 			},
 			wachstum: {
 				...cfg.wachstum,
 				due: suggestions.wachstum.suggested,
-				next: nextOccurrence({ repeat: 'monthly', date: '', weekdays: [], day: cfg.wachstum.day, time: cfg.wachstum.time }, today, minutes)
+				next: nextReview('wachstum', metas, cfg, today, minutes)
 			}
 		},
 		push: {

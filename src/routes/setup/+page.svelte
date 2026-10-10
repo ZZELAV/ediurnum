@@ -57,7 +57,8 @@
 			<input type="checkbox" bind:checked={confirmed} />
 			{t('setup.keyConfirm')}
 		</label>
-		<a class="btn" href="/profile?welcome" aria-disabled={!confirmed} class:disabled={!confirmed} data-sveltekit-reload>{t('setup.start')}</a>
+		<!-- Ohne href ist der Link auch per Tastatur nicht erreichbar -->
+		<a class="btn" href={confirmed ? '/profile?welcome' : undefined} aria-disabled={!confirmed} class:disabled={!confirmed} data-sveltekit-reload>{t('setup.start')}</a>
 	{:else}
 		<h1>{t('setup.title')}</h1>
 		<div class="tabs" role="tablist">

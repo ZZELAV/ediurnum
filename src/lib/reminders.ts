@@ -167,11 +167,14 @@ export function nextOccurrence(s: ReminderSchedule, today: string, nowMinutes: n
  * ein Monatsrückblick erst nach rund einem Monat. Etwas Spielraum, damit ein leicht verspäteter
  * Rückblick den nächsten nicht um eine ganze Woche bzw. einen ganzen Monat verschiebt.
  */
+/** Für die Fälligkeit zählen nur Datum und Abschnittsarten eines Eintrags. */
+type ReviewMeta = Pick<EntryMeta, 'date' | 'kinds'>;
+
 export const WEEKLY_GAP_DAYS = 6;
 export const MONTHLY_GAP_DAYS = 25;
 
 /** Letzter Tag (am oder vor `date`) mit diesem Abschnitt – ohne Rückblick der erste Eintrag überhaupt. */
-function lastReviewOrStart(metas: EntryMeta[], kind: SectionKind, date: string): string | null {
+function lastReviewOrStart(metas: ReviewMeta[], kind: SectionKind, date: string): string | null {
 	let last: string | null = null;
 	let first: string | null = null;
 	for (const m of metas) {
@@ -186,20 +189,45 @@ function lastReviewOrStart(metas: EntryMeta[], kind: SectionKind, date: string):
  * Fällig ab dem eingestellten Erinnerungstag, wenn seit dem letzten Rückblick mindestens `gap` Tage
  * vergangen sind. Ein Rückblick am Erinnerungstag oder danach gilt als erledigt.
  */
-function isReviewDue(date: string, metas: EntryMeta[], kind: SectionKind, scheduled: string, gap: number): boolean {
+function isReviewDue(date: string, metas: ReviewMeta[], kind: SectionKind, scheduled: string, gap: number): boolean {
 	const since = lastReviewOrStart(metas, kind, date);
 	if (!since || since >= scheduled) return false;
 	return daysBetween(since, scheduled) >= gap;
 }
 
-export function isGefuehlDue(date: string, metas: EntryMeta[], cfg: ReminderConfig): boolean {
+export function isGefuehlDue(date: string, metas: ReviewMeta[], cfg: ReminderConfig): boolean {
 	if (!cfg.gefuehl.enabled) return false;
 	return isReviewDue(date, metas, 'gefuehl', lastWeekdayOnOrBefore(date, cfg.gefuehl.weekday), WEEKLY_GAP_DAYS);
 }
 
-export function isWachstumDue(date: string, metas: EntryMeta[], cfg: ReminderConfig): boolean {
+export function isWachstumDue(date: string, metas: ReviewMeta[], cfg: ReminderConfig): boolean {
 	if (!cfg.wachstum.enabled) return false;
 	return isReviewDue(date, metas, 'wachstum', lastMonthlyDueOnOrBefore(date, cfg.wachstum.day), MONTHLY_GAP_DAYS);
+}
+
+/**
+ * Nächster Tag, an dem tatsächlich an den Rückblick erinnert wird – also mit Mindestabstand,
+ * nicht nur nach Wochentag bzw. Monatstag. Ohne Einträge zählt heute als erster Eintrag.
+ */
+export function nextReview(
+	kind: 'gefuehl' | 'wachstum',
+	metas: ReviewMeta[],
+	cfg: ReminderConfig,
+	today: string,
+	nowMinutes: number
+): string | null {
+	const schedule: ReminderSchedule =
+		kind === 'gefuehl'
+			? { repeat: 'weekly', date: '', weekdays: [cfg.gefuehl.weekday], day: 1, time: cfg.gefuehl.time }
+			: { repeat: 'monthly', date: '', weekdays: [], day: cfg.wachstum.day, time: cfg.wachstum.time };
+	const isDue = kind === 'gefuehl' ? isGefuehlDue : isWachstumDue;
+	const known = metas.length ? metas : [{ date: today, kinds: [] }];
+	for (let i = 0; i <= 93; i++) {
+		const d = addDays(today, i);
+		if (!occursOn(schedule, d) || (i === 0 && minutesOf(schedule.time) <= nowMinutes)) continue;
+		if (isDue(d, known, cfg)) return d;
+	}
+	return null;
 }
 
 export interface Suggestions {

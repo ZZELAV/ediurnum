@@ -7,6 +7,7 @@ import {
 	lastMonthlyDueOnOrBefore,
 	lastWeekdayOnOrBefore,
 	nextOccurrence,
+	nextReview,
 	occursOn,
 	sanitizeCustomReminder,
 	sanitizeReminders,
@@ -79,6 +80,21 @@ test('Weiterentwicklung: fällig am Monatsletzten, wenn seit rund einem Monat ke
 test('Neues Tagebuch: Monatsrückblick erst nach rund einem Monat', () => {
 	assert.equal(isWachstumDue('2026-10-31', [meta('2026-10-20', ['erlebt'])], cfg), false);
 	assert.equal(isWachstumDue('2026-11-30', [meta('2026-10-20', ['erlebt'])], cfg), true);
+});
+
+test('Nächster Rückblick berücksichtigt den Mindestabstand', () => {
+	// Neues Tagebuch am Samstag, 10. Oktober: erste Erinnerung erst am Sonntag darauf bzw. Ende November
+	const fresh = [meta('2026-10-10', ['erlebt'])];
+	assert.equal(nextReview('gefuehl', fresh, cfg, '2026-10-10', 600), '2026-10-18');
+	assert.equal(nextReview('wachstum', fresh, cfg, '2026-10-10', 600), '2026-11-30');
+	// Ganz ohne Einträge zählt heute als Beginn
+	assert.equal(nextReview('gefuehl', [], cfg, '2026-10-10', 600), '2026-10-18');
+	// Laufendes Tagebuch: der nächste Sonntag, heute nur vor der Uhrzeit
+	assert.equal(nextReview('gefuehl', [start], cfg, '2026-10-10', 600), '2026-10-11');
+	assert.equal(nextReview('gefuehl', [start], cfg, '2026-10-11', 18 * 60), '2026-10-11');
+	assert.equal(nextReview('gefuehl', [start], cfg, '2026-10-11', 20 * 60), '2026-10-18');
+	const off = sanitizeReminders({ gefuehl: { enabled: false }, wachstum: { enabled: false } }, 'de');
+	assert.equal(nextReview('gefuehl', [start], off, '2026-10-10', 600), null);
 });
 
 test('Ausgeschaltete Erinnerungen sind nie fällig', () => {

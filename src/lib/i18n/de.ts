@@ -109,7 +109,7 @@ export const de: Record<string, string> = {
 	'dashboard.focusEmpty': 'Lass deine Einträge unter „Einsichten“ auswerten, um hier Fokuspunkte für die nächsten Wochen zu sehen.',
 	'dashboard.focusFrom': 'aus der Auswertung vom {date}',
 	'dashboard.recent': 'Letzte Einträge',
-	'dashboard.recentEmpty': 'Hier erscheinen deine letzten Einträge.',
+	'dashboard.recentEmpty': 'Hier erscheinen deine früheren Tage.',
 	'dashboard.stats': '{count} Einträge insgesamt',
 	'dashboard.yearAgo': 'Heute vor einem Jahr',
 	'dashboard.yearsAgo': 'Heute vor {years} Jahren',
@@ -501,7 +501,7 @@ export const de: Record<string, string> = {
 	// Über mich (Selbsteinschätzung)
 	'profile.title': 'Über mich',
 	'profile.intro': 'Deine Selbsteinschätzung. Sie hilft dir später zu sehen, wie du dich verändert hast, und gibt der KI bei Auswertungen den nötigen Hintergrund. Alles ist freiwillig.',
-	'profile.welcomeEyebrow': 'Dein erster Eintrag',
+	'profile.welcomeEyebrow': 'Dein erster Schritt',
 	'profile.welcomeTitle': 'Schön, dass du da bist, {name}',
 	'profile.welcomeIntro': 'Bevor es losgeht: ein paar Fragen zu dir. Das dauert etwa fünf Minuten und dient als Ausgangspunkt – für dich und für die KI-Einsichten. Alles ist freiwillig und lässt sich später in den Einstellungen anpassen.',
 	'profile.updated': 'Zuletzt angepasst am {date}',

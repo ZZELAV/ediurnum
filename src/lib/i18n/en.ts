@@ -102,7 +102,7 @@ export const en: Record<string, string> = {
 	'dashboard.focusEmpty': 'Have your entries analysed under “Insights” to see focus points for the coming weeks here.',
 	'dashboard.focusFrom': 'from the analysis of {date}',
 	'dashboard.recent': 'Recent entries',
-	'dashboard.recentEmpty': 'Your latest entries will appear here.',
+	'dashboard.recentEmpty': 'Your previous days will appear here.',
 	'dashboard.stats': '{count} entries in total',
 	'dashboard.yearAgo': 'One year ago today',
 	'dashboard.yearsAgo': '{years} years ago today',
@@ -485,7 +485,7 @@ export const en: Record<string, string> = {
 	// About me (self-assessment)
 	'profile.title': 'About me',
 	'profile.intro': 'Your self-assessment. It helps you see later how you have changed and gives the AI the background it needs for reviews. Everything is optional.',
-	'profile.welcomeEyebrow': 'Your first entry',
+	'profile.welcomeEyebrow': 'Your first step',
 	'profile.welcomeTitle': 'Good to have you here, {name}',
 	'profile.welcomeIntro': 'Before you start: a few questions about you. It takes about five minutes and serves as a starting point – for you and for the AI insights. Everything is optional and can be changed later in the settings.',
 	'profile.updated': 'Last updated on {date}',

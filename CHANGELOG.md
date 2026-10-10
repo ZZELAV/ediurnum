@@ -4,6 +4,22 @@ All notable changes to ediurnum are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [Semantic Versioning](https://semver.org).
 The topmost version without a date is still in development.
 
+## [0.1.0-beta.6]
+
+### Changed
+
+- Clearer wording during setup ("Your first step" above About me) and on the dashboard for an empty list of
+  previous days.
+
+### Fixed
+
+- The reminders page showed the next weekly and monthly review by schedule alone. It now shows the day the reminder
+  is actually sent, taking the minimum gap into account (e.g. in a new journal the first weekly review comes after
+  about a week).
+- "Open journal" after the recovery key could be reached with the keyboard before confirming that the key was saved.
+- After restoring from a backup, "Download a backup" in "Your first steps" is ticked off.
+- The log now says "PIN set" instead of "PIN changed" when a PIN is set for the first time.
+
 ## [0.1.0-beta.5] - 2026-10-10
 
 ### Added

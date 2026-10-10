@@ -153,7 +153,7 @@ export const actions: Actions = {
 			commit();
 		});
 		unlockPinForSession(session, lockKey);
-		log.info('PIN changed');
+		log.info(oldKey ? 'PIN changed' : 'PIN set');
 		return { section: 'pin', success: 'settings.pinSaved' };
 	},
 
