@@ -14,7 +14,8 @@ The topmost version without a date is still in development.
 - The journal locks itself after you leave the app – close it, switch to another app or tab, or lock the screen.
   By default after 1 minute; adjustable in the settings (1, 5 or 15 minutes, or never). This also works when the
   app was closed completely in the meantime.
-- "All entries" always shows the current month, even before its first entry, so you can fill in earlier days.
+- "All entries" shows every month from your first entry up to the current one, including months without entries,
+  so you can fill in any day.
 
 ### Changed
 
@@ -62,6 +63,8 @@ The topmost version without a date is still in development.
 - The dividers in "Recent entries" on the dashboard are straight like everywhere else (their ends curved upwards).
 - After restoring from a backup, "Download a backup" in "Your first steps" is ticked off.
 - The log now says "PIN set" instead of "PIN changed" when a PIN is set for the first time.
+- Push notifications are sent with high urgency, so iPhones show reminders on time instead of holding them back
+  until the device wakes up for another reason.
 - Search treats "ss" and "ß" as equal ("strasse" finds "Straße").
 - Search results are refreshed when the PIN expires or you lock again, so excerpts of locked entries no longer stay
   on screen. A failed search now shows an error instead of silently keeping the old results.

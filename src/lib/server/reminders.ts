@@ -172,7 +172,9 @@ export async function sendToAll(payload: { title: string; body: string; url: str
 			await webpush.sendNotification({ endpoint: r.endpoint, keys: JSON.parse(r.keys) }, JSON.stringify(payload), {
 				vapidDetails: { subject: vapidSubject(), publicKey, privateKey },
 				TTL: 60 * 60 * 12,
-				urgency: 'normal'
+				// „high“: sofort zustellen. Bei „normal“ darf Apple (iOS) die Nachricht zurückhalten, bis das Gerät
+				// ohnehin aufwacht – sie kam dann oft erst an, wenn z. B. ein VPN das iPhone geweckt hat.
+				urgency: 'high'
 			});
 			sent++;
 		} catch (e) {

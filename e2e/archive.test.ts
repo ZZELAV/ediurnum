@@ -48,11 +48,17 @@ describe('Alle Einträge', () => {
 		assert.match(html, /Spaziergang an der Straße zum See/, 'Auszug im Titel');
 	});
 
-	test('Laufender Monat erscheint auch ohne Eintrag, zuoberst', async () => {
+	test('Alle Monate vom laufenden bis zum ersten Eintrag, auch ohne Eintrag', async () => {
 		const html = await (await c.get('/archive')).text();
 		const titles = [...html.matchAll(/<h2 class="svelte-\w+">([^<]+)<\/h2>/g)].map((m) => m[1]);
-		const current = new Intl.DateTimeFormat('de-CH', { month: 'long', year: 'numeric', timeZone: 'Europe/Zurich' }).format(new Date());
-		assert.deepEqual(titles, [current, 'März 2026', 'Februar 2026']);
+		const fmt = new Intl.DateTimeFormat('de-CH', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+		const expected: string[] = [];
+		const today = new Date(new Date().toLocaleString('sv', { timeZone: 'Europe/Zurich' }).slice(0, 10) + 'T00:00:00Z');
+		for (let d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)); d >= new Date(Date.UTC(2026, 1, 1)); d.setUTCMonth(d.getUTCMonth() - 1)) {
+			expected.push(fmt.format(d));
+		}
+		assert.deepEqual(titles, expected);
+		assert.equal(titles.at(-1), 'Februar 2026');
 		assert.match(html, /0 Einträge/);
 	});
 

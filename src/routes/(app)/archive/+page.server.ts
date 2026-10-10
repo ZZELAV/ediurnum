@@ -3,14 +3,28 @@ import { monthKey, todayIso } from '#lib/dates.ts';
 import { getEntry, listEntryMeta } from '#lib/server/entries.ts';
 import { snippetOf } from '#lib/server/snippet.ts';
 
+type Day = { date: string; mood: number | null; locked: boolean; kinds: string[]; snippet: string };
+
+/** Alle Monate vom laufenden zurück bis `oldest` (beide eingeschlossen), neuester zuerst. */
+function monthsBack(current: string, oldest: string): string[] {
+	const out: string[] = [];
+	let [y, m] = current.split('-').map(Number);
+	for (let key = current; key >= oldest; key = `${y}-${String(m).padStart(2, '0')}`) {
+		out.push(key);
+		if (--m === 0) [y, m] = [y - 1, 12];
+	}
+	return out;
+}
+
 export const load: PageServerLoad = ({ locals }) => {
 	const session = locals.session!;
-	let months = new Map<string, { date: string; mood: number | null; locked: boolean; kinds: string[]; snippet: string }[]>();
-	for (const m of listEntryMeta()) {
+	const byMonth = new Map<string, Day[]>();
+	const metas = listEntryMeta(); // neuester Tag zuerst
+	for (const m of metas) {
 		const e = m.locked && !session.lockKey ? null : getEntry(session, m.date);
 		const key = monthKey(m.date);
-		if (!months.has(key)) months.set(key, []);
-		months.get(key)!.push({
+		if (!byMonth.has(key)) byMonth.set(key, []);
+		byMonth.get(key)!.push({
 			date: m.date,
 			mood: e?.content?.mood ?? null,
 			locked: m.locked,
@@ -18,8 +32,11 @@ export const load: PageServerLoad = ({ locals }) => {
 			snippet: e?.content ? snippetOf(e.content, 90) : ''
 		});
 	}
-	// Der laufende Monat erscheint immer (auch ohne Eintrag), damit frühere Tage darin nachgetragen werden können
+	if (!metas.length) return { months: [] };
+	// Lückenlos vom laufenden Monat bis zum Monat des ersten Eintrags – auch Monate ohne Eintrag,
+	// damit sich jeder Tag im Kalender nachtragen lässt
+	const oldest = monthKey(metas[metas.length - 1].date);
 	const current = monthKey(todayIso());
-	if (months.size && !months.has(current)) months = new Map([[current, []], ...months]);
-	return { months: [...months.entries()].map(([month, days]) => ({ month, days })) };
+	const keys = monthsBack(current > oldest ? current : oldest, oldest);
+	return { months: keys.map((month) => ({ month, days: byMonth.get(month) ?? [] })) };
 };
