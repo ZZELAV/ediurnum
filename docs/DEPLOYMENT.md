@@ -49,6 +49,9 @@ nano .env
   and installing the app then do not work, because browsers only allow them on secure origins.
 - `TZ` – your time zone (`Europe/Zurich`, …). “Today”, the version history (one version per day) and all reminder times use it.
 - `EDIURNUM_VERSION` (optional) – pin a release, e.g. `0.1.0-beta.5`. Without it, the newest release (`latest`) is used.
+- `COOKIE_SECURE` (optional) – whether the session cookie is marked `Secure` (only sent over HTTPS). By default this
+  follows `ORIGIN`: on with `https://`, off with `http://`. Set `true` or `false` only if that does not fit, e.g.
+  `false` if the journal must also be reachable over plain `http://` while `ORIGIN` is `https://`.
 - `LOG_LEVEL` (optional) – `info` by default: start-up, opening and closing the journal, failed attempts, backups,
   push notifications and errors. `debug` additionally logs every request. Logs never contain journal content.
 - `WIDGET_TOKEN` (optional) – enables `/api/widget` for dashboards such as Homepage: it returns the number of entries,

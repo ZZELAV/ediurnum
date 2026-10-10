@@ -15,8 +15,7 @@ import {
 	createDecipheriv,
 	createHash,
 	hkdfSync,
-	randomBytes,
-	timingSafeEqual
+	randomBytes
 } from 'node:crypto';
 
 const FORMAT_VERSION = 1;
@@ -107,12 +106,6 @@ export function keyFingerprint(key: Buffer): string {
 
 export function randomToken(bytes = 32): string {
 	return randomBytes(bytes).toString('base64url');
-}
-
-export function safeEqual(a: string, b: string): boolean {
-	const ab = Buffer.from(a);
-	const bb = Buffer.from(b);
-	return ab.length === bb.length && timingSafeEqual(ab, bb);
 }
 
 // ---------------------------------------------------------------------------

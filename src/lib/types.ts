@@ -1,7 +1,6 @@
 export type Lang = 'de' | 'en';
 export type Theme = 'system' | 'light' | 'dark';
 export type SectionKind = 'erlebt' | 'gefuehl' | 'wachstum';
-export const SECTION_KINDS: SectionKind[] = ['erlebt', 'gefuehl', 'wachstum'];
 
 export type FieldValue = string | number | string[] | null;
 

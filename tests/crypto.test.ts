@@ -12,8 +12,7 @@ import {
 	generateKey,
 	keyFingerprint,
 	parseRecoveryKey,
-	randomToken,
-	safeEqual
+	randomToken
 } from '../src/lib/server/crypto.ts';
 
 describe('AES-256-GCM', () => {
@@ -147,12 +146,5 @@ describe('Hilfsfunktionen', () => {
 		const a = randomToken();
 		assert.match(a, /^[A-Za-z0-9_-]{43}$/);
 		assert.notEqual(a, randomToken());
-	});
-
-	test('Vergleich in konstanter Zeit', () => {
-		assert.ok(safeEqual('abc', 'abc'));
-		assert.ok(!safeEqual('abc', 'abd'));
-		assert.ok(!safeEqual('abc', 'abcd'));
-		assert.ok(!safeEqual('', 'a'));
 	});
 });

@@ -59,6 +59,7 @@ Images are built for `linux/amd64` and `linux/arm64` (e.g. Raspberry Pi 4/5). Pi
 | `TZ` | recommended | Time zone for “today”, the version history and reminder times, default `Europe/Zurich` |
 | `ADDRESS_HEADER`, `XFF_DEPTH` | behind a proxy | Real client IP from the proxy, e.g. `X-Forwarded-For` and `1` (slows down password guessing) |
 | `BODY_SIZE_LIMIT` | no | Maximum upload size for restoring a backup, default `50M` |
+| `COOKIE_SECURE` | no | `true`/`false`: mark the session cookie `Secure` (HTTPS only). Default follows `ORIGIN` (`https://` → on) |
 | `VAPID_SUBJECT` | no | Sender for push services (`mailto:` or `https:`), defaults to `ORIGIN` |
 | `LOG_LEVEL` | no | `error`, `warn`, `info` (default) or `debug` (every request). Logs never contain journal content |
 | `WIDGET_TOKEN` | no | Enables `/api/widget` for dashboards (number of entries, time of the latest save, written today, current streak); at least 16 characters, sent as `Authorization: Bearer <token>` |

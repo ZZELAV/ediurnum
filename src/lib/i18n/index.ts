@@ -2,7 +2,6 @@ import { de } from './de.ts';
 import { en } from './en.ts';
 import type { Lang } from '#lib/types.ts';
 
-export const LANGS: Lang[] = ['de', 'en'];
 const dictionaries: Record<Lang, Record<string, string>> = { de, en };
 
 export function isLang(v: unknown): v is Lang {

@@ -17,7 +17,7 @@ export const variables = defineEnvVars({
 		schema: (value) => optional(value)?.replace(/\/+$/, '')
 	},
 	COOKIE_SECURE: {
-		description: '"false" erlaubt Sitzungs-Cookies ohne HTTPS (nur im Heimnetz sinnvoll)',
+		description: 'true/false: Sitzungs-Cookie nur über HTTPS senden; Standard folgt ORIGIN (https:// → true)',
 		schema: optional
 	},
 	LOG_LEVEL: {
