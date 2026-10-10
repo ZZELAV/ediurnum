@@ -1,5 +1,7 @@
 # Builds the Docker image for every release tag (vX.Y.Z or vX.Y.Z-beta.N) and pushes it to Docker Hub
 # as zzelav/ediurnum:<version> and zzelav/ediurnum:latest (amd64 and arm64).
+# Run it by hand ("Run workflow", input: an existing tag) to rebuild an older release – that only
+# publishes its version tag and leaves "latest" untouched.
 #
 # Required repository secrets (Settings → Secrets and variables → Actions):
 #   DOCKERHUB_USERNAME  – the Docker Hub user (zzelav)
@@ -48,9 +50,10 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          # "latest" only for a newly pushed tag – rebuilding an older release by hand must not move it back
           tags: |
             ${{ env.IMAGE }}:${{ steps.version.outputs.version }}
-            ${{ env.IMAGE }}:latest
+            ${{ github.event_name == 'push' && format('{0}:latest', env.IMAGE) || '' }}
           labels: |
             org.opencontainers.image.title=ediurnum
             org.opencontainers.image.description=A private, self-hosted, encrypted journal for daily reflection
