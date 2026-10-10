@@ -148,6 +148,22 @@ describe('Backup-Versionen', () => {
 		}
 	});
 
+	test('Unbekannte Spalten im Backup werden ignoriert (landen nicht im SQL)', async () => {
+		const odd = repack(2, (data) => {
+			data.entries[0]['x) VALUES (1); DROP TABLE entries; --'] = 1;
+			data.entries[0].unknown_column = 'egal';
+		});
+		const { target, r } = await restore(odd);
+		try {
+			assert.equal(r.location, '/');
+			const db = new DatabaseSync(join(target.dataDir, 'ediurnum.db'));
+			assert.equal((db.prepare('SELECT COUNT(*) AS n FROM entries').get() as { n: number }).n, 2);
+			db.close();
+		} finally {
+			await target.stop();
+		}
+	});
+
 	test('Backups einer neueren Version werden mit Hinweis abgelehnt', async () => {
 		const { target, r } = await restore(repack(3, () => {}));
 		try {

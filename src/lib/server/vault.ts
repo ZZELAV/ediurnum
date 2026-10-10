@@ -161,6 +161,27 @@ export function destroyAllSessions() {
 	for (const token of [...sessions.keys()]) destroySession(token);
 }
 
+/** Beendet alle Sitzungen ausser dieser (z. B. nach dem Ändern des Passworts). Gibt die Anzahl zurück. */
+export function destroyOtherSessions(keep: Session): number {
+	let n = 0;
+	for (const [token, s] of [...sessions]) {
+		if (s === keep) continue;
+		destroySession(token);
+		n++;
+	}
+	return n;
+}
+
+/** Schliesst die offene PIN in allen anderen Sitzungen – deren Sperr-Schlüssel gilt nach einem PIN-Wechsel nicht mehr. */
+export function closePinInOtherSessions(keep: Session) {
+	for (const s of sessions.values()) {
+		if (s === keep || !s.lockKey) continue;
+		s.lockKey.fill(0);
+		s.lockKey = null;
+		s.lockUntil = 0;
+	}
+}
+
 if (state.sweeper) clearInterval(state.sweeper);
 state.sweeper = setInterval(() => {
 	for (const token of [...sessions.keys()]) getSession(token);

@@ -43,6 +43,7 @@ The topmost version without a date is still in development.
 
 ### Security
 
+- Changing the password locks the journal on all other devices where it was open.
 - A PIN in the wrong format is rejected without running the key derivation.
 - Passwords are limited to 1024 characters, so very large inputs are no longer run through Argon2 (also on the
   sign-in page).
@@ -77,6 +78,9 @@ The topmost version without a date is still in development.
 - The mood chart adapts when the screen gets narrower (e.g. turning the phone).
 - Switching a reminder back on, or changing the review schedule, after its time today no longer sends the
   notification right away; it comes the next time instead (as when creating a reminder).
+- After changing the PIN, another device with the PIN still open showed a server error when opening a locked entry.
+  The PIN is now closed there and has to be entered again.
+- The backup description in the settings mentions everything it contains (also the self-assessment and reminders).
 - Search treats "ss" and "ß" as equal ("strasse" finds "Straße").
 - Search results are refreshed when the PIN expires or you lock again, so excerpts of locked entries no longer stay
   on screen. A failed search now shows an error instead of silently keeping the old results.

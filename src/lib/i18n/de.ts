@@ -422,7 +422,7 @@ export const de: Record<string, string> = {
 	'settings.currentPassword': 'Aktuelles Passwort',
 	'settings.newPassword': 'Neues Passwort',
 	'settings.newPasswordConfirm': 'Neues Passwort wiederholen',
-	'settings.passwordChanged': 'Passwort geändert.',
+	'settings.passwordChanged': 'Passwort geändert. Andere Geräte, auf denen das Tagebuch offen war, sind jetzt gesperrt.',
 	'settings.pin': 'PIN für gesperrte Einträge',
 	'settings.pinIntro': 'Mit der PIN schützt du einzelne Einträge zusätzlich. Sie ist ein Schutz vor neugierigen Blicken; die Einträge werden zusätzlich mit ihr verschlüsselt.',
 	'settings.pinSet': 'PIN festlegen',
@@ -468,7 +468,7 @@ export const de: Record<string, string> = {
 	'settings.aiSaved': 'KI-Agent gespeichert.',
 
 	'settings.backup': 'Backup & Export',
-	'settings.backupIntro': 'Das verschlüsselte Backup enthält alle Einträge, Versionen, Auswertungen und Einstellungen. Es lässt sich nur mit deinem Wiederherstellungsschlüssel öffnen.',
+	'settings.backupIntro': 'Das verschlüsselte Backup enthält alle Einträge, Versionen, Auswertungen, Einstellungen, deine Selbsteinschätzung und die Erinnerungen. Es lässt sich nur mit deinem Wiederherstellungsschlüssel öffnen.',
 	'settings.backupDownload': 'Verschlüsseltes Backup herunterladen',
 	'settings.backupRestoreHint': 'Wiederherstellen kannst du ein Backup beim Einrichten einer neuen ediurnum-Installation.',
 	'settings.plainExport': 'Lesbarer Export',

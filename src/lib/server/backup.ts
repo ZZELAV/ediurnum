@@ -96,8 +96,11 @@ export function readBackup(text: string, dek: Buffer): BackupData {
 
 function insertRows(table: string, rows: Record<string, unknown>[]) {
 	const d = getDb();
+	// nur bekannte Spalten – die Namen landen im SQL
+	const known = new Set((d.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).map((c) => c.name));
 	for (const o of rows) {
 		const r = jsonToRow(o);
+		for (const k of Object.keys(r)) if (!known.has(k)) delete r[k];
 		const cols = Object.keys(r);
 		d.prepare(`INSERT INTO ${table} (${cols.join(',')}) VALUES (${cols.map(() => '?').join(',')})`).run(
 			...(Object.values(r) as (string | number | Buffer | null)[])

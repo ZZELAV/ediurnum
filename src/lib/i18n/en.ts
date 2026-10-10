@@ -407,7 +407,7 @@ export const en: Record<string, string> = {
 	'settings.currentPassword': 'Current password',
 	'settings.newPassword': 'New password',
 	'settings.newPasswordConfirm': 'Repeat new password',
-	'settings.passwordChanged': 'Password changed.',
+	'settings.passwordChanged': 'Password changed. Other devices where the journal was open are now locked.',
 	'settings.pin': 'PIN for locked entries',
 	'settings.pinIntro': 'The PIN adds extra protection to single entries. It guards against curious eyes; the entries are additionally encrypted with it.',
 	'settings.pinSet': 'Set PIN',
@@ -453,7 +453,7 @@ export const en: Record<string, string> = {
 	'settings.aiSaved': 'AI agent saved.',
 
 	'settings.backup': 'Backup & export',
-	'settings.backupIntro': 'The encrypted backup contains all entries, versions, analyses and settings. It can only be opened with your recovery key.',
+	'settings.backupIntro': 'The encrypted backup contains all entries, versions, analyses, settings, your self-assessment and the reminders. It can only be opened with your recovery key.',
 	'settings.backupDownload': 'Download encrypted backup',
 	'settings.backupRestoreHint': 'You can restore a backup when setting up a new ediurnum installation.',
 	'settings.plainExport': 'Readable export',

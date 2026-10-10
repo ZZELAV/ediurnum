@@ -17,6 +17,8 @@ import { parseRecoveryKey } from '#lib/server/crypto.ts';
 import { loadSettings, publicAgent, saveSettings } from '#lib/server/settings.ts';
 import { validateNewPassword, validatePin } from '#lib/server/validation.ts';
 import {
+	closePinInOtherSessions,
+	destroyOtherSessions,
 	hasPin,
 	prepareNewPin,
 	registerFailure,
@@ -108,7 +110,10 @@ export const actions: Actions = {
 		}
 		registerSuccess('password-change');
 		await setPassword(dek, next);
-		log.info('password changed');
+		dek.fill(0);
+		// Wer das Passwort ändert, will oft andere Geräte aussperren (z. B. wenn es jemand kennen könnte)
+		const closed = destroyOtherSessions(locals.session!);
+		log.info('password changed', { otherSessionsClosed: closed });
 		return { section: 'password', success: 'settings.passwordChanged' };
 	},
 
@@ -157,6 +162,8 @@ export const actions: Actions = {
 			commit();
 		});
 		unlockPinForSession(session, lockKey);
+		closePinInOtherSessions(session);
+		oldKey?.fill(0);
 		log.info(oldKey ? 'PIN changed' : 'PIN set');
 		return { section: 'pin', success: 'settings.pinSaved' };
 	},
