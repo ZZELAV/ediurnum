@@ -71,17 +71,15 @@ nano .env
               - value: true
                 to: ✓
               - any: true
-                to: –
+                to: x
           - field: streak
             label: Streak
-            suffix: days
           - field: entries
             label: Entries
+            format: number
           - field: lastEntry
             label: Latest
-            format: date
-            dateStyle: short
-            timeStyle: short
+            format: relativeDate
   ```
 - Leave the other values as they are unless you know you need something else.
 

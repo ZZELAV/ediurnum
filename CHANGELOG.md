@@ -21,7 +21,7 @@ The topmost version without a date is still in development.
 
 - "Close journal" is now called "Lock journal".
 - `lastEntry` in `/api/widget` is now the time of the latest save (ISO timestamp) instead of only the date, so
-  dashboards can show the actual time. The Homepage example in DEPLOYMENT.md shows date and time.
+  dashboards can show the actual time. The Homepage example in DEPLOYMENT.md shows it as relative time ("2 hours ago").
 
 - An entry whose content is completely deleted no longer counts as written (list, calendar, streak, widget). It
   stays with its version history and counts again once you write something.
