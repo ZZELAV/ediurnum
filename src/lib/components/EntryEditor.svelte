@@ -6,7 +6,7 @@
 	import { exitFocus, focusMode } from '$lib/focus';
 	import { page } from '$app/state';
 	import { api } from '$lib/client';
-	import { fmtDate, fmtTime, t } from '$lib/i18n/t';
+	import { fmtDate, fmtDateTime, t } from '$lib/i18n/t';
 	import { emptyContent, sanitizeContent, SECTIONS, sectionDef } from '$lib/templates';
 	import type { Suggestions } from '$lib/reminders';
 	import { dismiss, isDismissed } from '$lib/suggest';
@@ -340,7 +340,7 @@
 			{#if meta}
 				<section class="card meta">
 					<p class="faint">
-						{t('entry.revision', { n: meta.revision })} · {t('entry.lastSaved', { time: fmtTime(meta.updatedAt) })}
+						{t('entry.revision', { n: meta.revision })} · {t('entry.lastSaved', { time: fmtDateTime(meta.updatedAt) })}
 					</p>
 					<div class="row">
 						<a class="btn ghost small" href="/entry/{date}/history">{t('entry.history')}</a>

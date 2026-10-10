@@ -6,6 +6,10 @@ The topmost version without a date is still in development.
 
 ## [0.1.0-beta.5]
 
+### Changed
+
+- "Last saved" in an entry now shows the date as well as the time.
+
 ### Fixed
 
 - The version history still described the old ten-minute rule instead of one version per day.
