@@ -8,6 +8,21 @@ export function currentLang(): Lang {
 	return isLang(l) ? l : 'de';
 }
 
+/**
+ * Format für Datum und Zahlen (vom Server aus Accept-Language bestimmt). Passt es nicht zur aktuellen
+ * Sprache – etwa direkt nach einem Sprachwechsel –, gilt das Standard-Format der Sprache.
+ */
+export function currentLocale(): string {
+	const lang = currentLang();
+	const l = page.data?.locale;
+	return typeof l === 'string' && l.split('-')[0] === lang ? l : locale(lang);
+}
+
+/** Zahl im Format des Nutzers, z. B. 3.3 (de-CH) oder 3,3 (de-DE). */
+export function fmtNumber(value: number, digits = 1): string {
+	return new Intl.NumberFormat(currentLocale(), { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+}
+
 /** Übersetzt einen Schlüssel in die aktuelle Sprache. Nur in Komponenten verwenden. */
 export function t(key: string, params?: Record<string, string | number>): string {
 	return translate(currentLang(), key, params);
@@ -24,13 +39,13 @@ export function fmtDate(iso: string, style: 'long' | 'medium' | 'short' | 'weekd
 					: style === 'dayMonth'
 						? { weekday: 'short', day: 'numeric', month: 'short' }
 						: { day: '2-digit', month: '2-digit', year: 'numeric' };
-	return new Intl.DateTimeFormat(locale(currentLang()), { ...opts, timeZone: 'UTC' }).format(
+	return new Intl.DateTimeFormat(currentLocale(), { ...opts, timeZone: 'UTC' }).format(
 		new Date(iso.length === 10 ? iso + 'T00:00:00Z' : iso)
 	);
 }
 
 export function fmtDateTime(iso: string): string {
-	return new Intl.DateTimeFormat(locale(currentLang()), {
+	return new Intl.DateTimeFormat(currentLocale(), {
 		day: 'numeric',
 		month: 'short',
 		year: 'numeric',
@@ -40,12 +55,12 @@ export function fmtDateTime(iso: string): string {
 }
 
 export function fmtTime(iso: string | number): string {
-	return new Intl.DateTimeFormat(locale(currentLang()), { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+	return new Intl.DateTimeFormat(currentLocale(), { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
 }
 
 /** Name eines Wochentags (0 = Sonntag). */
 export function weekdayName(day: number, style: 'long' | 'short' = 'long'): string {
-	return new Intl.DateTimeFormat(locale(currentLang()), { weekday: style, timeZone: 'UTC' }).format(new Date(Date.UTC(2024, 0, 7 + day)));
+	return new Intl.DateTimeFormat(currentLocale(), { weekday: style, timeZone: 'UTC' }).format(new Date(Date.UTC(2024, 0, 7 + day)));
 }
 
 /** Wochentage in Anzeigereihenfolge ab Montag. */

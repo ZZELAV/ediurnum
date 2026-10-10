@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { api } from '$lib/client';
-	import { currentLang, fmtDate, t } from '$lib/i18n/t';
-	import { locale } from '$lib/i18n';
+	import { currentLocale, fmtDate, t } from '$lib/i18n/t';
 	import PinDialog from '$lib/components/PinDialog.svelte';
 	import type { SearchHit } from '$lib/search';
 
@@ -37,7 +36,7 @@
 	}
 
 	function monthTitle(month: string) {
-		return new Intl.DateTimeFormat(locale(currentLang()), { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+		return new Intl.DateTimeFormat(currentLocale(), { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
 			new Date(month + '-01T00:00:00Z')
 		);
 	}
@@ -54,7 +53,7 @@
 
 	const weekdays = $derived(
 		Array.from({ length: 7 }, (_, i) =>
-			new Intl.DateTimeFormat(locale(currentLang()), { weekday: 'narrow', timeZone: 'UTC' }).format(new Date(Date.UTC(2024, 0, 1 + i)))
+			new Intl.DateTimeFormat(currentLocale(), { weekday: 'narrow', timeZone: 'UTC' }).format(new Date(Date.UTC(2024, 0, 1 + i)))
 		)
 	);
 </script>

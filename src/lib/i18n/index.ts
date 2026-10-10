@@ -21,9 +21,7 @@ export function translate(lang: Lang, key: string, params?: Record<string, strin
 	return text;
 }
 
-export function locale(lang: Lang): string {
-	return lang === 'de' ? 'de-CH' : 'en-GB';
-}
+export { locale, pickLocale } from './locale';
 
 export function pickLang(acceptLanguage: string | null): Lang {
 	return acceptLanguage && /^en\b/i.test(acceptLanguage.trim()) ? 'en' : 'de';

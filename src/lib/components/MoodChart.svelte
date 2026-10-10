@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { daysBetween } from '$lib/dates';
-	import { fmtDate, t } from '$lib/i18n/t';
+	import { fmtDate, fmtNumber, t } from '$lib/i18n/t';
 
 	/** Stimmungsverlauf (1–5) über einen Zeitraum: Linie mit Punkten, Lücken an Tagen ohne Stimmung. */
 	let {
@@ -36,7 +36,7 @@
 	<figcaption>
 		<span class="title">{t('mood.chartTitle')}</span>
 		{#if average !== null}
-			<span class="faint">{t('mood.chartAverage', { value: average.toFixed(1), count: sorted.length })}</span>
+			<span class="faint">{t('mood.chartAverage', { value: fmtNumber(average), count: sorted.length })}</span>
 		{/if}
 	</figcaption>
 

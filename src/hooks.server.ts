@@ -6,7 +6,7 @@ import { getSession, isInitialized } from '$lib/server/vault';
 import { loadSettings } from '$lib/server/settings';
 import { dataDir } from '$lib/server/db';
 import { log } from '$lib/server/log';
-import { isLang, pickLang } from '$lib/i18n';
+import { isLang, pickLang, pickLocale } from '$lib/i18n';
 import { SESSION_COOKIE } from '$lib/server/auth';
 
 const PUBLIC_PATHS = ['/setup', '/login', '/recover'];
@@ -43,6 +43,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const cookieLang = event.cookies.get('lang');
 	event.locals.lang =
 		event.locals.settings?.language ?? (isLang(cookieLang) ? cookieLang : pickLang(event.request.headers.get('accept-language')));
+	event.locals.locale = pickLocale(event.request.headers.get('accept-language'), event.locals.lang);
 
 	const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(p + '/'));
 	const isApi = path.startsWith('/api/');

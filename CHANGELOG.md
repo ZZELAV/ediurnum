@@ -8,6 +8,9 @@ The topmost version without a date is still in development.
 
 ### Changed
 
+- Dates and numbers follow the regional format of your browser when it matches the app language (e.g. "3,3" in
+  Germany, "3.3" in Switzerland, US date order in American English). Otherwise Swiss German or British English
+  formats are used as before.
 - Clearer wording during setup ("Your first step" above About me) and on the dashboard for an empty list of
   previous days.
 
