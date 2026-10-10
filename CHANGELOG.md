@@ -14,6 +14,10 @@ The topmost version without a date is still in development.
 
 ### Changed
 
+- An entry whose content is completely deleted no longer counts as written (list, calendar, streak, widget). It
+  stays with its version history and counts again once you write something.
+- Backups now have format version 2. Older backups can still be restored; a backup from a newer ediurnum version
+  is rejected with a clear message.
 - The version history shows connected changes as one block (all removed words, then all new ones) instead of
   alternating word by word.
 - Unlocking an entry no longer releases it for AI insights again; that only happens when you switch it on.

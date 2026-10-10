@@ -83,6 +83,7 @@ export const en: Record<string, string> = {
 	'recovery.invalidChecksum': 'The key contains a typo (checksum mismatch).',
 	'recovery.wrongKey': 'This key does not belong to this journal.',
 	'backup.invalidFile': 'This is not a valid ediurnum backup file.',
+	'backup.tooNew': 'This backup comes from a newer version of ediurnum. Please update ediurnum first.',
 	'backup.wrongKey': 'The backup cannot be opened with this key.',
 	'backup.missingFile': 'Please choose a backup file.',
 

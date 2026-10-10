@@ -89,6 +89,7 @@ export const de: Record<string, string> = {
 	'recovery.invalidChecksum': 'Der Schlüssel enthält einen Tippfehler (Prüfsumme stimmt nicht).',
 	'recovery.wrongKey': 'Dieser Schlüssel gehört nicht zu diesem Tagebuch.',
 	'backup.invalidFile': 'Das ist keine gültige ediurnum-Backup-Datei.',
+	'backup.tooNew': 'Dieses Backup stammt aus einer neueren ediurnum-Version. Bitte aktualisiere ediurnum zuerst.',
 	'backup.wrongKey': 'Das Backup lässt sich mit diesem Schlüssel nicht öffnen.',
 	'backup.missingFile': 'Bitte wähle eine Backup-Datei aus.',
 

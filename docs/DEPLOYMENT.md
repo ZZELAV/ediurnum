@@ -74,7 +74,7 @@ nano .env
                 to: –
           - field: streak
             label: Streak
-            suffix: " days"
+            suffix: days
           - field: entries
             label: Entries
           - field: lastEntry

@@ -15,11 +15,13 @@ import type { Entry, Lang } from '#lib/types.ts';
  */
 
 const AAD = 'ediurnum/backup/v1';
+/** 1: bis 0.1.0-beta.5 · 2: Einträge mit Spalte "empty" (Schema 3). Ältere Versionen bleiben lesbar. */
+const VERSION = 2;
 const META_KEYS = ['created_at', 'settings', 'profile', 'pin_kdf', 'pin_check', 'reminders'];
 
 interface BackupHeader {
 	format: 'ediurnum-backup';
-	version: 1;
+	version: number;
 	appVersion: string;
 	createdAt: string;
 	keyFingerprint: string;
@@ -64,7 +66,7 @@ export function createBackup(dek: Buffer): string {
 	};
 	const header: BackupHeader = {
 		format: 'ediurnum-backup',
-		version: 1,
+		version: VERSION,
 		appVersion: __APP_VERSION__,
 		createdAt: new Date().toISOString(),
 		keyFingerprint: keyFingerprint(dek),
@@ -80,7 +82,10 @@ export function readBackup(text: string, dek: Buffer): BackupData {
 	} catch {
 		throw new Error('backup.invalidFile');
 	}
-	if (header.format !== 'ediurnum-backup' || header.version !== 1) throw new Error('backup.invalidFile');
+	if (header?.format !== 'ediurnum-backup' || !Number.isInteger(header.version) || header.version < 1) {
+		throw new Error('backup.invalidFile');
+	}
+	if (header.version > VERSION) throw new Error('backup.tooNew');
 	if (header.keyFingerprint !== keyFingerprint(dek)) throw new Error('backup.wrongKey');
 	try {
 		return JSON.parse(gunzipSync(decrypt(dek, Buffer.from(header.data, 'base64'), AAD)).toString('utf8'));

@@ -12,6 +12,7 @@ interface EntryRow {
 	kinds: string;
 	locked: number;
 	ai_allowed: number;
+	empty: number;
 	revision: number;
 	rev_started_at: string;
 	created_at: string;
@@ -63,10 +64,11 @@ function rowByDate(date: string): EntryRow | undefined {
 	return getDb().prepare('SELECT * FROM entries WHERE date = ?').get(date) as EntryRow | undefined;
 }
 
+/** Alle geschriebenen Einträge (ohne komplett geleerte), neuester zuerst. */
 export function listEntryMeta(): EntryMeta[] {
 	const rows = getDb()
 		.prepare(
-			'SELECT id, date, kinds, locked, ai_allowed, revision, rev_started_at, created_at, updated_at FROM entries ORDER BY date DESC'
+			'SELECT id, date, kinds, locked, ai_allowed, empty, revision, rev_started_at, created_at, updated_at FROM entries WHERE empty = 0 ORDER BY date DESC'
 		)
 		.all() as unknown as EntryRow[];
 	return rows.map(toMeta);
@@ -96,6 +98,7 @@ export function saveEntry(
 	const row = rowByDate(date);
 	const now = nowIso();
 	const kinds = filledKinds(content).join(',');
+	const empty = isEmptyContent(content) ? 1 : 0;
 
 	if (!row) {
 		if (isEmptyContent(content)) return null;
@@ -127,13 +130,13 @@ export function saveEntry(
 			const rev = row.revision + 1;
 			getDb()
 				.prepare(
-					`UPDATE entries SET kinds = ?, revision = ?, rev_started_at = ?, updated_at = ?, payload = ? WHERE id = ?`
+					`UPDATE entries SET kinds = ?, empty = ?, revision = ?, rev_started_at = ?, updated_at = ?, payload = ? WHERE id = ?`
 				)
-				.run(kinds, rev, now, now, encryptJson(key, content, aad(row.id, rev)), row.id);
+				.run(kinds, empty, rev, now, now, encryptJson(key, content, aad(row.id, rev)), row.id);
 		} else {
 			getDb()
-				.prepare(`UPDATE entries SET kinds = ?, updated_at = ?, payload = ? WHERE id = ?`)
-				.run(kinds, now, encryptJson(key, content, aad(row.id, row.revision)), row.id);
+				.prepare(`UPDATE entries SET kinds = ?, empty = ?, updated_at = ?, payload = ? WHERE id = ?`)
+				.run(kinds, empty, now, encryptJson(key, content, aad(row.id, row.revision)), row.id);
 		}
 	});
 	return toMeta(rowByDate(date)!);
@@ -243,7 +246,7 @@ export function entriesForAi(
 	to: string
 ): { entries: Entry[]; skippedLocked: number } {
 	const rows = getDb()
-		.prepare('SELECT * FROM entries WHERE date >= ? AND date <= ? AND ai_allowed = 1 ORDER BY date ASC')
+		.prepare('SELECT * FROM entries WHERE date >= ? AND date <= ? AND ai_allowed = 1 AND empty = 0 ORDER BY date ASC')
 		.all(from, to) as unknown as EntryRow[];
 	const entries: Entry[] = [];
 	let skippedLocked = 0;

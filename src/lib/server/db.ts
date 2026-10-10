@@ -9,7 +9,7 @@ import { DATA_DIR } from '$app/env/private';
  * Klartext sind nur technische Metadaten: IDs, Datum, Zeitstempel,
  * Sperr-/KI-Flags und welche Abschnitte ein Eintrag enthält.
  */
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 let db: DatabaseSync | null = null;
 
@@ -71,6 +71,11 @@ function migrate(d: DatabaseSync) {
 				created_at TEXT NOT NULL
 			);
 		`);
+	}
+	if (current < 3) {
+		// Kennzeichen für Einträge, deren Inhalt komplett gelöscht wurde: Sie bleiben samt Versionen
+		// erhalten, zählen aber nicht als geschrieben (Liste, Kalender, Serie, Widget).
+		d.exec(`ALTER TABLE entries ADD COLUMN empty INTEGER NOT NULL DEFAULT 0`);
 	}
 	if (current < SCHEMA_VERSION) {
 		d.prepare(`INSERT OR REPLACE INTO meta (key, value) VALUES ('schema', ?)`).run(String(SCHEMA_VERSION));

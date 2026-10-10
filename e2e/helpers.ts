@@ -31,15 +31,19 @@ export interface TestServer {
 	dataDir: string;
 	/** Bisherige Ausgabe des Servers (für Prüfungen am Log) */
 	output(): string;
-	stop(): Promise<void>;
+	/** Beendet den Server; der Datenordner wird gelöscht, ausser mit keepData. */
+	stop(opts?: { keepData?: boolean }): Promise<void>;
 }
 
-/** Startet eine eigene Instanz mit leerem Datenordner. `env` ergänzt oder überschreibt Variablen. */
-export async function startServer(env: Record<string, string | undefined> = {}): Promise<TestServer> {
+/**
+ * Startet eine eigene Instanz – mit leerem Datenordner oder einem bestehenden (`dataDir`).
+ * `env` ergänzt oder überschreibt Variablen.
+ */
+export async function startServer(env: Record<string, string | undefined> = {}, opts: { dataDir?: string } = {}): Promise<TestServer> {
 	if (!existsSync(new URL('build/index.js', ROOT))) throw new Error('Zuerst bauen: npm run build');
 	const port = await freePort();
 	const url = `http://127.0.0.1:${port}`;
-	const dataDir = mkdtempSync(join(tmpdir(), 'ediurnum-e2e-'));
+	const dataDir = opts.dataDir ?? mkdtempSync(join(tmpdir(), 'ediurnum-e2e-'));
 	let out = '';
 	const child: ChildProcess = spawn(process.execPath, ['--disable-warning=ExperimentalWarning', 'server.js'], {
 		cwd: ROOT,
@@ -76,13 +80,13 @@ export async function startServer(env: Record<string, string | undefined> = {}):
 		url,
 		dataDir,
 		output: () => out,
-		stop: async () => {
+		stop: async ({ keepData = false } = {}) => {
 			if (child.exitCode === null) {
 				const exited = new Promise((r) => child.once('exit', r));
 				child.kill();
 				await exited;
 			}
-			rmSync(dataDir, { recursive: true, force: true });
+			if (!keepData) rmSync(dataDir, { recursive: true, force: true });
 		}
 	};
 }
