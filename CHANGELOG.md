@@ -20,6 +20,7 @@ The topmost version without a date is still in development.
   is actually sent, taking the minimum gap into account (e.g. in a new journal the first weekly review comes after
   about a week).
 - "Open journal" after the recovery key could be reached with the keyboard before confirming that the key was saved.
+- "Recent entries" shows the weekday before the day in every regional format (American English showed "8 Thu").
 - The dividers in "Recent entries" on the dashboard are straight like everywhere else (their ends curved upwards).
 - After restoring from a backup, "Download a backup" in "Your first steps" is ticked off.
 - The log now says "PIN set" instead of "PIN changed" when a PIN is set for the first time.

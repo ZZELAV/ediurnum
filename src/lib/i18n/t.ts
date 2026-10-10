@@ -39,9 +39,14 @@ export function fmtDate(iso: string, style: 'long' | 'medium' | 'short' | 'weekd
 					: style === 'dayMonth'
 						? { weekday: 'short', day: 'numeric', month: 'short' }
 						: { day: '2-digit', month: '2-digit', year: 'numeric' };
-	return new Intl.DateTimeFormat(currentLocale(), { ...opts, timeZone: 'UTC' }).format(
-		new Date(iso.length === 10 ? iso + 'T00:00:00Z' : iso)
-	);
+	const fmt = new Intl.DateTimeFormat(currentLocale(), { ...opts, timeZone: 'UTC' });
+	const date = new Date(iso.length === 10 ? iso + 'T00:00:00Z' : iso);
+	if (style === 'weekday') {
+		// Wochentag immer zuerst – en-US würde sonst „8 Thu“ schreiben
+		const part = (type: string) => fmt.formatToParts(date).find((p) => p.type === type)?.value ?? '';
+		return currentLang() === 'de' ? `${part('weekday')}, ${part('day')}.` : `${part('weekday')} ${part('day')}`;
+	}
+	return fmt.format(date);
 }
 
 export function fmtDateTime(iso: string): string {

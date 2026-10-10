@@ -130,11 +130,8 @@
 		padding: 0;
 		margin: 0 0 1rem;
 	}
-	.list li {
-		border-bottom: 1px solid var(--rule);
-	}
-	.list li:last-child {
-		border-bottom: 0;
+	.list li + li {
+		border-top: 1px solid var(--rule);
 	}
 	.item {
 		display: grid;
