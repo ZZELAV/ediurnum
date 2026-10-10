@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { t } from '$lib/i18n/t';
+	import { t } from '#lib/i18n/t.ts';
 
 	let { children, wide = false }: { children: Snippet; wide?: boolean } = $props();
 </script>

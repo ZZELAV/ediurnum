@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { isIsoDate } from '$lib/dates';
-import { getEntry, listRevisions } from '$lib/server/entries';
+import { isIsoDate } from '#lib/dates.ts';
+import { getEntry, listRevisions } from '#lib/server/entries.ts';
 
 export const load: PageServerLoad = ({ params, locals }) => {
 	if (!isIsoDate(params.date)) redirect(303, '/');

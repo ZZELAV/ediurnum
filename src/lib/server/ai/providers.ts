@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { AiAgent } from '$lib/types';
+import type { AiAgent } from '#lib/types.ts';
 
 /**
  * Einheitliche Schnittstelle zu den KI-Anbietern.

@@ -4,7 +4,7 @@ import { getDb, getMeta, setMeta, transaction } from './db';
 import { formatEntries } from './ai/analyze';
 import { listEntryMeta, getEntry } from './entries';
 import type { Session } from './vault';
-import type { Entry, Lang } from '$lib/types';
+import type { Entry, Lang } from '#lib/types.ts';
 
 /**
  * Backup-Format (.ediurnum):

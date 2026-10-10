@@ -1,21 +1,21 @@
 import { fail } from '@sveltejs/kit';
 import { randomUUID } from 'node:crypto';
 import type { Actions, PageServerLoad } from './$types';
-import { isIsoDate } from '$lib/dates';
-import { entriesForAi, moodSeries } from '$lib/server/entries';
-import { loadProfile } from '$lib/server/profile';
-import { isEmptyProfile } from '$lib/profile';
-import { log } from '$lib/server/log';
-import { loadSettings, saveSettings } from '$lib/server/settings';
-import { deleteAnalysis, listAnalyses, pinAnalysis, saveAnalysis } from '$lib/server/analyses';
-import { buildChatMarkdown, defaultInstructions, MAX_INSTRUCTIONS, parseResponse } from '$lib/server/ai/analyze';
-import { renderMarkdown } from '$lib/markdown';
-import type { AiAgent } from '$lib/types';
+import { isIsoDate } from '#lib/dates.ts';
+import { entriesForAi, moodSeries } from '#lib/server/entries.ts';
+import { loadProfile } from '#lib/server/profile.ts';
+import { isEmptyProfile } from '#lib/profile.ts';
+import { log } from '#lib/server/log.ts';
+import { loadSettings, saveSettings } from '#lib/server/settings.ts';
+import { deleteAnalysis, listAnalyses, pinAnalysis, saveAnalysis } from '#lib/server/analyses.ts';
+import { buildChatMarkdown, defaultInstructions, MAX_INSTRUCTIONS, parseResponse } from '#lib/server/ai/analyze.ts';
+import { renderMarkdown } from '#lib/markdown.ts';
+import type { AiAgent } from '#lib/types.ts';
 
 /**
  * Einsichten über einen beliebigen KI-Chat: Die App erstellt eine Markdown-Datei mit Auftrag
  * und Einträgen; die Antwort der KI kann zurückkopiert und als Auswertung gespeichert werden.
- * (KI-Agenten mit API-Schlüssel folgen in einem späteren Release – siehe $lib/server/ai.)
+ * (KI-Agenten mit API-Schlüssel folgen in einem späteren Release – siehe #lib/server/ai.)
  */
 export const load: PageServerLoad = ({ locals }) => {
 	const session = locals.session!;

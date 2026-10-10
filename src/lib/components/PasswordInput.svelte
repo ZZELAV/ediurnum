@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { HTMLInputAttributes } from 'svelte/elements';
-	import { t } from '$lib/i18n/t';
+	import { t } from '#lib/i18n/t.ts';
 
 	/** Passwortfeld mit Auge zum Anzeigen/Verbergen. Alle übrigen Attribute gehen an das Eingabefeld. */
 	let {

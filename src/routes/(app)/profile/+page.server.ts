@@ -1,7 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { loadProfile, saveProfile } from '$lib/server/profile';
-import { log } from '$lib/server/log';
+import { loadProfile, saveProfile } from '#lib/server/profile.ts';
+import { log } from '#lib/server/log.ts';
 
 export const load: PageServerLoad = ({ locals, url }) => {
 	return {

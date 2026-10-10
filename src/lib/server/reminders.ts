@@ -1,9 +1,9 @@
 import webpush from 'web-push';
-import { env } from '$env/dynamic/private';
+import { ORIGIN, VAPID_SUBJECT } from '$app/env/private';
 import { getDb, getMeta, nowIso, setMeta } from './db';
 import { listEntryMeta } from './entries';
-import { isLang, translate } from '$lib/i18n';
-import { todayIso } from '$lib/dates';
+import { isLang, translate } from '#lib/i18n/index.ts';
+import { todayIso } from '#lib/dates.ts';
 import { randomUUID } from 'node:crypto';
 import { log } from './log';
 import {
@@ -21,8 +21,8 @@ import {
 	type CustomReminderError,
 	type CustomReminderView,
 	type ReminderConfig
-} from '$lib/reminders';
-import type { Lang } from '$lib/types';
+} from '#lib/reminders.ts';
+import type { Lang } from '#lib/types.ts';
 
 /**
  * Erinnerungen und Push-Benachrichtigungen.
@@ -157,8 +157,8 @@ export function removeAllDevices() {
  * deshalb die öffentliche Adresse aus ORIGIN – oder ausdrücklich VAPID_SUBJECT (mailto: oder https:).
  */
 function vapidSubject(): string {
-	if (env.VAPID_SUBJECT) return env.VAPID_SUBJECT;
-	if (env.ORIGIN?.startsWith('https://')) return env.ORIGIN;
+	if (VAPID_SUBJECT) return VAPID_SUBJECT;
+	if (ORIGIN?.startsWith('https://')) return ORIGIN;
 	return 'mailto:ediurnum@example.com';
 }
 

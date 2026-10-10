@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { t, weekdayName, WEEK_ORDER } from '$lib/i18n/t';
-	import { CUSTOM_REPEATS, type CustomReminder, type CustomRepeat } from '$lib/reminders';
+	import { t, weekdayName, WEEK_ORDER } from '#lib/i18n/t.ts';
+	import { CUSTOM_REPEATS, type CustomReminder, type CustomRepeat } from '#lib/reminders.ts';
 
 	interface Props {
 		reminder: CustomReminder | null;

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { autosize } from '$lib/actions';
-	import { t } from '$lib/i18n/t';
-	import { sectionDef } from '$lib/templates';
-	import type { FieldValue, SectionKind } from '$lib/types';
+	import { autosize } from '#lib/actions.ts';
+	import { t } from '#lib/i18n/t.ts';
+	import { sectionDef } from '#lib/templates.ts';
+	import type { FieldValue, SectionKind } from '#lib/types.ts';
 	import Scale from './Scale.svelte';
 
 	let {

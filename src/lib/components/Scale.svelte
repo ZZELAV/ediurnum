@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { t } from '$lib/i18n/t';
+	import { t } from '#lib/i18n/t.ts';
 
 	let {
 		value = $bindable(null),

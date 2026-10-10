@@ -1,6 +1,6 @@
 import { decryptJson, encryptJson } from './crypto';
 import { getDb } from './db';
-import type { Analysis } from '$lib/types';
+import type { Analysis } from '#lib/types.ts';
 
 const aad = (id: string) => `analysis:${id}`;
 

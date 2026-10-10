@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { t } from '$lib/i18n/t';
-	import { SECTIONS } from '$lib/templates';
-	import { diffWords, hasChanges, type DiffPart } from '$lib/diff';
-	import type { EntryContent, FieldValue } from '$lib/types';
+	import { t } from '#lib/i18n/t.ts';
+	import { SECTIONS } from '#lib/templates.ts';
+	import { diffWords, hasChanges, type DiffPart } from '#lib/diff.ts';
+	import type { EntryContent, FieldValue } from '#lib/types.ts';
 
 	/** Zeigt eine Version mit den Änderungen gegenüber der Version davor (`before`). */
 	let { before, after }: { before: EntryContent; after: EntryContent } = $props();

@@ -2,10 +2,9 @@
 	import { onMount } from 'svelte';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { dev } from '$app/environment';
-	import { t } from '$lib/i18n/t';
-	import PinBar from '$lib/components/PinBar.svelte';
-	import { watchIdle } from '$lib/idle';
+	import { t } from '#lib/i18n/t.ts';
+	import PinBar from '#lib/components/PinBar.svelte';
+	import { watchIdle } from '#lib/idle.ts';
 
 	let { data, children } = $props();
 
@@ -18,7 +17,7 @@
 		if (!window.isSecureContext || !('serviceWorker' in navigator)) return;
 		navigator.serviceWorker
 			.getRegistration('/')
-			.then((existing) => existing ?? navigator.serviceWorker.register('/service-worker.js', { type: dev ? 'module' : 'classic' }))
+			.then((existing) => existing ?? navigator.serviceWorker.register('/service-worker.js', { type: 'module' }))
 			.catch(() => {});
 	});
 

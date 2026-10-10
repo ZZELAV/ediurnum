@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { t } from '$lib/i18n/t';
+	import { t } from '#lib/i18n/t.ts';
 
 	/** Erste Schritte nach der Einrichtung. Erledigtes hakt sich automatisch ab. */
 	let { steps, today }: { steps: Record<string, boolean>; today: string } = $props();

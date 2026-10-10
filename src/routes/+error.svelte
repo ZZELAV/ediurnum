@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { t } from '$lib/i18n/t';
+	import { t } from '#lib/i18n/t.ts';
 </script>
 
 <main class="wrap">

@@ -85,7 +85,7 @@ npm run check    # type check
 npm run build    # production build in ./build
 ```
 
-Tech stack: SvelteKit 2, Svelte 5, TypeScript, `node:sqlite`, `web-push`.
+Tech stack: SvelteKit 3, Svelte 5, TypeScript, `node:sqlite`, `web-push`.
 Releases follow [Semantic Versioning](https://semver.org); see [CHANGELOG.md](CHANGELOG.md).
 
 ## License

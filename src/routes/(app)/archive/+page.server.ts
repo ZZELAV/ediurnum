@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
-import { monthKey } from '$lib/dates';
-import { getEntry, listEntryMeta } from '$lib/server/entries';
-import { snippetOf } from '$lib/server/snippet';
+import { monthKey } from '#lib/dates.ts';
+import { getEntry, listEntryMeta } from '#lib/server/entries.ts';
+import { snippetOf } from '#lib/server/snippet.ts';
 
 export const load: PageServerLoad = ({ locals }) => {
 	const session = locals.session!;

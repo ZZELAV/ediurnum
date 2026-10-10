@@ -1,6 +1,6 @@
 import { de } from './de';
 import { en } from './en';
-import type { Lang } from '$lib/types';
+import type { Lang } from '#lib/types.ts';
 
 export const LANGS: Lang[] = ['de', 'en'];
 const dictionaries: Record<Lang, Record<string, string>> = { de, en };

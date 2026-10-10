@@ -1,7 +1,6 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { requireSession } from '$lib/server/auth';
-import { fail } from '$lib/server/api';
+import { requireSession } from '#lib/server/auth.ts';
+import { fail } from '#lib/server/api.ts';
 import {
 	hasPin,
 	registerFailure,
@@ -10,7 +9,7 @@ import {
 	throttleRemaining,
 	unlockPinForSession,
 	verifyPin
-} from '$lib/server/vault';
+} from '#lib/server/vault.ts';
 
 /** PIN eingeben: gesperrte Einträge werden in dieser Sitzung für 10 Minuten lesbar. */
 export const POST: RequestHandler = async (event) => {
@@ -26,10 +25,10 @@ export const POST: RequestHandler = async (event) => {
 	}
 	registerSuccess('pin');
 	unlockPinForSession(session, lockKey);
-	return json({ until: session.lockUntil });
+	return Response.json({ until: session.lockUntil });
 };
 
 export const DELETE: RequestHandler = (event) => {
 	relockSession(requireSession(event));
-	return json({ ok: true });
+	return Response.json({ ok: true });
 };

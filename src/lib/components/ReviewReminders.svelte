@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { fmtDate, t, weekdayName, WEEK_ORDER } from '$lib/i18n/t';
-	import type { ReminderConfig } from '$lib/reminders';
+	import { fmtDate, t, weekdayName, WEEK_ORDER } from '#lib/i18n/t.ts';
+	import type { ReminderConfig } from '#lib/reminders.ts';
 
 	interface Props {
 		gefuehl: ReminderConfig['gefuehl'] & { next: string | null };

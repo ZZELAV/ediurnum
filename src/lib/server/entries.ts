@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { decryptJson, encryptJson } from './crypto';
 import { getDb, nowIso, transaction } from './db';
-import { todayIso } from '$lib/dates';
+import { todayIso } from '#lib/dates.ts';
 import type { Session } from './vault';
-import { filledKinds, isEmptyContent } from '$lib/templates';
-import type { Entry, EntryContent, EntryMeta, RevisionInfo, SectionKind } from '$lib/types';
+import { filledKinds, isEmptyContent } from '#lib/templates.ts';
+import type { Entry, EntryContent, EntryMeta, RevisionInfo, SectionKind } from '#lib/types.ts';
 
 /** Änderungen innerhalb dieses Zeitfensters werden in derselben Version zusammengefasst. */
 

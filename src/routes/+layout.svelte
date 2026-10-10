@@ -3,7 +3,7 @@
 	import '@fontsource-variable/lora/wght-italic.css';
 	import '@fontsource-variable/inter';
 	import '../app.css';
-	import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
+	import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
 
 	let { data, children } = $props();
 

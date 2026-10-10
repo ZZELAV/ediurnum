@@ -55,7 +55,7 @@ Images are built for `linux/amd64` and `linux/arm64` (e.g. Raspberry Pi 4/5). Pi
 
 | Variable | Required | Description |
 |---|---|---|
-| `ORIGIN` | yes | Exact public address, e.g. `https://journal.example.com` (cross-site protection, secure cookies, push sender) |
+| `ORIGIN` | yes | Exact public address, e.g. `https://journal.example.com` (cross-site protection, secure cookies, push sender). Without HTTPS use the `http://` address – push and app installation then do not work |
 | `TZ` | recommended | Time zone for “today”, the version history and reminder times, default `Europe/Zurich` |
 | `ADDRESS_HEADER`, `XFF_DEPTH` | behind a proxy | Real client IP from the proxy, e.g. `X-Forwarded-For` and `1` (slows down password guessing) |
 | `BODY_SIZE_LIMIT` | no | Maximum upload size for restoring a backup, default `50M` |

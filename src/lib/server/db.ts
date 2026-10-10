@@ -1,7 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { env } from '$env/dynamic/private';
+import { DATA_DIR } from '$app/env/private';
 
 /**
  * SQLite-Datenbank (node:sqlite, ohne native Zusatzpakete).
@@ -14,7 +14,7 @@ const SCHEMA_VERSION = 2;
 let db: DatabaseSync | null = null;
 
 export function dataDir(): string {
-	return resolve(env.DATA_DIR || './data');
+	return resolve(DATA_DIR);
 }
 
 export function getDb(): DatabaseSync {

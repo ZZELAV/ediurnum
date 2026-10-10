@@ -2,20 +2,20 @@ import { fail, redirect } from '@sveltejs/kit';
 import { randomUUID } from 'node:crypto';
 import type { Actions, PageServerLoad } from './$types';
 import changelog from '../../../../CHANGELOG.md?raw';
-import { isLang } from '$lib/i18n';
-import { renderMarkdown } from '$lib/markdown';
-import { changelogSection } from '$lib/changelog';
-import { isEmptyProfile } from '$lib/profile';
-import { loadProfile } from '$lib/server/profile';
-import { log } from '$lib/server/log';
-import { presetById } from '$lib/ai-presets';
-import { SESSION_COOKIE, setLangCookie } from '$lib/server/auth';
-import { purgeContent, resetAll } from '$lib/server/purge';
-import { countLocked, rekeyLocked } from '$lib/server/entries';
-import { transaction } from '$lib/server/db';
-import { parseRecoveryKey } from '$lib/server/crypto';
-import { loadSettings, publicAgent, saveSettings } from '$lib/server/settings';
-import { validateNewPassword, validatePin } from '$lib/server/validation';
+import { isLang } from '#lib/i18n/index.ts';
+import { renderMarkdown } from '#lib/markdown.ts';
+import { changelogSection } from '#lib/changelog.ts';
+import { isEmptyProfile } from '#lib/profile.ts';
+import { loadProfile } from '#lib/server/profile.ts';
+import { log } from '#lib/server/log.ts';
+import { presetById } from '#lib/ai-presets.ts';
+import { SESSION_COOKIE, setLangCookie } from '#lib/server/auth.ts';
+import { purgeContent, resetAll } from '#lib/server/purge.ts';
+import { countLocked, rekeyLocked } from '#lib/server/entries.ts';
+import { transaction } from '#lib/server/db.ts';
+import { parseRecoveryKey } from '#lib/server/crypto.ts';
+import { loadSettings, publicAgent, saveSettings } from '#lib/server/settings.ts';
+import { validateNewPassword, validatePin } from '#lib/server/validation.ts';
 import {
 	hasPin,
 	prepareNewPin,
@@ -26,9 +26,9 @@ import {
 	unlockPinForSession,
 	unlockWithPassword,
 	verifyPin
-} from '$lib/server/vault';
-import { setReminderLang } from '$lib/server/reminders';
-import type { AiAgent, Theme } from '$lib/types';
+} from '#lib/server/vault.ts';
+import { setReminderLang } from '#lib/server/reminders.ts';
+import type { AiAgent, Theme } from '#lib/types.ts';
 
 export const load: PageServerLoad = ({ locals }) => {
 	const settings = loadSettings(locals.session!.dek);

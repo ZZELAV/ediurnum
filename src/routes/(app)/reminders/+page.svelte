@@ -1,9 +1,9 @@
 <script lang="ts">
-	import CustomReminders from '$lib/components/CustomReminders.svelte';
-	import PushDevices from '$lib/components/PushDevices.svelte';
-	import ReviewReminders from '$lib/components/ReviewReminders.svelte';
-	import { t } from '$lib/i18n/t';
-	import { minutesOf } from '$lib/reminders';
+	import CustomReminders from '#lib/components/CustomReminders.svelte';
+	import PushDevices from '#lib/components/PushDevices.svelte';
+	import ReviewReminders from '#lib/components/ReviewReminders.svelte';
+	import { t } from '#lib/i18n/t.ts';
+	import { minutesOf } from '#lib/reminders.ts';
 
 	let { data, form } = $props();
 

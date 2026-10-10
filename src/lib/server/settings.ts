@@ -1,6 +1,6 @@
 import { decryptJson, encryptJson } from './crypto';
 import { getMeta, setMeta } from './db';
-import type { AiAgent, PublicAiAgent, Settings } from '$lib/types';
+import type { AiAgent, PublicAiAgent, Settings } from '#lib/types.ts';
 
 const AAD = 'ediurnum/settings';
 

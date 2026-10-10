@@ -1,6 +1,6 @@
 # ediurnum – Hinweise für Claude
 
-Privates, verschlüsseltes Tagebuch. SvelteKit 2 + Svelte 5 (Runes), TypeScript, `node:sqlite`, Node ≥ 24.7.
+Privates, verschlüsseltes Tagebuch. SvelteKit 3 + Svelte 5 (Runes), TypeScript, `node:sqlite`, Node ≥ 24.7.
 Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ statt „ß“).
 
 ## Befehle
@@ -27,6 +27,10 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 
 ## Architektur
 
+- SvelteKit-Konfiguration (Adapter, CSP) in `vite.config.ts` – `svelte.config.js` gibt es seit SvelteKit 3 nicht mehr.
+- Importe aus `src/lib` immer mit `#lib/…` **und Dateiendung** (`#lib/dates.ts`, `#lib/components/Cover.svelte`); `$lib` gibt es nicht mehr.
+- Umgebungsvariablen nur über `src/env.ts` (deklarieren) und `$app/env/private` (importieren), nie `$env/*` oder `process.env` in App-Code (Ausnahme: `TZ`, das Node selbst auswertet).
+- `server.js` – Startskript für den Produktivbetrieb: lädt den Server von adapter-node und übernimmt Protokoll und Host aus `ORIGIN` (adapter-node 6 kennt `ORIGIN` nicht mehr; ohne das Skript wäre Betrieb über `http://` nicht möglich).
 - `src/lib/server/crypto.ts` – AES-256-GCM, Argon2id, Wiederherstellungsschlüssel-Format. Datensätze sind per AAD an ihre ID gebunden.
 - `src/lib/server/vault.ts` – Hauptschlüssel nur im RAM pro Sitzung; PIN → Sperr-Schlüssel (HKDF aus Hauptschlüssel + PIN-Schlüssel).
 - `src/lib/server/entries.ts` – ein Eintrag pro Tag; höchstens eine Version pro Kalendertag (TZ): Die erste Bearbeitung an einem neuen Tag archiviert die bisherige Fassung.

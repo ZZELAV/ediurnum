@@ -1,6 +1,6 @@
 import { decryptJson, encryptJson } from './crypto';
 import { getMeta, nowIso, setMeta } from './db';
-import { emptyProfile, sanitizeProfile, type Profile } from '$lib/profile';
+import { emptyProfile, sanitizeProfile, type Profile } from '#lib/profile.ts';
 
 /** Selbsteinschätzung – wie alle Inhalte nur verschlüsselt gespeichert. */
 const AAD = 'ediurnum/profile';

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { fmtDate, t } from '$lib/i18n/t';
-	import { dismiss, isDismissed } from '$lib/suggest';
-	import MoodChart from '$lib/components/MoodChart.svelte';
-	import WelcomeCard from '$lib/components/WelcomeCard.svelte';
-	import type { SectionKind } from '$lib/types';
+	import { fmtDate, t } from '#lib/i18n/t.ts';
+	import { dismiss, isDismissed } from '#lib/suggest.ts';
+	import MoodChart from '#lib/components/MoodChart.svelte';
+	import WelcomeCard from '#lib/components/WelcomeCard.svelte';
+	import type { SectionKind } from '#lib/types.ts';
 
 	let { data } = $props();
 

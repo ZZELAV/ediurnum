@@ -1,8 +1,8 @@
-import { error, json } from '@sveltejs/kit';
-import { isIsoDate, todayIso } from '$lib/dates';
+import { error } from '@sveltejs/kit';
+import { isIsoDate, todayIso } from '#lib/dates.ts';
 
 export function fail(key: string, status = 400, extra: Record<string, unknown> = {}) {
-	return json({ error: key, ...extra }, { status });
+	return Response.json({ error: key, ...extra }, { status });
 }
 
 /** Prüft den Datumsparameter einer Route. */

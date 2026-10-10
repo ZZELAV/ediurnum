@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { api } from '$lib/client';
-	import { currentLocale, fmtDate, t } from '$lib/i18n/t';
-	import PinDialog from '$lib/components/PinDialog.svelte';
-	import type { SearchHit } from '$lib/search';
+	import { api } from '#lib/client.ts';
+	import { currentLocale, fmtDate, t } from '#lib/i18n/t.ts';
+	import PinDialog from '#lib/components/PinDialog.svelte';
+	import type { SearchHit } from '#lib/search.ts';
 
 	let { data } = $props();
 

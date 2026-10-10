@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { AI_PRESETS, presetById } from '$lib/ai-presets';
-	import { api } from '$lib/client';
-	import { t } from '$lib/i18n/t';
-	import type { PublicAiAgent } from '$lib/types';
+	import { AI_PRESETS, presetById } from '#lib/ai-presets.ts';
+	import { api } from '#lib/client.ts';
+	import { t } from '#lib/i18n/t.ts';
+	import type { PublicAiAgent } from '#lib/types.ts';
 	import PasswordInput from './PasswordInput.svelte';
 
 	let { agent, onclose }: { agent: PublicAiAgent | null; onclose: () => void } = $props();

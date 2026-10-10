@@ -1,8 +1,8 @@
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-import { hasPin } from '$lib/server/vault';
-import { pinnedAnalysis } from '$lib/server/analyses';
-import { todayIso } from '$lib/dates';
+import { hasPin } from '#lib/server/vault.ts';
+import { pinnedAnalysis } from '#lib/server/analyses.ts';
+import { todayIso } from '#lib/dates.ts';
 
 export const load: LayoutServerLoad = ({ locals }) => {
 	const session = locals.session;

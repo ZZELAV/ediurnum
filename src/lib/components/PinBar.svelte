@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import { api } from '$lib/client';
-	import { fmtTime, t } from '$lib/i18n/t';
+	import { refreshAll } from '$app/navigation';
+	import { api } from '#lib/client.ts';
+	import { fmtTime, t } from '#lib/i18n/t.ts';
 
 	let { until }: { until: number } = $props();
 
 	$effect(() => {
 		const ms = until - Date.now();
 		if (ms <= 0) return;
-		const timer = setTimeout(() => invalidateAll(), ms + 500);
+		const timer = setTimeout(() => refreshAll(), ms + 500);
 		return () => clearTimeout(timer);
 	});
 
 	async function relock() {
 		await api('/api/pin', 'DELETE');
-		await invalidateAll();
+		await refreshAll();
 	}
 </script>
 

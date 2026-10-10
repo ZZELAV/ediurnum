@@ -1,8 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { registerFailure, registerSuccess, throttleRemaining, unlockWithPassword } from '$lib/server/vault';
-import { clientKey, startSession } from '$lib/server/auth';
-import { log } from '$lib/server/log';
+import { registerFailure, registerSuccess, throttleRemaining, unlockWithPassword } from '#lib/server/vault.ts';
+import { clientKey, startSession } from '#lib/server/auth.ts';
+import { log } from '#lib/server/log.ts';
 
 export const actions: Actions = {
 	default: async (event) => {

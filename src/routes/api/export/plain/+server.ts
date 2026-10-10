@@ -1,8 +1,8 @@
 import type { RequestHandler } from './$types';
-import { requireSession } from '$lib/server/auth';
-import { plainExport } from '$lib/server/backup';
-import { todayIso } from '$lib/dates';
-import { log } from '$lib/server/log';
+import { requireSession } from '#lib/server/auth.ts';
+import { plainExport } from '#lib/server/backup.ts';
+import { todayIso } from '#lib/dates.ts';
+import { log } from '#lib/server/log.ts';
 
 export const GET: RequestHandler = (event) => {
 	const session = requireSession(event);

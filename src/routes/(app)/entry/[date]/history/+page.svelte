@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ask } from '$lib/confirm.svelte';
-	import { api } from '$lib/client';
-	import EntryView from '$lib/components/EntryView.svelte';
-	import RevisionDiff from '$lib/components/RevisionDiff.svelte';
-	import PinDialog from '$lib/components/PinDialog.svelte';
-	import { fmtDate, fmtDateTime, t } from '$lib/i18n/t';
+	import { ask } from '#lib/confirm.svelte.ts';
+	import { api } from '#lib/client.ts';
+	import EntryView from '#lib/components/EntryView.svelte';
+	import RevisionDiff from '#lib/components/RevisionDiff.svelte';
+	import PinDialog from '#lib/components/PinDialog.svelte';
+	import { fmtDate, fmtDateTime, t } from '#lib/i18n/t.ts';
 
 	let { data } = $props();
 	let selected = $state(0);
@@ -20,7 +20,7 @@
 	async function restore() {
 		if (!(await ask(t('history.restoreConfirm')))) return;
 		const res = await api(`/api/entry/${data.date}/restore`, 'POST', { revision: rev.revision });
-		if (res.ok) await goto(`/entry/${data.date}`, { invalidateAll: true });
+		if (res.ok) await goto(`/entry/${data.date}`, { refreshAll: true });
 		else error = res.error;
 	}
 </script>

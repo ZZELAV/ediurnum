@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { onMount, tick, untrack } from 'svelte';
-	import { ask } from '$lib/confirm.svelte';
-	import { beforeNavigate, goto, invalidateAll } from '$app/navigation';
-	import { autosize } from '$lib/actions';
-	import { exitFocus, focusMode } from '$lib/focus';
+	import { ask } from '#lib/confirm.svelte.ts';
+	import { beforeNavigate, goto, refreshAll } from '$app/navigation';
+	import { autosize } from '#lib/actions.ts';
+	import { exitFocus, focusMode } from '#lib/focus.ts';
 	import { page } from '$app/state';
-	import { api } from '$lib/client';
-	import { fmtDate, fmtDateTime, t } from '$lib/i18n/t';
-	import { emptyContent, sanitizeContent, SECTIONS, sectionDef } from '$lib/templates';
-	import type { Suggestions } from '$lib/reminders';
-	import { dismiss, isDismissed } from '$lib/suggest';
-	import type { Entry, EntryMeta, SectionKind } from '$lib/types';
+	import { api } from '#lib/client.ts';
+	import { fmtDate, fmtDateTime, t } from '#lib/i18n/t.ts';
+	import { emptyContent, sanitizeContent, SECTIONS, sectionDef } from '#lib/templates.ts';
+	import type { Suggestions } from '#lib/reminders.ts';
+	import { dismiss, isDismissed } from '#lib/suggest.ts';
+	import type { Entry, EntryMeta, SectionKind } from '#lib/types.ts';
 	import PinDialog from './PinDialog.svelte';
 	import EntryView from './EntryView.svelte';
 	import Scale from './Scale.svelte';
@@ -41,7 +41,7 @@
 	let pinDialog = $state(false);
 	let afterPin: (() => void) | null = null;
 
-	// Nach invalidateAll (z. B. Sperren) die Metadaten übernehmen
+	// Nach refreshAll (z. B. Sperren) die Metadaten übernehmen
 	$effect(() => {
 		if (entry) meta = { ...entry };
 	});
@@ -110,7 +110,7 @@
 
 	// ---- Vorschläge für Rückblicke ----
 	// Fällige Rückblicke erscheinen als eigene Karte; „Heute nicht“ wird pro Tag im Browser gemerkt
-	// (gleich wie auf der Startseite, siehe $lib/suggest).
+	// (gleich wie auf der Startseite, siehe #lib/suggest).
 	let dismissed = $state<Partial<Record<SectionKind, boolean>>>({});
 
 	onMount(() => {
@@ -170,7 +170,7 @@
 		withPin(async () => {
 			const res = await api(`/api/entry/${date}/lock`, 'POST', { locked: !meta!.locked });
 			if (!res.ok) message = res.error;
-			await invalidateAll();
+			await refreshAll();
 		});
 	}
 
@@ -186,7 +186,7 @@
 			const res = await api(`/api/entry/${date}`, 'DELETE');
 			if (res.ok) {
 				lastSaved = JSON.stringify(content);
-				await goto('/', { invalidateAll: true });
+				await goto('/', { refreshAll: true });
 			} else {
 				message = res.error;
 			}

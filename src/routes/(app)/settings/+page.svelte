@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { ask } from '$lib/confirm.svelte';
+	import { ask } from '#lib/confirm.svelte.ts';
 	import { enhance } from '$app/forms';
-	import { fmtDate, t } from '$lib/i18n/t';
-	import { CHANGELOG_URL } from '$lib/changelog';
-	import PasswordInput from '$lib/components/PasswordInput.svelte';
+	import { fmtDate, t } from '#lib/i18n/t.ts';
+	import { CHANGELOG_URL } from '#lib/changelog.ts';
+	import PasswordInput from '#lib/components/PasswordInput.svelte';
 
 	let { data, form } = $props();
 

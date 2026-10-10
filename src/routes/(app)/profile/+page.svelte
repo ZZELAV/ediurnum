@@ -2,9 +2,9 @@
 	import { untrack } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { autosize } from '$lib/actions';
-	import { fmtDate, t } from '$lib/i18n/t';
-	import { JOURNALING, TRAITS, VALUES, sanitizeProfile, type ProfileText } from '$lib/profile';
+	import { autosize } from '#lib/actions.ts';
+	import { fmtDate, t } from '#lib/i18n/t.ts';
+	import { JOURNALING, TRAITS, VALUES, sanitizeProfile, type ProfileText } from '#lib/profile.ts';
 
 	let { data } = $props();
 
@@ -63,7 +63,7 @@
 			return async ({ result, update }) => {
 				busy = false;
 				if (result.type === 'success') {
-					if (data.welcome) return goto('/', { invalidateAll: true });
+					if (data.welcome) return goto('/', { refreshAll: true });
 					notice = { kind: 'ok', text: t('profile.saved') };
 					await update({ reset: false });
 				} else {

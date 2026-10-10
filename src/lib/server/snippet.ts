@@ -1,4 +1,4 @@
-import type { EntryContent } from '$lib/types';
+import type { EntryContent } from '#lib/types.ts';
 
 /** Kurzer Auszug für Übersichten: Höhepunkt, sonst Erlebtes, sonst freie Seite. */
 export function snippetOf(c: EntryContent, max = 140): string {

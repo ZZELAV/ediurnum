@@ -21,10 +21,10 @@ RUN apk add --no-cache tzdata \
 WORKDIR /app
 COPY --from=build --chown=node:node /app/build ./build
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
-COPY --from=build --chown=node:node /app/package.json ./package.json
+COPY --from=build --chown=node:node /app/package.json /app/server.js ./
 USER node
 VOLUME ["/data"]
 EXPOSE 3000
 HEALTHCHECK --interval=60s --timeout=5s --start-period=20s \
     CMD wget -q --spider http://127.0.0.1:3000/login || exit 1
-CMD ["node", "--disable-warning=ExperimentalWarning", "build"]
+CMD ["node", "--disable-warning=ExperimentalWarning", "server.js"]

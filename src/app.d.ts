@@ -1,5 +1,5 @@
-import type { Session } from '$lib/server/vault';
-import type { Lang, Settings } from '$lib/types';
+import type { Session } from '#lib/server/vault.ts';
+import type { Lang, Settings } from '#lib/types.ts';
 
 declare global {
 	const __APP_VERSION__: string;

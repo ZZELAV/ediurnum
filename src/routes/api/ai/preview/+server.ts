@@ -1,9 +1,8 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { requireSession } from '$lib/server/auth';
-import { isIsoDate } from '$lib/dates';
-import { fail } from '$lib/server/api';
-import { listEntryMeta } from '$lib/server/entries';
+import { requireSession } from '#lib/server/auth.ts';
+import { isIsoDate } from '#lib/dates.ts';
+import { fail } from '#lib/server/api.ts';
+import { listEntryMeta } from '#lib/server/entries.ts';
 
 /** Zeigt vor einer Auswertung, welche Einträge übertragen würden. */
 export const GET: RequestHandler = (event) => {
@@ -15,7 +14,7 @@ export const GET: RequestHandler = (event) => {
 	const allowed = inRange.filter((m) => m.aiAllowed);
 	const locked = allowed.filter((m) => m.locked);
 	const pinOpen = session.lockKey !== null;
-	return json({
+	return Response.json({
 		send: allowed.length - (pinOpen ? 0 : locked.length),
 		locked: locked.length,
 		pinOpen,

@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { parseRecoveryKey } from '$lib/server/crypto';
+import { parseRecoveryKey } from '#lib/server/crypto.ts';
 import {
 	destroyAllSessions,
 	matchesStoredKey,
@@ -8,10 +8,10 @@ import {
 	registerSuccess,
 	setPassword,
 	throttleRemaining
-} from '$lib/server/vault';
-import { clientKey, startSession } from '$lib/server/auth';
-import { validateNewPassword } from '$lib/server/validation';
-import { log } from '$lib/server/log';
+} from '#lib/server/vault.ts';
+import { clientKey, startSession } from '#lib/server/auth.ts';
+import { validateNewPassword } from '#lib/server/validation.ts';
+import { log } from '#lib/server/log.ts';
 
 export const actions: Actions = {
 	default: async (event) => {

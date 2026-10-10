@@ -1,9 +1,8 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { requireSession } from '$lib/server/auth';
-import { fail } from '$lib/server/api';
-import { addDevice, removeAllDevices, removeDevice } from '$lib/server/reminders';
-import { log } from '$lib/server/log';
+import { requireSession } from '#lib/server/auth.ts';
+import { fail } from '#lib/server/api.ts';
+import { addDevice, removeAllDevices, removeDevice } from '#lib/server/reminders.ts';
+import { log } from '#lib/server/log.ts';
 
 /** Gerät für Push-Benachrichtigungen anmelden. */
 export const POST: RequestHandler = async (event) => {
@@ -16,7 +15,7 @@ export const POST: RequestHandler = async (event) => {
 	}
 	addDevice({ endpoint, keys: { p256dh: keys.p256dh, auth: keys.auth } }, String(label ?? ''));
 	log.info('push device registered', { service: new URL(endpoint).hostname });
-	return json({ ok: true });
+	return Response.json({ ok: true });
 };
 
 /** Gerät abmelden ({ endpoint }) oder alle Geräte ({ all: true }). */
@@ -26,5 +25,5 @@ export const DELETE: RequestHandler = async (event) => {
 	if (body.all === true) removeAllDevices();
 	else if (typeof body.endpoint === 'string') removeDevice(body.endpoint);
 	log.info(body.all === true ? 'all push devices removed' : 'push device removed');
-	return json({ ok: true });
+	return Response.json({ ok: true });
 };

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { daysBetween } from '$lib/dates';
-	import { fmtDate, fmtNumber, t } from '$lib/i18n/t';
+	import { daysBetween } from '#lib/dates.ts';
+	import { fmtDate, fmtNumber, t } from '#lib/i18n/t.ts';
 
 	/** Stimmungsverlauf (1–5) über einen Zeitraum: Linie mit Punkten, Lücken an Tagen ohne Stimmung. */
 	let {

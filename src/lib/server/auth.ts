@@ -1,14 +1,14 @@
 import { error, type Cookies, type RequestEvent } from '@sveltejs/kit';
-import { dev } from '$app/environment';
-import { env } from '$env/dynamic/private';
+import { dev } from '$app/env';
+import { COOKIE_SECURE, ORIGIN } from '$app/env/private';
 import { createSession, destroySession, type Session } from './vault';
 import { loadSettings } from './settings';
 
 export const SESSION_COOKIE = 'ediurnum_session';
 
 function secureCookies(): boolean {
-	if (env.COOKIE_SECURE) return env.COOKIE_SECURE !== 'false';
-	return !dev && (env.ORIGIN ?? '').startsWith('https://');
+	if (COOKIE_SECURE) return COOKIE_SECURE !== 'false';
+	return !dev && (ORIGIN ?? '').startsWith('https://');
 }
 
 export function startSession(cookies: Cookies, dek: Buffer): Session {

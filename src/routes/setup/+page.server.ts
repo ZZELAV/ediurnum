@@ -1,15 +1,15 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { generateKey, parseRecoveryKey } from '$lib/server/crypto';
-import { initialize, isInitialized } from '$lib/server/vault';
-import { defaultSettings, saveSettings } from '$lib/server/settings';
-import { readBackup, restoreBackup } from '$lib/server/backup';
-import { startSession } from '$lib/server/auth';
-import { saveReminders } from '$lib/server/reminders';
-import { defaultReminders } from '$lib/reminders';
-import { validateNewPassword } from '$lib/server/validation';
-import { log } from '$lib/server/log';
-import { nowIso, setMeta } from '$lib/server/db';
+import { generateKey, parseRecoveryKey } from '#lib/server/crypto.ts';
+import { initialize, isInitialized } from '#lib/server/vault.ts';
+import { defaultSettings, saveSettings } from '#lib/server/settings.ts';
+import { readBackup, restoreBackup } from '#lib/server/backup.ts';
+import { startSession } from '#lib/server/auth.ts';
+import { saveReminders } from '#lib/server/reminders.ts';
+import { defaultReminders } from '#lib/reminders.ts';
+import { validateNewPassword } from '#lib/server/validation.ts';
+import { log } from '#lib/server/log.ts';
+import { nowIso, setMeta } from '#lib/server/db.ts';
 
 export const load: PageServerLoad = ({ locals }) => {
 	if (isInitialized()) redirect(303, locals.session ? '/' : '/login');

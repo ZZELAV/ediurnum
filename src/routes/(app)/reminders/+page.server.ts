@@ -1,7 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { todayIso } from '$lib/dates';
-import { listEntryMeta } from '$lib/server/entries';
+import { todayIso } from '#lib/dates.ts';
+import { listEntryMeta } from '#lib/server/entries.ts';
 import {
 	deleteCustomReminder,
 	listCustomReminders,
@@ -11,8 +11,8 @@ import {
 	saveReminders,
 	setCustomReminderEnabled,
 	vapidPublicKey
-} from '$lib/server/reminders';
-import { nextReview, sanitizeReminders, suggestionsFor } from '$lib/reminders';
+} from '#lib/server/reminders.ts';
+import { nextReview, sanitizeReminders, suggestionsFor } from '#lib/reminders.ts';
 
 export const load: PageServerLoad = () => {
 	const now = new Date();

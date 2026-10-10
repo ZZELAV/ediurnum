@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { ask } from '$lib/confirm.svelte';
-	import { fmtDate, t, weekdayName, WEEK_ORDER } from '$lib/i18n/t';
-	import type { CustomReminder, CustomReminderView } from '$lib/reminders';
+	import { ask } from '#lib/confirm.svelte.ts';
+	import { fmtDate, t, weekdayName, WEEK_ORDER } from '#lib/i18n/t.ts';
+	import type { CustomReminder, CustomReminderView } from '#lib/reminders.ts';
 	import CustomReminderForm from './CustomReminderForm.svelte';
 
 	interface Props {

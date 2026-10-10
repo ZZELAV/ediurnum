@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { t } from '$lib/i18n/t';
-	import { SECTIONS } from '$lib/templates';
-	import type { EntryContent } from '$lib/types';
+	import { t } from '#lib/i18n/t.ts';
+	import { SECTIONS } from '#lib/templates.ts';
+	import type { EntryContent } from '#lib/types.ts';
 
 	let { content }: { content: EntryContent } = $props();
 

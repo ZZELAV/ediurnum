@@ -1,4 +1,4 @@
-import type { Lang } from '$lib/types';
+import type { Lang } from '#lib/types.ts';
 
 /** Standard-Format pro Sprache, wenn der Browser nichts Passendes angibt. */
 export function locale(lang: Lang): string {

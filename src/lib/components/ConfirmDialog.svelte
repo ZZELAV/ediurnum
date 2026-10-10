@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { answer, confirmState } from '$lib/confirm.svelte';
-	import { t } from '$lib/i18n/t';
+	import { answer, confirmState } from '#lib/confirm.svelte.ts';
+	import { t } from '#lib/i18n/t.ts';
 
 	let dialog: HTMLDialogElement | undefined = $state();
 	const request = $derived(confirmState.request);

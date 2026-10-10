@@ -2,7 +2,7 @@ import { getMeta } from './db';
 import { hasPin } from './vault';
 import { hasProfile } from './profile';
 import { listDevices } from './reminders';
-import type { EntryMeta } from '$lib/types';
+import type { EntryMeta } from '#lib/types.ts';
 
 /**
  * Willkommenskarte: die ersten Schritte in ediurnum. Jeder Schritt hakt sich automatisch ab,

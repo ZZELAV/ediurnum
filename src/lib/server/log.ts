@@ -1,4 +1,4 @@
-import { env } from '$env/dynamic/private';
+import { LOG_LEVEL } from '$app/env/private';
 
 /**
  * Protokoll für die Konsole (Docker-Log). Enthält nie Tagebuchinhalte, Passwörter oder Schlüssel –
@@ -10,7 +10,7 @@ const LEVELS = { error: 0, warn: 1, info: 2, debug: 3 } as const;
 type Level = keyof typeof LEVELS;
 
 function threshold(): number {
-	const l = (env.LOG_LEVEL ?? '').toLowerCase();
+	const l = (LOG_LEVEL ?? '').toLowerCase();
 	return l in LEVELS ? LEVELS[l as Level] : LEVELS.info;
 }
 

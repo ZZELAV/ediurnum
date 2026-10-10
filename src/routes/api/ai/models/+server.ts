@@ -1,10 +1,9 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { requireSession } from '$lib/server/auth';
-import { fail } from '$lib/server/api';
-import { loadSettings } from '$lib/server/settings';
-import { AiError, listModels } from '$lib/server/ai/providers';
-import type { AiAgent, ProviderKind } from '$lib/types';
+import { requireSession } from '#lib/server/auth.ts';
+import { fail } from '#lib/server/api.ts';
+import { loadSettings } from '#lib/server/settings.ts';
+import { AiError, listModels } from '#lib/server/ai/providers.ts';
+import type { AiAgent, ProviderKind } from '#lib/types.ts';
 
 /** Lädt die verfügbaren Modelle eines Anbieters (für das Agent-Formular). */
 export const POST: RequestHandler = async (event) => {
@@ -24,7 +23,7 @@ export const POST: RequestHandler = async (event) => {
 		maxFocusPoints: 4
 	};
 	try {
-		return json({ models: await listModels(agent) });
+		return Response.json({ models: await listModels(agent) });
 	} catch (e) {
 		if (e instanceof AiError) return fail(`insights.error.${e.code}`, 502, { detail: e.message });
 		throw e;

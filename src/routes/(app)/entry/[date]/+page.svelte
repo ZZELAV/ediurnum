@@ -1,6 +1,6 @@
 <script lang="ts">
-	import EntryEditor from '$lib/components/EntryEditor.svelte';
-	import { fmtDate } from '$lib/i18n/t';
+	import EntryEditor from '#lib/components/EntryEditor.svelte';
+	import { fmtDate } from '#lib/i18n/t.ts';
 
 	let { data } = $props();
 	const editorKey = $derived(`${data.date}|${data.entry?.content === null ? 'closed' : 'open'}`);

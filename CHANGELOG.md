@@ -11,8 +11,17 @@ The topmost version without a date is still in development.
 - Dates and numbers follow the regional format of your browser when it matches the app language (e.g. "3,3" in
   Germany, "3.3" in Switzerland, US date order in American English). Otherwise Swiss German or British English
   formats are used as before.
+- Updated to SvelteKit 3, Vite 8 and TypeScript 6. Nothing changes for existing installations: `ORIGIN` works as
+  before, also with an `http://` address. The container now starts with `node server.js` (only relevant if you run
+  ediurnum without the Docker image).
+- Unexpected errors and rejected requests are logged more precisely; expected ones (e.g. "not found") only with
+  `LOG_LEVEL=debug`.
 - Clearer wording during setup ("Your first step" above About me) and on the dashboard for an empty list of
   previous days.
+
+### Security
+
+- Resolves the advisory for the `cookie` package (not exploitable in ediurnum, as cookie names and paths are fixed).
 
 ### Fixed
 

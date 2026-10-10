@@ -1,13 +1,14 @@
-import { json, redirect, type Handle, type HandleServerError, type ServerInit } from '@sveltejs/kit';
-import { dev } from '$app/environment';
-import { env } from '$env/dynamic/private';
-import { startReminderScheduler } from '$lib/server/reminders';
-import { getSession, isInitialized } from '$lib/server/vault';
-import { loadSettings } from '$lib/server/settings';
-import { dataDir } from '$lib/server/db';
-import { log } from '$lib/server/log';
-import { isLang, pickLang, pickLocale } from '$lib/i18n';
-import { SESSION_COOKIE } from '$lib/server/auth';
+import { redirect } from '@sveltejs/kit';
+import type { Handle, HandleServerError, ServerInit } from '@sveltejs/kit/hooks';
+import { dev } from '$app/env';
+import { ORIGIN } from '$app/env/private';
+import { startReminderScheduler } from '#lib/server/reminders.ts';
+import { getSession, isInitialized } from '#lib/server/vault.ts';
+import { loadSettings } from '#lib/server/settings.ts';
+import { dataDir } from '#lib/server/db.ts';
+import { log } from '#lib/server/log.ts';
+import { isLang, pickLang, pickLocale } from '#lib/i18n/index.ts';
+import { SESSION_COOKIE } from '#lib/server/auth.ts';
 
 const PUBLIC_PATHS = ['/setup', '/login', '/recover'];
 /** Prüfen selbst einen Token statt der Sitzung (z. B. Dashboard-Widget). */
@@ -21,12 +22,12 @@ export const init: ServerInit = () => {
 	log.info('ediurnum started', {
 		version: __APP_VERSION__,
 		node: process.version,
-		origin: env.ORIGIN || '(not set)',
+		origin: ORIGIN ?? '(not set)',
 		dataDir: dataDir(),
 		tz: process.env.TZ ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
 		initialized: isInitialized()
 	});
-	if (!env.ORIGIN && !dev) log.warn('ORIGIN is not set – form submissions behind a reverse proxy will fail');
+	if (!ORIGIN && !dev) log.warn('ORIGIN is not set – session cookies are not marked secure and push notifications use a placeholder sender');
 	startReminderScheduler();
 };
 
@@ -50,13 +51,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (!isInitialized()) {
 		if (path !== '/setup') {
-			if (isApi) return json({ error: 'error.unauthorized' }, { status: 401 });
+			if (isApi) return Response.json({ error: 'error.unauthorized' }, { status: 401 });
 			redirect(303, '/setup');
 		}
 	} else if (TOKEN_PATHS.includes(path)) {
 		// Zugang über Token, siehe Endpunkt
 	} else if (!session && !isPublic) {
-		if (isApi) return json({ error: 'error.unauthorized' }, { status: 401 });
+		if (isApi) return Response.json({ error: 'error.unauthorized' }, { status: 401 });
 		redirect(303, '/login');
 	} else if (session && isPublic && path !== '/setup') {
 		redirect(303, '/');
@@ -80,17 +81,19 @@ export const handle: Handle = async ({ event, resolve }) => {
 	return response;
 };
 
-/** Unerwartete Fehler ins Log schreiben (ohne Anfrageinhalte); 404 nur im Debug-Modus. */
-export const handleError: HandleServerError = ({ error, event, status, message }) => {
-	if (status === 404) {
-		log.debug('not found', { method: event.request.method, path: event.url.pathname });
+/**
+ * Fehler ins Log schreiben (ohne Anfrageinhalte). Erwartete Fehler (eigene `error()`-Aufrufe wie 401/404,
+ * 404 von SvelteKit) nur im Debug-Modus, andere Fehler von SvelteKit (z. B. 403 bei fremder Herkunft)
+ * als Warnung, unerwartete als Fehler mit Stacktrace. Die Antwort an den Browser bleibt unverändert.
+ */
+export const handleError: HandleServerError = (caught) => {
+	const where = { method: caught.event.request.method, path: caught.event.url.pathname };
+	if (caught.kind === 'unknown') {
+		const e = caught.error;
+		log.error('request failed', { ...where, error: e instanceof Error ? (e.stack ?? e.message) : String(e) });
+	} else if (caught.kind === 'app' || caught.error.status === 404) {
+		log.debug('request rejected', { ...where, status: caught.error.status });
 	} else {
-		log.error('request failed', {
-			method: event.request.method,
-			path: event.url.pathname,
-			status,
-			error: error instanceof Error ? (error.stack ?? error.message) : String(error)
-		});
+		log.warn('request rejected', { ...where, status: caught.error.status, reason: caught.error.message });
 	}
-	return { message };
 };

@@ -1,13 +1,13 @@
 import type { Actions, PageServerLoad } from './$types';
-import { loadSettings, saveSettings } from '$lib/server/settings';
-import { welcomeProgress } from '$lib/server/welcome';
-import { addYears, todayIso } from '$lib/dates';
-import { getEntry, listEntryMeta, moodSeries } from '$lib/server/entries';
-import { pinnedAnalysis } from '$lib/server/analyses';
-import { suggestionsFor } from '$lib/reminders';
-import { loadReminders } from '$lib/server/reminders';
-import { snippetOf } from '$lib/server/snippet';
-import type { EntryMeta } from '$lib/types';
+import { loadSettings, saveSettings } from '#lib/server/settings.ts';
+import { welcomeProgress } from '#lib/server/welcome.ts';
+import { addYears, todayIso } from '#lib/dates.ts';
+import { getEntry, listEntryMeta, moodSeries } from '#lib/server/entries.ts';
+import { pinnedAnalysis } from '#lib/server/analyses.ts';
+import { suggestionsFor } from '#lib/reminders.ts';
+import { loadReminders } from '#lib/server/reminders.ts';
+import { snippetOf } from '#lib/server/snippet.ts';
+import type { EntryMeta } from '#lib/types.ts';
 
 export const load: PageServerLoad = ({ locals }) => {
 	const session = locals.session!;

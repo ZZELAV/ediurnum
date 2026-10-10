@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms';
-	import Cover from '$lib/components/Cover.svelte';
-	import PasswordInput from '$lib/components/PasswordInput.svelte';
-	import { t } from '$lib/i18n/t';
+	import Cover from '#lib/components/Cover.svelte';
+	import PasswordInput from '#lib/components/PasswordInput.svelte';
+	import { t } from '#lib/i18n/t.ts';
 
 	let { form } = $props();
 

@@ -1,6 +1,6 @@
 import { page } from '$app/state';
 import { isLang, locale, translate } from './index';
-import type { Lang } from '$lib/types';
+import type { Lang } from '#lib/types.ts';
 
 /** Aktuelle Sprache der Seite (aus den Layout-Daten). */
 export function currentLang(): Lang {

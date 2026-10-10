@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { complete } from './providers';
-import { SECTIONS } from '$lib/templates';
-import { translate } from '$lib/i18n';
-import { isEmptyProfile, profileMarkdown, type Profile } from '$lib/profile';
-import type { AiAgent, Analysis, Entry, Lang } from '$lib/types';
+import { SECTIONS } from '#lib/templates.ts';
+import { translate } from '#lib/i18n/index.ts';
+import { isEmptyProfile, profileMarkdown, type Profile } from '#lib/profile.ts';
+import type { AiAgent, Analysis, Entry, Lang } from '#lib/types.ts';
 
 const TONES: Record<AiAgent['tone'], Record<Lang, string>> = {
 	gentle: {

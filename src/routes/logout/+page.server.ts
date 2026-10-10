@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { endSession } from '$lib/server/auth';
-import { log } from '$lib/server/log';
+import { endSession } from '#lib/server/auth.ts';
+import { log } from '#lib/server/log.ts';
 
 export const load: PageServerLoad = () => redirect(303, '/');
 

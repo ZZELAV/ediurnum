@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { ask } from '$lib/confirm.svelte';
-	import { invalidateAll } from '$app/navigation';
-	import { dev } from '$app/environment';
-	import { api } from '$lib/client';
-	import { t } from '$lib/i18n/t';
+	import { ask } from '#lib/confirm.svelte.ts';
+	import { refreshAll } from '$app/navigation';
+	import { api } from '#lib/client.ts';
+	import { t } from '#lib/i18n/t.ts';
 
 	interface Props {
 		push: { publicKey: string; devices: { endpoint: string; label: string; createdAt: string }[] };
@@ -44,7 +43,7 @@
 
 	async function registration(): Promise<ServiceWorkerRegistration> {
 		const existing = await navigator.serviceWorker.getRegistration('/');
-		if (!existing) await navigator.serviceWorker.register('/service-worker.js', { type: dev ? 'module' : 'classic' });
+		if (!existing) await navigator.serviceWorker.register('/service-worker.js', { type: 'module' });
 		return navigator.serviceWorker.ready;
 	}
 
@@ -84,7 +83,7 @@
 			if (!res.ok) throw new Error(res.error);
 			endpoint = sub.endpoint;
 			pushState = 'on';
-			await invalidateAll();
+			await refreshAll();
 		} catch (e) {
 			pushMessage = t('common.error') + ' ' + (e as Error).message;
 		} finally {
@@ -103,7 +102,7 @@
 			}
 			endpoint = null;
 			pushState = 'off';
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			busy = false;
 		}

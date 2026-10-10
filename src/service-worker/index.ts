@@ -1,14 +1,9 @@
-/// <reference types="@sveltejs/kit" />
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext" />
-/// <reference lib="webworker" />
+import { self as sw } from '$app/service-worker';
 
 /**
  * Service Worker – nur für Push-Benachrichtigungen.
  * Bewusst ohne Offline-Cache: Tagebuchinhalte sollen nie im Browser-Cache landen.
  */
-const sw = self as unknown as ServiceWorkerGlobalScope;
-
 sw.addEventListener('install', () => {
 	sw.skipWaiting();
 });

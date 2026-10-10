@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { ask } from '$lib/confirm.svelte';
+	import { ask } from '#lib/confirm.svelte.ts';
 	import { enhance } from '$app/forms';
-	import { api } from '$lib/client';
-	import { addDays } from '$lib/dates';
-	import PinDialog from '$lib/components/PinDialog.svelte';
-	import MoodChart from '$lib/components/MoodChart.svelte';
-	import { fmtDate, fmtDateTime, t } from '$lib/i18n/t';
+	import { api } from '#lib/client.ts';
+	import { addDays } from '#lib/dates.ts';
+	import PinDialog from '#lib/components/PinDialog.svelte';
+	import MoodChart from '#lib/components/MoodChart.svelte';
+	import { fmtDate, fmtDateTime, t } from '#lib/i18n/t.ts';
 
 	let { data } = $props();
 

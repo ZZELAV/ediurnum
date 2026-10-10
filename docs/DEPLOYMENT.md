@@ -45,6 +45,8 @@ nano .env
 
 - `ORIGIN` – the exact public address, e.g. `https://journal.example.com` (no trailing slash).
   It is used for cross-site protection, secure cookies and as the sender for push services.
+  Without HTTPS (home network only) use the `http://` address, e.g. `http://192.168.1.10:3000`; push notifications
+  and installing the app then do not work, because browsers only allow them on secure origins.
 - `TZ` – your time zone (`Europe/Zurich`, …). “Today”, the version history (one version per day) and all reminder times use it.
 - `EDIURNUM_VERSION` (optional) – pin a release, e.g. `0.1.0-beta.5`. Without it, the newest release (`latest`) is used.
 - `LOG_LEVEL` (optional) – `info` by default: start-up, opening and closing the journal, failed attempts, backups,

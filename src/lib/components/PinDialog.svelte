@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import { api } from '$lib/client';
-	import { t } from '$lib/i18n/t';
+	import { refreshAll } from '$app/navigation';
+	import { api } from '#lib/client.ts';
+	import { t } from '#lib/i18n/t.ts';
 	import PasswordInput from './PasswordInput.svelte';
 
 	let { open = $bindable(false), onunlocked }: { open?: boolean; onunlocked?: () => void } = $props();
@@ -30,7 +30,7 @@
 		busy = false;
 		if (res.ok) {
 			open = false;
-			await invalidateAll();
+			await refreshAll();
 			onunlocked?.();
 		} else {
 			error = res.error;
