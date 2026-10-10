@@ -4,7 +4,7 @@ import type { EntryContent } from './types';
 /**
  * Volltextsuche über entschlüsselte Einträge. Läuft nur im RAM auf dem Server –
  * es gibt keinen Suchindex, weil der im Klartext auf der Platte läge.
- * Gross-/Kleinschreibung und Akzente spielen keine Rolle („cafe“ findet „Café“).
+ * Gross-/Kleinschreibung und Akzente spielen keine Rolle („cafe“ findet „Café“, „strasse“ findet „Straße“).
  */
 
 export interface SearchHit {
@@ -37,7 +37,7 @@ function foldWithMap(text: string): { folded: string; map: number[] } {
 }
 
 function fold(text: string): string {
-	return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+	return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/ß/g, 'ss');
 }
 
 /** Alle durchsuchbaren Texte eines Eintrags mit dem Textschlüssel ihres Feldes. */

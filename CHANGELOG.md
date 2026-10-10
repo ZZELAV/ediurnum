@@ -54,6 +54,9 @@ The topmost version without a date is still in development.
 - The dividers in "Recent entries" on the dashboard are straight like everywhere else (their ends curved upwards).
 - After restoring from a backup, "Download a backup" in "Your first steps" is ticked off.
 - The log now says "PIN set" instead of "PIN changed" when a PIN is set for the first time.
+- Search treats "ss" and "ß" as equal ("strasse" finds "Straße").
+- Search results are refreshed when the PIN expires or you lock again, so excerpts of locked entries no longer stay
+  on screen. A failed search now shows an error instead of silently keeping the old results.
 
 ## [0.1.0-beta.5] - 2026-10-10
 

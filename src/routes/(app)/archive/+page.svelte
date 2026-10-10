@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { api } from '#lib/client.ts';
 	import { currentLocale, fmtDate, t } from '#lib/i18n/t.ts';
 	import PinDialog from '#lib/components/PinDialog.svelte';
@@ -11,6 +12,7 @@
 	type Result = { date: string; mood: number | null; locked: boolean } & SearchHit;
 	let query = $state('');
 	let search = $state<{ query: string; results: Result[]; skippedLocked: number } | null>(null);
+	let failed = $state(false);
 	let pinDialog = $state(false);
 	let timer: ReturnType<typeof setTimeout> | undefined;
 	let latest = 0;
@@ -21,14 +23,25 @@
 		if (!q) {
 			latest++;
 			search = null;
+			failed = false;
 			return;
 		}
 		timer = setTimeout(async () => {
 			const id = ++latest;
 			const res = await api<{ results: Result[]; skippedLocked: number }>('/api/search', 'POST', { query: q });
-			if (res.ok && id === latest) search = { query: q, ...res.data };
+			if (id !== latest) return;
+			failed = !res.ok;
+			if (res.ok) search = { query: q, ...res.data };
 		}, delay);
 	}
+
+	// PIN abgelaufen oder „Wieder sperren“: Ergebnisse neu holen, damit keine Auszüge gesperrter Einträge stehen bleiben
+	let pinUntil: number | undefined;
+	$effect(() => {
+		const until = data.pinUnlockedUntil;
+		if (pinUntil !== undefined && until !== pinUntil) untrack(() => search && runSearch(query, 0));
+		pinUntil = until;
+	});
 
 	function clear() {
 		query = '';
@@ -60,7 +73,7 @@
 
 <svelte:head><title>{t('archive.title')} · ediurnum</title></svelte:head>
 
-<PinDialog bind:open={pinDialog} onunlocked={() => runSearch(query, 0)} />
+<PinDialog bind:open={pinDialog} />
 
 <div class="view">
 	<header class="view-head">
@@ -88,6 +101,7 @@
 					onkeydown={(e) => e.key === 'Escape' && query && (e.preventDefault(), clear())}
 				/>
 			</form>
+			{#if failed}<p class="notice error" role="alert">{t('common.error')}</p>{/if}
 		{/if}
 
 		{#if search}
@@ -142,7 +156,7 @@
 							<p class="faint">{t('archive.entries', { count: m.days.length })}</p>
 						</div>
 					</header>
-					<div class="cal" role="grid">
+					<div class="cal">
 						{#each weekdays as w, i (i)}<span class="wd" aria-hidden="true">{w}</span>{/each}
 						{#each grid(m.month) as cell, i (i)}
 							{#if cell === null}

@@ -45,3 +45,32 @@ test('Leere Suche findet nichts', () => {
 	assert.deepEqual(searchTerms('   '), []);
 	assert.equal(matchEntry(entry, [], t), null);
 });
+
+test('„ss“ und „ß“ gelten als gleich, die Markierung trifft das Original', () => {
+	const c: EntryContent = { mood: null, sections: {}, free: 'Über die Straße gegangen.' };
+	assert.deepEqual(marked(matchEntry(c, searchTerms('strasse'), t)), ['Straße']);
+	assert.deepEqual(marked(matchEntry(c, searchTerms('STRAẞE'), t)), ['Straße']);
+	assert.deepEqual(marked(matchEntry(c, searchTerms('uber'), t)), ['Über']);
+});
+
+test('Zerlegte Akzente im Text werden ganz markiert', () => {
+	const c: EntryContent = { mood: null, sections: {}, free: 'Im Café gesessen' };
+	assert.deepEqual(marked(matchEntry(c, searchTerms('café'), t)), ['Café']);
+});
+
+test('Alle Fundstellen im Auszug sind markiert, kurzer Text ohne Auslassung', () => {
+	const c: EntryContent = { mood: null, sections: {}, free: 'See, dann\n\nwieder  See und Berge' };
+	const hit = matchEntry(c, searchTerms('see berge'), t);
+	assert.equal(text(hit), 'See, dann wieder See und Berge');
+	assert.deepEqual(marked(hit), ['See', 'See', 'Berge']);
+});
+
+test('Suchbegriffe: doppelte entfernt, höchstens acht', () => {
+	assert.deepEqual(searchTerms('See see SEE'), ['see']);
+	assert.equal(searchTerms('a b c d e f g h i j').length, 8);
+});
+
+test('Leere Felder und Listen ergeben keinen Treffer', () => {
+	const c: EntryContent = { mood: 3, sections: { erlebt: { gratitude: ['', ' '], highlight: '  ' } }, free: '' };
+	assert.equal(matchEntry(c, searchTerms('a'), t), null);
+});
