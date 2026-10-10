@@ -10,6 +10,7 @@ export function defaultSettings(): Settings {
 		language: 'de',
 		theme: 'system',
 		sessionMinutes: 30,
+		leaveMinutes: 1,
 		focusMode: false,
 		welcomeHidden: false,
 		aiInstructions: '',

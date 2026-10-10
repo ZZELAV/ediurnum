@@ -35,7 +35,11 @@ describe('Komplett geleerter Eintrag', () => {
 		assert.equal(r.status, 200);
 		const w = await widgetAuth();
 		assert.equal(w.entries, 1, 'geleerter Eintrag zählt nicht');
-		assert.equal(w.lastEntry, '2026-05-02');
+		const db = new DatabaseSync(join(server.dataDir, 'ediurnum.db'));
+		const saved = db.prepare(`SELECT updated_at FROM entries WHERE date = '2026-05-02'`).get() as { updated_at: string };
+		db.close();
+		assert.equal(w.lastEntry, saved.updated_at, 'Zeitpunkt der letzten Speicherung, nicht des geleerten Eintrags');
+		assert.match(String(w.lastEntry), /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/);
 
 		// nicht in „Alle Einträge“, aber die Seite des Tages und die Versionen gibt es weiterhin
 		const archive = await (await c.get('/archive/__data.json')).text();

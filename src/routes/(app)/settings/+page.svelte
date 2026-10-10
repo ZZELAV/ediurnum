@@ -84,6 +84,13 @@
 					<label for="sess">{t('settings.session')}</label>
 					<input id="sess" name="sessionMinutes" type="number" min="5" max="720" value={data.settings.sessionMinutes} />
 				</div>
+				<div class="field">
+					<label for="leave">{t('settings.leave')}</label>
+					<select id="leave" name="leaveMinutes" value={String(data.settings.leaveMinutes)}>
+						{#each [1, 5, 15, 0] as m (m)}<option value={String(m)}>{t(`settings.leave.${m}`)}</option>{/each}
+					</select>
+				</div>
+				<p class="faint hint">{t('settings.leaveHint')}</p>
 				{#if data.settings.theme === 'system' && !chosenTheme}<p class="faint hint">{t('settings.themeSystemHint')}</p>{/if}
 				<div class="field check">
 					<label class="switch-label">

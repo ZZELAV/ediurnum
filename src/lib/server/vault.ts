@@ -29,6 +29,10 @@ export interface Session {
 	createdAt: number;
 	lastSeen: number;
 	idleMs: number;
+	/** Sperren, wenn die App so lange verlassen ist (0 = aus) */
+	awayMs: number;
+	/** Seit wann die App verlassen ist (0 = im Vordergrund), siehe #lib/idle */
+	awaySince: number;
 	lockKey: Buffer | null;
 	lockUntil: number;
 }
@@ -102,7 +106,7 @@ export async function setPassword(dek: Buffer, newPassword: string) {
 // Sitzungen
 // --------------------------------------------------------------------------
 
-export function createSession(dek: Buffer, idleMinutes: number): Session {
+export function createSession(dek: Buffer, idleMinutes: number, leaveMinutes = 0): Session {
 	const now = Date.now();
 	const s: Session = {
 		token: randomToken(),
@@ -110,6 +114,8 @@ export function createSession(dek: Buffer, idleMinutes: number): Session {
 		createdAt: now,
 		lastSeen: now,
 		idleMs: Math.max(5, idleMinutes) * 60 * 1000,
+		awayMs: Math.max(0, leaveMinutes) * 60 * 1000,
+		awaySince: 0,
 		lockKey: null,
 		lockUntil: 0
 	};
@@ -122,8 +128,10 @@ export function getSession(token: string | undefined): Session | null {
 	const s = sessions.get(token);
 	if (!s) return null;
 	const now = Date.now();
-	if (now - s.lastSeen > s.idleMs || now - s.createdAt > ABSOLUTE_MAX_MS) {
-		log.info('journal closed automatically', { reason: now - s.createdAt > ABSOLUTE_MAX_MS ? 'max-duration' : 'inactivity' });
+	const left = s.awayMs > 0 && s.awaySince > 0 && now - s.awaySince > s.awayMs;
+	if (now - s.lastSeen > s.idleMs || now - s.createdAt > ABSOLUTE_MAX_MS || left) {
+		const reason = now - s.createdAt > ABSOLUTE_MAX_MS ? 'max-duration' : left ? 'left-app' : 'inactivity';
+		log.info('journal closed automatically', { reason });
 		destroySession(token);
 		return null;
 	}
@@ -133,6 +141,11 @@ export function getSession(token: string | undefined): Session | null {
 		s.lockKey = null;
 	}
 	return s;
+}
+
+/** Die App wurde verlassen (geschlossen, Hintergrund, Bildschirm gesperrt) bzw. ist wieder im Vordergrund. */
+export function markAway(s: Session, away: boolean) {
+	s.awaySince = away ? Date.now() : 0;
 }
 
 export function destroySession(token: string) {

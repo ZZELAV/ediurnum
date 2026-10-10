@@ -52,7 +52,7 @@ nano .env
 - `LOG_LEVEL` (optional) – `info` by default: start-up, opening and closing the journal, failed attempts, backups,
   push notifications and errors. `debug` additionally logs every request. Logs never contain journal content.
 - `WIDGET_TOKEN` (optional) – enables `/api/widget` for dashboards such as Homepage: it returns the number of entries,
-  the date of the latest entry, whether today is written and the current writing streak (never content) for requests
+  when you last wrote (time of the latest save, ISO timestamp), whether today is written and the current writing streak (never content) for requests
   with `Authorization: Bearer <token>`. Use at least 16 characters, e.g. from `openssl rand -hex 32`. Without it, the
   endpoint is off. Example for Homepage (`services.yaml`):
 
@@ -80,6 +80,8 @@ nano .env
           - field: lastEntry
             label: Latest
             format: date
+            dateStyle: short
+            timeStyle: short
   ```
 - Leave the other values as they are unless you know you need something else.
 

@@ -6,7 +6,7 @@ export const en: Record<string, string> = {
 	'nav.insights': 'Insights',
 	'nav.reminders': 'Reminders',
 	'nav.settings': 'Settings',
-	'nav.lock': 'Close journal',
+	'nav.lock': 'Lock journal',
 	'nav.skip': 'Skip to content',
 
 	'common.save': 'Save',
@@ -316,6 +316,12 @@ export const en: Record<string, string> = {
 	'settings.theme.light': 'Light (paper)',
 	'settings.theme.dark': 'Dark (night reading)',
 	'settings.session': 'Lock automatically (in minutes)',
+	'settings.leave': 'Lock after leaving the app',
+	'settings.leave.1': 'after 1 minute',
+	'settings.leave.5': 'after 5 minutes',
+	'settings.leave.15': 'after 15 minutes',
+	'settings.leave.0': 'never (only when inactive)',
+	'settings.leaveHint': 'Applies when you close the app, switch to another app or tab, or lock the screen. If you copy the file into an AI chat for insights, 5 or 15 minutes work better.',
 	'settings.saved': 'Settings saved.',
 
 	'settings.remindersIntro': 'Get reminded of your reflections. A hint appears in the app, and registered devices also receive a notification. If you have already written the reflection, you will not be reminded.',

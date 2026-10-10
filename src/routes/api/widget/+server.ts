@@ -12,7 +12,7 @@ const digest = (s: string) => createHash('sha256').update(s).digest();
 /**
  * Kennzahlen für ein Dashboard (z. B. Homepage, Widget "customapi"). Nur aktiv mit WIDGET_TOKEN;
  * Abfrage mit "Authorization: Bearer <token>". Liefert ausschliesslich unverschlüsselte Metadaten
- * (Anzahl Einträge, Datum des neuesten Eintrags, heute geschrieben, aktuelle Serie) – nie Inhalte.
+ * (Anzahl Einträge, Zeitpunkt des letzten Schreibens, heute geschrieben, aktuelle Serie) – nie Inhalte.
  */
 export const GET: RequestHandler = (event) => {
 	const token = WIDGET_TOKEN ?? '';
@@ -34,7 +34,8 @@ export const GET: RequestHandler = (event) => {
 	return Response.json(
 		{
 			entries: metas.length,
-			lastEntry: metas[0]?.date ?? null,
+			// Zeitpunkt (ISO, UTC) der letzten Speicherung irgendeines Eintrags – nicht nur das Datum
+			lastEntry: metas.reduce<string | null>((max, m) => (max && max > m.updatedAt ? max : m.updatedAt), null),
 			writtenToday: metas[0]?.date === today,
 			streak: currentStreak(metas.map((m) => m.date), today)
 		},

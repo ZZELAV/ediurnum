@@ -48,6 +48,14 @@ describe('Alle Einträge', () => {
 		assert.match(html, /Spaziergang an der Straße zum See/, 'Auszug im Titel');
 	});
 
+	test('Laufender Monat erscheint auch ohne Eintrag, zuoberst', async () => {
+		const html = await (await c.get('/archive')).text();
+		const titles = [...html.matchAll(/<h2 class="svelte-\w+">([^<]+)<\/h2>/g)].map((m) => m[1]);
+		const current = new Intl.DateTimeFormat('de-CH', { month: 'long', year: 'numeric', timeZone: 'Europe/Zurich' }).format(new Date());
+		assert.deepEqual(titles, [current, 'März 2026', 'Februar 2026']);
+		assert.match(html, /0 Einträge/);
+	});
+
 	test('Gesperrter Eintrag ohne PIN: kein Auszug, keine Stimmung', async () => {
 		const html = await (await c.get('/archive')).text();
 		assert.doesNotMatch(html, /Geheimnis/);

@@ -13,7 +13,7 @@ function secureCookies(): boolean {
 
 export function startSession(cookies: Cookies, dek: Buffer): Session {
 	const settings = loadSettings(dek);
-	const session = createSession(dek, settings.sessionMinutes);
+	const session = createSession(dek, settings.sessionMinutes, settings.leaveMinutes);
 	cookies.set(SESSION_COOKIE, session.token, {
 		path: '/',
 		httpOnly: true,

@@ -11,8 +11,16 @@ The topmost version without a date is still in development.
 - The dashboard endpoint `/api/widget` also returns whether today's entry is written (`writtenToday`) and the
   current writing streak in days (`streak`; counts up to yesterday until today is written). DEPLOYMENT.md has a
   Homepage example.
+- The journal locks itself after you leave the app – close it, switch to another app or tab, or lock the screen.
+  By default after 1 minute; adjustable in the settings (1, 5 or 15 minutes, or never). This also works when the
+  app was closed completely in the meantime.
+- "All entries" always shows the current month, even before its first entry, so you can fill in earlier days.
 
 ### Changed
+
+- "Close journal" is now called "Lock journal".
+- `lastEntry` in `/api/widget` is now the time of the latest save (ISO timestamp) instead of only the date, so
+  dashboards can show the actual time. The Homepage example in DEPLOYMENT.md shows date and time.
 
 - An entry whose content is completely deleted no longer counts as written (list, calendar, streak, widget). It
   stays with its version history and counts again once you write something.

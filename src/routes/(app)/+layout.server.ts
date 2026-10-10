@@ -14,6 +14,7 @@ export const load: LayoutServerLoad = ({ locals }) => {
 		name: locals.settings?.name ?? '',
 		focusMode: locals.settings?.focusMode ?? false,
 		sessionMinutes: locals.settings?.sessionMinutes ?? 30,
+		leaveMinutes: locals.settings?.leaveMinutes ?? 1,
 		pinUnlockedUntil: session.lockKey ? session.lockUntil : 0,
 		focus: pinned ? { id: pinned.id, createdAt: pinned.createdAt, points: pinned.focusPoints } : null
 	};

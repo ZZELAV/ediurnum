@@ -43,6 +43,7 @@ export const load: PageServerLoad = ({ locals }) => {
 };
 
 const THEMES: Theme[] = ['system', 'light', 'dark'];
+const LEAVE_MINUTES = [1, 5, 15, 0];
 
 export const actions: Actions = {
 	general: async ({ request, locals, cookies }) => {
@@ -52,14 +53,17 @@ export const actions: Actions = {
 		const language = form.get('language');
 		const theme = form.get('theme') as Theme;
 		const minutes = Number(form.get('sessionMinutes'));
+		const leave = Number(form.get('leaveMinutes'));
 		settings.name = String(form.get('name') ?? '').trim().slice(0, 60);
 		if (isLang(language)) settings.language = language;
 		if (THEMES.includes(theme)) settings.theme = theme;
 		settings.focusMode = form.get('focusMode') === 'on';
 		settings.welcomeHidden = form.get('welcome') !== 'on';
 		if (Number.isFinite(minutes)) settings.sessionMinutes = Math.min(720, Math.max(5, Math.round(minutes)));
+		if (LEAVE_MINUTES.includes(leave)) settings.leaveMinutes = leave;
 		saveSettings(session.dek, settings);
 		session.idleMs = settings.sessionMinutes * 60 * 1000;
+		session.awayMs = settings.leaveMinutes * 60 * 1000;
 		setLangCookie(cookies, settings.language);
 		setReminderLang(settings.language);
 		return { section: 'general', success: 'settings.saved' };

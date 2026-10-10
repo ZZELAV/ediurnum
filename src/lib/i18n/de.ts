@@ -8,7 +8,7 @@ export const de: Record<string, string> = {
 	'nav.insights': 'Einsichten',
 	'nav.reminders': 'Erinnerungen',
 	'nav.settings': 'Einstellungen',
-	'nav.lock': 'Tagebuch schliessen',
+	'nav.lock': 'Tagebuch sperren',
 	'nav.skip': 'Zum Inhalt springen',
 
 	// Allgemein
@@ -331,6 +331,12 @@ export const de: Record<string, string> = {
 	'settings.theme.light': 'Hell (Papier)',
 	'settings.theme.dark': 'Dunkel (Nachtlektüre)',
 	'settings.session': 'Automatisch sperren (in Minuten)',
+	'settings.leave': 'Sperren nach Verlassen der App',
+	'settings.leave.1': 'nach 1 Minute',
+	'settings.leave.5': 'nach 5 Minuten',
+	'settings.leave.15': 'nach 15 Minuten',
+	'settings.leave.0': 'nie (nur bei Inaktivität)',
+	'settings.leaveHint': 'Gilt, wenn du die App schliesst, in eine andere App oder einen anderen Tab wechselst oder den Bildschirm sperrst. Wenn du für KI-Einsichten die Datei in einen KI-Chat kopierst, wähle besser 5 oder 15 Minuten.',
 	'settings.saved': 'Einstellungen gespeichert.',
 
 	'settings.remindersIntro': 'Lass dich an deine Rückblicke erinnern. In der App erscheint dann ein Hinweis, auf angemeldeten Geräten zusätzlich eine Benachrichtigung. Hast du den Rückblick schon geschrieben, wirst du nicht erinnert.',

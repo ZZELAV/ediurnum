@@ -56,6 +56,7 @@ export interface Settings {
 	language: Lang;
 	theme: Theme;
 	sessionMinutes: number;
+	leaveMinutes: number; // nach Verlassen der App sperren (0 = nie), siehe #lib/idle
 	focusMode: boolean;
 	welcomeHidden: boolean; // Willkommenskarte auf der Startseite ausgeblendet
 	aiInstructions: string; // eigener Auftrag an die KI (leer = Standard aus #lib/server/ai/analyze)

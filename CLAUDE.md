@@ -40,7 +40,7 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 - `src/lib/reminders.ts` – Fälligkeit der Rückblicke (gemeinsam für App-Hinweise und Push); `src/lib/server/reminders.ts` – Zeitplan, VAPID, Geräte, Planer (läuft minütlich, gestartet in `hooks.server.ts` → `init`); `src/service-worker.ts` – nur Push, bewusst ohne Offline-Cache.
 - `src/lib/profile.ts` – Selbsteinschätzung „Über mich“ (verschlüsselt in `meta.profile`, im Backup enthalten, optional in der KI-Datei). **Feld-IDs nie umbenennen.**
 - `src/lib/server/log.ts` – Protokoll fürs Docker-Log (`LOG_LEVEL`); nie Inhalte, Passwörter oder Schlüssel loggen.
-- `src/lib/idle.ts` – schliesst das Tagebuch im Browser nach Inaktivität (Lebenszeichen an `/api/session`).
+- `src/lib/idle.ts` – sperrt das Tagebuch nach Inaktivität (Lebenszeichen GET `/api/session`) und nach Verlassen der App (sendBeacon POST `/api/session`; der Server sperrt nach `leaveMinutes`, auch wenn die App inzwischen beendet ist).
 - `src/lib/templates.ts` – geführte Fragen. **Feld-IDs nie umbenennen** (alte Antworten hängen daran).
 - Checkboxen erscheinen global als Schalter (`app.css`, Abschnitt Formulare) – keine eigenen Checkbox-Stile bauen; für Ein/Aus-Optionen `role="switch"` setzen.
 - Passwort- und PIN-Felder immer mit `PasswordInput.svelte` (Auge zum Anzeigen).

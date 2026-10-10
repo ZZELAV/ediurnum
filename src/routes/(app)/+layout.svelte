@@ -8,8 +8,8 @@
 
 	let { data, children } = $props();
 
-	// Nach der eingestellten Zeit ohne Aktivität schliesst sich das Tagebuch auch auf dem Bildschirm.
-	$effect(() => watchIdle(data.sessionMinutes));
+	// Nach der eingestellten Zeit ohne Aktivität oder nach Verlassen der App sperrt sich das Tagebuch auch auf dem Bildschirm.
+	$effect(() => watchIdle(data.sessionMinutes, data.leaveMinutes));
 
 	// Service Worker (nur für Push, ohne Cache) früh registrieren – damit ist ediurnum
 	// auch in Browsern installierbar, die dafür einen Service Worker verlangen.
