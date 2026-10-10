@@ -15,13 +15,18 @@ The topmost version without a date is still in development.
 - Legend for the calendar colours in "All entries".
 - Test your recovery key in the security settings without changing anything.
 - Customisable instructions for the AI in Insights, with a default that can be restored at any time.
-- A short one-time explanation the first time focus mode starts.
 
 ### Changed
 
 - "Today" now has a sun icon instead of a pencil.
 - Text fields can only be resized vertically.
+- Clearer mood colours, especially in light mode; entries without a mood are outlined in the calendar.
+- Collapsible boxes show an arrow on the right.
 - The default AI instructions no longer ask for Swiss spelling.
+
+### Fixed
+
+- Text fields and drop-downs next to each other now have the same height, so their labels line up.
 
 ## [0.1.0-beta.3] - 2026-10-09
 

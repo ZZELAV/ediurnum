@@ -24,6 +24,17 @@
 	--gold: #c39a52;
 	--danger: #a4553f;
 	--danger-soft: #f6e6df;
+	/* Stimmung 1–5 (schwer … sehr gut); -soft = Flächen im Kalender */
+	--mood-1: #7d5ba6;
+	--mood-2: #3f7cbf;
+	--mood-3: #8c8a80;
+	--mood-4: #4c9a5b;
+	--mood-5: #d4991c;
+	--mood-1-soft: color-mix(in srgb, var(--mood-1) 42%, var(--paper));
+	--mood-2-soft: color-mix(in srgb, var(--mood-2) 40%, var(--paper));
+	--mood-3-soft: color-mix(in srgb, var(--mood-3) 34%, var(--paper));
+	--mood-4-soft: color-mix(in srgb, var(--mood-4) 40%, var(--paper));
+	--mood-5-soft: color-mix(in srgb, var(--mood-5) 48%, var(--paper));
 	--shadow: 0 1px 2px rgba(50, 40, 25, 0.05), 0 4px 16px -6px rgba(50, 40, 25, 0.1);
 	--radius: 14px;
 	--font-serif: 'Lora Variable', 'Lora', Georgia, 'Times New Roman', serif;
@@ -51,6 +62,16 @@
 		--gold: #d4b67c;
 		--danger: #e08f76;
 		--danger-soft: #3a2723;
+		--mood-1: #a08cc8;
+		--mood-2: #6f9bd0;
+		--mood-3: #9a9a8a;
+		--mood-4: #7aaf82;
+		--mood-5: #d6ac55;
+		--mood-1-soft: color-mix(in srgb, var(--mood-1) 38%, var(--paper));
+		--mood-2-soft: color-mix(in srgb, var(--mood-2) 36%, var(--paper));
+		--mood-3-soft: color-mix(in srgb, var(--mood-3) 30%, var(--paper));
+		--mood-4-soft: color-mix(in srgb, var(--mood-4) 36%, var(--paper));
+		--mood-5-soft: color-mix(in srgb, var(--mood-5) 40%, var(--paper));
 		--shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px -8px rgba(0, 0, 0, 0.5);
 		color-scheme: dark;
 	}
@@ -73,6 +94,16 @@
 	--gold: #d4b67c;
 	--danger: #e08f76;
 	--danger-soft: #3a2723;
+	--mood-1: #a08cc8;
+	--mood-2: #6f9bd0;
+	--mood-3: #9a9a8a;
+	--mood-4: #7aaf82;
+	--mood-5: #d6ac55;
+	--mood-1-soft: color-mix(in srgb, var(--mood-1) 38%, var(--paper));
+	--mood-2-soft: color-mix(in srgb, var(--mood-2) 36%, var(--paper));
+	--mood-3-soft: color-mix(in srgb, var(--mood-3) 30%, var(--paper));
+	--mood-4-soft: color-mix(in srgb, var(--mood-4) 36%, var(--paper));
+	--mood-5-soft: color-mix(in srgb, var(--mood-5) 40%, var(--paper));
 	--shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px -8px rgba(0, 0, 0, 0.5);
 	color-scheme: dark;
 }
@@ -287,6 +318,8 @@ textarea {
 	min-width: 0;
 	/* Textfelder nur in der Höhe vergrösserbar – in der Breite würden sie aus der Spalte ragen */
 	resize: vertical;
+	/* Eingabe- und Auswahlfelder gleich hoch, damit Felder nebeneinander bündig stehen */
+	min-height: 2.75rem;
 	font: inherit;
 	color: var(--ink);
 	background: var(--paper-2);
@@ -329,6 +362,35 @@ textarea:focus {
 	background: var(--paper);
 }
 
+
+/* Einklappbare Boxen (<details>): Pfeil rechts statt des Browser-Dreiecks, dreht sich beim Öffnen */
+details > summary {
+	position: relative;
+	padding-right: 2rem;
+	cursor: pointer;
+	list-style: none;
+}
+details > summary::-webkit-details-marker {
+	display: none;
+}
+details > summary::after {
+	content: '';
+	position: absolute;
+	top: 0.35em;
+	right: 0.3rem;
+	width: 0.45rem;
+	height: 0.45rem;
+	border-right: 1.6px solid var(--ink-soft);
+	border-bottom: 1.6px solid var(--ink-soft);
+	transform: rotate(45deg);
+	transition: transform 0.2s ease;
+}
+details[open] > summary::after {
+	transform: translateY(0.25em) rotate(-135deg);
+}
+details > summary:hover::after {
+	border-color: var(--ink);
+}
 
 /* Checkboxen erscheinen immer als Schalter (wie bei den eigenen Erinnerungen).
  * Für Ein/Aus-Optionen zusätzlich role="switch" setzen. */
@@ -379,6 +441,7 @@ input[type='checkbox']:disabled {
 	select,
 	textarea {
 		font-size: max(1rem, 16px);
+		min-height: 2.875rem;
 	}
 }
 
@@ -631,48 +694,6 @@ textarea.write {
 	:root[data-focus] .focus-exit {
 		opacity: 0.8;
 		pointer-events: auto;
-	}
-}
-/* Einmalige Erklärung beim allerersten Fokus (gesteuert über data-focus-intro, siehe $lib/focus.ts) */
-.focus-intro {
-	position: fixed;
-	left: 50%;
-	bottom: 1.5rem;
-	z-index: 40;
-	width: min(26rem, calc(100% - 2rem));
-	margin: 0;
-	padding: 0.8rem 1rem;
-	display: grid;
-	gap: 0.2rem;
-	font-size: 0.9rem;
-	color: var(--ink-soft);
-	background: var(--paper);
-	border: 1px solid var(--paper-edge);
-	border-left: 3px solid var(--accent);
-	border-radius: 12px;
-	box-shadow: 0 8px 28px rgb(0 0 0 / 0.18);
-	opacity: 0;
-	pointer-events: none;
-	transform: translate(-50%, 0.5rem);
-	transition:
-		opacity 0.8s ease,
-		transform 0.8s ease;
-}
-.focus-intro strong {
-	color: var(--ink);
-}
-:root[data-focus][data-focus-intro] .focus-intro {
-	opacity: 1;
-	transform: translate(-50%, 0);
-}
-@media (hover: hover) and (pointer: fine) {
-	.focus-intro .touch {
-		display: none;
-	}
-}
-@media not ((hover: hover) and (pointer: fine)) {
-	.focus-intro .keys {
-		display: none;
 	}
 }
 

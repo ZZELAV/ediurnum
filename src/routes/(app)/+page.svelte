@@ -255,9 +255,9 @@
 		border-radius: 50%;
 		background: var(--paper-edge);
 	}
-	.m1 { background: #8a7ca8; }
-	.m2 { background: #6f8fb0; }
-	.m3 { background: #9a9a8a; }
-	.m4 { background: #7aa37f; }
-	.m5 { background: #c9a24e; }
+	.m1 { background: var(--mood-1); }
+	.m2 { background: var(--mood-2); }
+	.m3 { background: var(--mood-3); }
+	.m4 { background: var(--mood-4); }
+	.m5 { background: var(--mood-5); }
 </style>

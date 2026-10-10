@@ -6,8 +6,6 @@
  */
 const START_AFTER_CHARS = 3; // so viele Zeichen hintereinander, bis der Fokus beginnt
 const PAUSE_RESETS_MS = 2000; // längere Pause beginnt die Zählung neu
-const INTRO_KEY = 'ediurnum.focusIntroSeen'; // Erklärung beim allerersten Fokus (pro Browser)
-const INTRO_MS = 7000;
 
 let exitCurrent: (() => void) | null = null;
 
@@ -22,24 +20,6 @@ export function focusMode(node: HTMLElement, enabled: boolean) {
 	let active = false;
 	let streak = 0;
 	let lastInput = 0;
-	let introTimer: ReturnType<typeof setTimeout> | undefined;
-
-	/** Beim ersten Fokus einmalig erklären, was passiert ist und wie man zurückkommt. */
-	function showIntroOnce() {
-		try {
-			if (localStorage.getItem(INTRO_KEY)) return;
-			localStorage.setItem(INTRO_KEY, '1');
-		} catch {
-			return; // ohne Speicher lieber gar nicht als bei jedem Fokus
-		}
-		root.dataset.focusIntro = 'on';
-		introTimer = setTimeout(hideIntro, INTRO_MS);
-	}
-
-	function hideIntro() {
-		clearTimeout(introTimer);
-		delete root.dataset.focusIntro;
-	}
 
 	function onInput() {
 		if (!allowed || active) return;
@@ -49,13 +29,11 @@ export function focusMode(node: HTMLElement, enabled: boolean) {
 		if (streak >= START_AFTER_CHARS) {
 			active = true;
 			root.dataset.focus = 'on';
-			showIntroOnce();
 		}
 	}
 
 	function exit() {
 		streak = lastInput = 0;
-		hideIntro();
 		if (!active) return;
 		active = false;
 		delete root.dataset.focus;

@@ -186,7 +186,7 @@
 		width: 0.9rem;
 		height: 0.9rem;
 		border-radius: 4px;
-		background: var(--accent-soft);
+		box-shadow: inset 0 0 0 1.5px var(--paper-edge);
 	}
 	.results {
 		max-width: 48rem;
@@ -239,11 +239,11 @@
 		background: var(--ink-faint);
 		flex: none;
 	}
-	.dot.m1 { background: #8a7ca8; }
-	.dot.m2 { background: #6f8fb0; }
-	.dot.m3 { background: #9a9a8a; }
-	.dot.m4 { background: #7aa37f; }
-	.dot.m5 { background: #c9a24e; }
+	.dot.m1 { background: var(--mood-1); }
+	.dot.m2 { background: var(--mood-2); }
+	.dot.m3 { background: var(--mood-3); }
+	.dot.m4 { background: var(--mood-4); }
+	.dot.m5 { background: var(--mood-5); }
 	.chapter header {
 		display: flex;
 		gap: 0.8rem;
@@ -282,16 +282,17 @@
 		background: var(--paper-2);
 		color: var(--ink);
 	}
+	/* Eintrag ohne Stimmung: nur umrandet, damit er sich von allen Stimmungsfarben abhebt */
 	.day.has {
 		color: var(--ink);
 		font-weight: 600;
-		background: var(--accent-soft);
+		box-shadow: inset 0 0 0 1.5px var(--paper-edge);
 	}
-	:is(.day, .swatch).m1 { background: color-mix(in srgb, #8a7ca8 30%, transparent); }
-	:is(.day, .swatch).m2 { background: color-mix(in srgb, #6f8fb0 30%, transparent); }
-	:is(.day, .swatch).m3 { background: color-mix(in srgb, #9a9a8a 30%, transparent); }
-	:is(.day, .swatch).m4 { background: color-mix(in srgb, #7aa37f 32%, transparent); }
-	:is(.day, .swatch).m5 { background: color-mix(in srgb, #c9a24e 35%, transparent); }
+	:is(.day, .swatch).m1 { background: var(--mood-1-soft); }
+	:is(.day, .swatch).m2 { background: var(--mood-2-soft); }
+	:is(.day, .swatch).m3 { background: var(--mood-3-soft); }
+	:is(.day, .swatch).m4 { background: var(--mood-4-soft); }
+	:is(.day, .swatch).m5 { background: var(--mood-5-soft); }
 	.day.future {
 		opacity: 0.35;
 	}

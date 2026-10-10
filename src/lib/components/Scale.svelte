@@ -68,14 +68,14 @@
 		opacity: 1;
 		transform: scale(1.12);
 	}
-	.s1 .dot { color: #8a7ca8; }
-	.s2 .dot { color: #6f8fb0; }
-	.s3 .dot { color: #9a9a8a; }
-	.s4 .dot { color: #7aa37f; }
-	.s5 .dot { color: #c9a24e; }
-	.on.s1 .dot { background: #8a7ca8; }
-	.on.s2 .dot { background: #6f8fb0; }
-	.on.s3 .dot { background: #9a9a8a; }
-	.on.s4 .dot { background: #7aa37f; }
-	.on.s5 .dot { background: #c9a24e; }
+	.s1 .dot { color: var(--mood-1); }
+	.s2 .dot { color: var(--mood-2); }
+	.s3 .dot { color: var(--mood-3); }
+	.s4 .dot { color: var(--mood-4); }
+	.s5 .dot { color: var(--mood-5); }
+	.on.s1 .dot { background: var(--mood-1); }
+	.on.s2 .dot { background: var(--mood-2); }
+	.on.s3 .dot { background: var(--mood-3); }
+	.on.s4 .dot { background: var(--mood-4); }
+	.on.s5 .dot { background: var(--mood-5); }
 </style>
