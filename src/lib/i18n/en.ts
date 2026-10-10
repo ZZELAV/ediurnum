@@ -147,6 +147,8 @@ export const en: Record<string, string> = {
 	'history.current': 'Current version',
 	'history.restore': 'Restore this version',
 	'history.restoreConfirm': 'Restore this version? The current state is kept as its own version.',
+	'history.highlight': 'Highlight changes compared with version {n}',
+	'history.noChanges': 'No changes in content compared with the previous version.',
 	'history.backToEntry': 'Back to entry',
 
 	'mood.1': 'heavy',

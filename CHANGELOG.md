@@ -6,6 +6,11 @@ The topmost version without a date is still in development.
 
 ## [0.1.0-beta.5]
 
+### Added
+
+- The version history highlights what changed compared with the previous version: added text is marked,
+  removed text is struck through, unchanged fields fade into the background. Can be switched off.
+
 ### Changed
 
 - "Last saved" in an entry now shows the date as well as the time.

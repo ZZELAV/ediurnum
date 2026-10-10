@@ -155,6 +155,8 @@ export const de: Record<string, string> = {
 	'history.current': 'Aktuelle Version',
 	'history.restore': 'Diese Version wiederherstellen',
 	'history.restoreConfirm': 'Diese Version wiederherstellen? Der aktuelle Stand bleibt als eigene Version erhalten.',
+	'history.highlight': 'Änderungen gegenüber Version {n} hervorheben',
+	'history.noChanges': 'Keine inhaltlichen Änderungen gegenüber der Version davor.',
 	'history.backToEntry': 'Zurück zum Eintrag',
 
 	// Stimmung

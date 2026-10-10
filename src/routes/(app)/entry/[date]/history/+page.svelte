@@ -3,6 +3,7 @@
 	import { ask } from '$lib/confirm.svelte';
 	import { api } from '$lib/client';
 	import EntryView from '$lib/components/EntryView.svelte';
+	import RevisionDiff from '$lib/components/RevisionDiff.svelte';
 	import PinDialog from '$lib/components/PinDialog.svelte';
 	import { fmtDate, fmtDateTime, t } from '$lib/i18n/t';
 
@@ -12,6 +13,9 @@
 	let error = $state<string | null>(null);
 
 	const rev = $derived(data.revisions[selected]);
+	// Vergleich mit der Version davor (die Liste ist von neu nach alt sortiert)
+	const older = $derived(data.revisions[selected + 1]);
+	let highlight = $state(true);
 
 	async function restore() {
 		if (!(await ask(t('history.restoreConfirm')))) return;
@@ -57,7 +61,15 @@
 						<button class="btn ghost small" onclick={restore}>{t('history.restore')}</button>
 					{/if}
 				</div>
-				{#if rev.content}
+				{#if rev.content && older?.content}
+					<label class="switch-label compare">
+						<input type="checkbox" role="switch" bind:checked={highlight} />
+						<span>{t('history.highlight', { n: older.revision })}</span>
+					</label>
+				{/if}
+				{#if rev.content && older?.content && highlight}
+					<RevisionDiff before={older.content} after={rev.content} />
+				{:else if rev.content}
 					<EntryView content={rev.content} />
 				{:else}
 					<p class="muted">{t('entry.lockedInfo')}</p>
@@ -106,5 +118,13 @@
 	}
 	.head h2 {
 		margin: 0;
+	}
+	.compare {
+		display: flex;
+		align-items: center;
+		gap: 0.55rem;
+		margin: 0 0 1rem;
+		font-size: 0.88rem;
+		color: var(--ink-soft);
 	}
 </style>
