@@ -1,5 +1,5 @@
-import { de } from './de';
-import { en } from './en';
+import { de } from './de.ts';
+import { en } from './en.ts';
 import type { Lang } from '#lib/types.ts';
 
 export const LANGS: Lang[] = ['de', 'en'];
@@ -21,7 +21,7 @@ export function translate(lang: Lang, key: string, params?: Record<string, strin
 	return text;
 }
 
-export { locale, pickLocale } from './locale';
+export { locale, pickLocale } from './locale.ts';
 
 export function pickLang(acceptLanguage: string | null): Lang {
 	return acceptLanguage && /^en\b/i.test(acceptLanguage.trim()) ? 'en' : 'de';

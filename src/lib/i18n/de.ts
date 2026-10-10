@@ -269,6 +269,8 @@ export const de: Record<string, string> = {
 	'insights.answerHint': 'Antwort aus dem KI-Chat hier einfügen …',
 	'insights.answerEmpty': 'Bitte füge zuerst die Antwort der KI ein.',
 	'insights.saveAnswer': 'Antwort speichern',
+	'insights.pendingEarlier': 'Antwort zur Datei für {from} – {to} einfügen:',
+	'insights.pendingDiscard': 'Verwerfen',
 	'insights.savedWithFocus': 'Gespeichert. {count} Fokuspunkte sind jetzt auf deinem Dashboard.',
 	'insights.savedNoFocus': 'Gespeichert. Es wurden keine Fokuspunkte gefunden (Abschnitt „## Fokuspunkte“).',
 	'insights.metaChat': '{from} – {to} · {count} Einträge · aus einem KI-Chat',

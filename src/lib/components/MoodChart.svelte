@@ -97,6 +97,9 @@
 	.mood-chart {
 		margin: 1rem 0;
 		min-width: 0;
+		/* Breite nur vom Platz drumherum, nicht vom gezeichneten SVG – sonst bliebe die Grafik nach dem
+		   Schmalerwerden (Handy drehen, Fenster verkleinern) so breit wie zuvor gemessen */
+		contain: inline-size;
 	}
 	figcaption {
 		display: flex;

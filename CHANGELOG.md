@@ -65,6 +65,16 @@ The topmost version without a date is still in development.
 - The log now says "PIN set" instead of "PIN changed" when a PIN is set for the first time.
 - Push notifications are sent with high urgency, so iPhones show reminders on time instead of holding them back
   until the device wakes up for another reason.
+- Insights: "Last week", "Last month" and "Last 3 months" cover exactly 7, 30 and 90 days (they included one day too
+  many).
+- Insights: the answer from the AI chat can still be pasted after the journal was locked in the meantime (e.g. while
+  you were in the chat). Only the period is kept in the browser, never content.
+- Insights: focus points are also recognised when the heading has extra words ("## Focus points for the coming
+  weeks"), is bold, or lost its Markdown formatting when copied. Duplicate focus points are dropped (they could break
+  the page).
+- Insights: lines in your entries that start with "#" no longer turn into headings in the AI file.
+- Insights: the question saved with an answer is the one from the file, even if you changed it afterwards.
+- The mood chart adapts when the screen gets narrower (e.g. turning the phone).
 - Search treats "ss" and "ß" as equal ("strasse" finds "Straße").
 - Search results are refreshed when the PIN expires or you lock again, so excerpts of locked entries no longer stay
   on screen. A failed search now shows an error instead of silently keeping the old results.

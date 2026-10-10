@@ -129,7 +129,7 @@
 				<h2>{t('dashboard.focus')}</h2>
 				{#if data.focus && data.focus.points.length}
 					<ol>
-						{#each data.focus.points as p (p)}<li>{p}</li>{/each}
+						{#each data.focus.points as p, i (i)}<li>{p}</li>{/each}
 					</ol>
 					{#if data.focusMood}
 						<MoodChart points={data.focusMood.points} from={data.focusMood.from} to={data.focusMood.to} compact />

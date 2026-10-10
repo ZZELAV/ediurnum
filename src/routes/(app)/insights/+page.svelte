@@ -29,15 +29,45 @@
 		to: string;
 		filename: string;
 	} | null>(null);
+	// Schritt 2 gehört zur zuletzt erstellten Datei. Zeitraum und Anzahl (keine Inhalte) bleiben im Browser
+	// gespeichert, damit die Antwort auch nach dem Sperren (z. B. während man im KI-Chat ist) noch eingefügt werden kann.
+	type Pending = { from: string; to: string; count: number; question: string; at: number };
+	const PENDING_KEY = 'ediurnum:pending-answer';
+	const PENDING_MAX_MS = 7 * 24 * 60 * 60 * 1000;
+	let pending = $state<Pending | null>(null);
+
+	function storePending(p: Pending | null) {
+		pending = p;
+		try {
+			if (p) localStorage.setItem(PENDING_KEY, JSON.stringify({ ...p, question: '' }));
+			else localStorage.removeItem(PENDING_KEY);
+		} catch {
+			// ohne Speicher gilt Schritt 2 nur bis zum Neuladen
+		}
+	}
+
+	$effect(() => {
+		try {
+			const p = JSON.parse(localStorage.getItem(PENDING_KEY) ?? 'null') as Pending | null;
+			if (p && Date.now() - p.at < PENDING_MAX_MS && /^\d{4}-\d\d-\d\d$/.test(p.from) && /^\d{4}-\d\d-\d\d$/.test(p.to)) {
+				untrack(() => (pending ??= p));
+			} else if (p) localStorage.removeItem(PENDING_KEY);
+		} catch {
+			// nichts gespeichert
+		}
+	});
+
 	let withProfile = $state(true);
 	let answer = $state('');
 	let error = $state<string | null>(null);
+	let answerError = $state<string | null>(null);
 	let notice = $state<string | null>(null);
 	let busy = $state(false);
 	let instructions = $state(untrack(() => data.instructions.custom || data.instructions.default));
 	let instructionsNotice = $state<string | null>(null);
 
-	const from = $derived(period === 'custom' ? customFrom : addDays(data.today, -Number(period)));
+	// „Letzte Woche“ = heute und die 6 Tage davor (7 Tage), entsprechend 30 und 90 Tage
+	const from = $derived(period === 'custom' ? customFrom : addDays(data.today, 1 - Number(period)));
 	const to = $derived(period === 'custom' ? customTo : data.today);
 
 	$effect(() => {
@@ -100,6 +130,7 @@
 					busy = false;
 					if (r.type === 'success' && r.data) {
 						result = r.data as typeof result;
+						storePending({ from: result!.from, to: result!.to, count: result!.count, question, at: Date.now() });
 						answer = '';
 					} else if (r.type === 'failure') {
 						error = String(r.data?.error ?? 'common.error');
@@ -183,7 +214,7 @@
 				</div>
 			{/if}
 
-			{#if error && !result}<p class="notice error" role="alert">{t(error)}</p>{/if}
+			{#if error}<p class="notice error" role="alert">{t(error)}</p>{/if}
 
 			<button class="btn" disabled={busy || preview?.send === 0}>{busy ? t('common.loading') : t('insights.createFile')}</button>
 		</form>
@@ -200,38 +231,49 @@
 				{#if notice}<p class="faint" role="status">{notice}</p>{/if}
 				<p class="faint">{t('insights.howTo')}</p>
 			</div>
+		{/if}
 
+		{#if pending}
 			<!-- Schritt 2 (optional): Antwort der KI speichern -->
+			{#if !result}
+				<p class="faint earlier">
+					{t('insights.pendingEarlier', { from: fmtDate(pending.from, 'short'), to: fmtDate(pending.to, 'short') })}
+					<button type="button" class="btn quiet small" onclick={() => storePending(null)}>{t('insights.pendingDiscard')}</button>
+				</p>
+			{/if}
 			<form
 				method="POST"
 				action="?/import"
 				use:enhance={() => {
 					busy = true;
-					error = notice = null;
+					answerError = notice = null;
 					return async ({ result: r, update }) => {
 						busy = false;
 						if (r.type === 'success') {
 							const n = Number((r.data as { focusCount?: number })?.focusCount ?? 0);
 							notice = n > 0 ? t('insights.savedWithFocus', { count: n }) : t('insights.savedNoFocus');
 							result = null;
+							storePending(null);
 							answer = '';
 							await update({ reset: false });
 						} else if (r.type === 'failure') {
-							error = String(r.data?.error ?? 'common.error');
+							answerError = String(r.data?.error ?? 'common.error');
+						} else {
+							answerError = 'common.error';
 						}
 					};
 				}}
 			>
 				<p class="step">2 · {t('insights.step2')} <span class="faint">({t('common.optional')})</span></p>
-				<input type="hidden" name="from" value={result.from} />
-				<input type="hidden" name="to" value={result.to} />
-				<input type="hidden" name="count" value={result.count} />
-				<input type="hidden" name="question" value={question} />
+				<input type="hidden" name="from" value={pending.from} />
+				<input type="hidden" name="to" value={pending.to} />
+				<input type="hidden" name="count" value={pending.count} />
+				<input type="hidden" name="question" value={pending.question} />
 				<div class="field">
 					<label for="answer" class="visually-hidden">{t('insights.answer')}</label>
 					<textarea id="answer" name="answer" rows="6" placeholder={t('insights.answerHint')} bind:value={answer}></textarea>
 				</div>
-				{#if error}<p class="notice error" role="alert">{t(error)}</p>{/if}
+				{#if answerError}<p class="notice error" role="alert">{t(answerError)}</p>{/if}
 				<button class="btn ghost" disabled={busy || !answer.trim()}>{t('insights.saveAnswer')}</button>
 			</form>
 		{:else if notice}
@@ -311,7 +353,7 @@
 				{#if a.focusPoints.length}
 					<div class="focus card">
 						<p class="eyebrow">{t('insights.focusPoints')}</p>
-						<ol>{#each a.focusPoints as p (p)}<li>{p}</li>{/each}</ol>
+						<ol>{#each a.focusPoints as p, i (i)}<li>{p}</li>{/each}</ol>
 					</div>
 				{/if}
 				<div class="prose">{@html a.html}</div>
@@ -341,6 +383,9 @@
 	.intro {
 		margin: 0.3rem 0 0;
 		max-width: 60ch;
+	}
+	.earlier {
+		margin: 1.2rem 0 0;
 	}
 	.history-title {
 		margin: 0;

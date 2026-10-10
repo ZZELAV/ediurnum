@@ -254,6 +254,8 @@ export const en: Record<string, string> = {
 	'insights.answer': 'AI answer',
 	'insights.answerHint': 'Paste the answer from the AI chat here …',
 	'insights.answerEmpty': 'Please paste the AI’s answer first.',
+	'insights.pendingEarlier': 'Paste the answer for the file covering {from} – {to}:',
+	'insights.pendingDiscard': 'Discard',
 	'insights.saveAnswer': 'Save answer',
 	'insights.savedWithFocus': 'Saved. {count} focus points are now on your dashboard.',
 	'insights.savedNoFocus': 'Saved. No focus points were found (section “## Focus points”).',

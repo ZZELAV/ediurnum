@@ -9,11 +9,11 @@ import type { AiAgent } from '#lib/types.ts';
  */
 
 export class AiError extends Error {
-	constructor(
-		public code: 'auth' | 'nokey' | 'rate_limit' | 'refusal' | 'network' | 'config' | 'provider',
-		message: string
-	) {
+	code: 'auth' | 'nokey' | 'rate_limit' | 'refusal' | 'network' | 'config' | 'provider';
+
+	constructor(code: AiError['code'], message: string) {
 		super(message);
+		this.code = code;
 	}
 }
 

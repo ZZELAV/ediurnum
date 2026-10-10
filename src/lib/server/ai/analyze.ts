@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { complete } from './providers';
+import { complete } from './providers.ts';
 import { SECTIONS } from '#lib/templates.ts';
 import { translate } from '#lib/i18n/index.ts';
 import { isEmptyProfile, profileMarkdown, type Profile } from '#lib/profile.ts';
@@ -93,6 +93,12 @@ export function buildSystemPrompt(agent: PromptOptions, lang: Lang, format: 'api
 		.join('\n\n');
 }
 
+/**
+ * Text aus dem Tagebuch für die Datei: Zeilen, die mit „#“ beginnen, würden sonst zu Überschriften
+ * und brächten die Gliederung der Datei (Auftrag, Einträge, Tage) durcheinander.
+ */
+const plain = (text: string) => text.trim().replace(/^(\s*)#/gm, '$1\\#');
+
 export function formatEntries(entries: Entry[], lang: Lang): string {
 	const t = (key: string) => translate(lang, key);
 	const dateFmt = new Intl.DateTimeFormat(lang === 'de' ? 'de-CH' : 'en-GB', {
@@ -115,18 +121,18 @@ export function formatEntries(entries: Entry[], lang: Lang): string {
 			for (const f of def.fields) {
 				const v = sec[f.id];
 				const label = t(`section.${def.kind}.${f.id}`);
-				if (typeof v === 'string' && v.trim()) parts.push(`- ${label}: ${v.trim()}`);
+				if (typeof v === 'string' && v.trim()) parts.push(`- ${label}: ${plain(v)}`);
 				else if (typeof v === 'number') parts.push(`- ${label}: ${v}/5`);
 				else if (Array.isArray(v)) {
 					const vals = v.filter((x) => x.trim());
 					if (!vals.length) continue;
-					const shown = f.type === 'chips' ? vals.map((x) => t(`emotion.${x}`)) : vals;
+					const shown = f.type === 'chips' ? vals.map((x) => t(`emotion.${x}`)) : vals.map(plain);
 					parts.push(`- ${label}: ${shown.join('; ')}`);
 				}
 			}
 			if (parts.length) lines.push(`**${t(`section.${def.kind}.title`)}**`, ...parts);
 		}
-		if (c.free.trim()) lines.push(`**${t('entry.free')}**`, c.free.trim());
+		if (c.free.trim()) lines.push(`**${t('entry.free')}**`, plain(c.free));
 		out.push(lines.join('\n'));
 	}
 	return out.join('\n\n');
@@ -139,32 +145,46 @@ export function buildUserPrompt(entries: Entry[], lang: Lang, from: string, to: 
 			: `Hier sind meine Tagebucheinträge vom ${from} bis ${to}.`;
 	const q = question.trim()
 		? lang === 'en'
-			? `\n\nPlease pay special attention to this: ${question.trim()}`
-			: `\n\nBitte achte besonders auf Folgendes: ${question.trim()}`
+			? `\n\nPlease pay special attention to this: ${plain(question)}`
+			: `\n\nBitte achte besonders auf Folgendes: ${plain(question)}`
 		: '';
 	return `${intro}${q}\n\n${formatEntries(entries, lang)}`;
 }
 
-const listItems = (block: string) =>
-	block
-		.split('\n')
-		.map((l) => l.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, '').replace(/\*\*/g, '').trim())
-		.filter(Boolean);
+/** Listenpunkte ohne Aufzählungszeichen und Fettschrift; doppelte und leere entfallen, höchstens sieben. */
+const listItems = (block: string) => [
+	...new Set(
+		block
+			.split('\n')
+			.map((l) => l.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, '').replace(/\*\*/g, '').trim())
+			.filter(Boolean)
+	)
+].slice(0, 7);
+
+/**
+ * Überschrift des Abschnitts mit den Fokuspunkten: als Markdown („## Fokuspunkte“, auch mit Zusatz wie
+ * „für die nächsten Wochen“) oder als blosse Zeile – so kommt sie an, wenn die Antwort im Chat
+ * markiert und kopiert statt über den Kopieren-Knopf übernommen wurde.
+ */
+const FOCUS_HEADING = /^(?:#{1,4}[ \t]*)?\**[ \t]*(?:Fokuspunkte|Fokus-Punkte|Focus points)\b[^\n]{0,60}?\**[ \t]*:?[ \t]*$/gim;
 
 /**
  * Trennt die Fokuspunkte vom restlichen Text: entweder ein <focus>-Block (KI-Agent)
  * oder der letzte Abschnitt „## Fokuspunkte“ / „## Focus points“ (Antwort aus einem KI-Chat).
  */
 export function parseResponse(text: string): { body: string; focusPoints: string[] } {
+	text = text.replace(/\r\n/g, '\n');
 	const block = text.match(/<(focus|fokus)>([\s\S]*?)<\/\1>/i);
 	if (block) return { body: text.replace(block[0], '').trim(), focusPoints: listItems(block[2]) };
-	const heading = text.match(/^#{1,4}\s*\**\s*(?:Fokuspunkte|Focus points)\s*\**\s*:?\s*$/im);
+	// die letzte passende Überschrift – der Abschnitt steht laut Auftrag am Schluss
+	const heading = [...text.matchAll(FOCUS_HEADING)].at(-1);
 	if (!heading || heading.index === undefined) return { body: text.trim(), focusPoints: [] };
 	const after = text.slice(heading.index + heading[0].length);
 	const end = after.search(/^#{1,4}\s/m);
 	const section = end === -1 ? after : after.slice(0, end);
 	const rest = end === -1 ? '' : after.slice(end);
-	const focusPoints = listItems(section).slice(0, 7);
+	const focusPoints = listItems(section);
+	if (!focusPoints.length) return { body: text.trim(), focusPoints: [] };
 	return { body: (text.slice(0, heading.index) + rest).trim(), focusPoints };
 }
 
