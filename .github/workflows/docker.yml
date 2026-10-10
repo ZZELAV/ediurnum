@@ -1,5 +1,5 @@
 # Builds the Docker image for every release tag (vX.Y.Z or vX.Y.Z-beta.N) and pushes it to Docker Hub
-# as zzelav/ediurnum:<version> and zzelav/ediurnum:latest (amd64 and arm64).
+# as zzelav/ediurnum:<version> and zzelav/ediurnum:latest (amd64 and arm64) – only after the CI checks pass.
 # Run it by hand ("Run workflow", input: an existing tag) to rebuild an older release – that only
 # publishes its version tag and leaves "latest" untouched.
 #
@@ -24,7 +24,13 @@ env:
   IMAGE: zzelav/ediurnum
 
 jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ inputs.tag || github.ref }}
+
   build:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -1,0 +1,37 @@
+# Checks every push to main and every pull request: type check, unit tests, build and end-to-end tests.
+# The Docker workflow calls it as well, so an image is only published when everything passes.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Git ref to test (default: the triggering ref)'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      # Older release tags have no end-to-end tests yet
+      - run: npm run test:e2e --if-present
