@@ -151,7 +151,7 @@ export const de: Record<string, string> = {
 	'entry.rhythm.monthly': 'monatlich',
 
 	'history.title': 'Versionen',
-	'history.intro': 'Jede Bearbeitung, die mehr als zehn Minuten nach Beginn der letzten Version erfolgt, wird als neue Version festgehalten.',
+	'history.intro': 'Pro Tag wird höchstens eine Version festgehalten: Alle Änderungen am selben Tag bleiben zusammen, die erste Änderung an einem späteren Tag beginnt eine neue Version.',
 	'history.current': 'Aktuelle Version',
 	'history.restore': 'Diese Version wiederherstellen',
 	'history.restoreConfirm': 'Diese Version wiederherstellen? Der aktuelle Stand bleibt als eigene Version erhalten.',

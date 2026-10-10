@@ -143,7 +143,7 @@ export const en: Record<string, string> = {
 	'entry.rhythm.monthly': 'monthly',
 
 	'history.title': 'Versions',
-	'history.intro': 'Every edit made more than ten minutes after the last version started is kept as a new version.',
+	'history.intro': 'At most one version is kept per day: all changes made on the same day stay together, and the first change on a later day starts a new version.',
 	'history.current': 'Current version',
 	'history.restore': 'Restore this version',
 	'history.restoreConfirm': 'Restore this version? The current state is kept as its own version.',
