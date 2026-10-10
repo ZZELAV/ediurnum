@@ -287,7 +287,7 @@ export const en: Record<string, string> = {
 	'insights.instructionsResetButton': 'Restore default',
 	'insights.instructionsResetConfirm': 'Discard your own instructions and use the default again?',
 	'insights.historyEmpty': 'No analyses yet.',
-	'insights.focusPoints': 'Key points for the coming weeks',
+	'insights.focusPoints': 'Your focus points',
 	'insights.pin': 'Set as current focus',
 	'insights.pinned': 'Current focus',
 	'insights.unpin': 'Stop showing as focus',

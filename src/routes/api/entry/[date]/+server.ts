@@ -11,7 +11,8 @@ export const POST: RequestHandler = async (event) => {
 	if (!assertNotFuture(date)) return fail('error.futureDate');
 	const body = await event.request.json();
 	try {
-		const meta = saveEntry(session, date, sanitizeContent(body.content));
+		// newRevision: erste Speicherung nach „Bearbeiten“ eines vergangenen Tages
+		const meta = saveEntry(session, date, sanitizeContent(body.content), { forceNewRevision: body.newRevision === true });
 		return json({ meta });
 	} catch (e) {
 		if (e instanceof LockedError) return fail('error.locked', 423);

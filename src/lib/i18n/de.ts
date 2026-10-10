@@ -301,7 +301,7 @@ export const de: Record<string, string> = {
 	'insights.instructionsResetButton': 'Standard wiederherstellen',
 	'insights.instructionsResetConfirm': 'Deinen eigenen Auftrag verwerfen und wieder den Standard verwenden?',
 	'insights.historyEmpty': 'Noch keine Auswertungen.',
-	'insights.focusPoints': 'Knackpunkte für die nächsten Wochen',
+	'insights.focusPoints': 'Deine Fokuspunkte',
 	'insights.pin': 'Als aktuellen Fokus festlegen',
 	'insights.pinned': 'Aktueller Fokus',
 	'insights.unpin': 'Nicht mehr als Fokus zeigen',

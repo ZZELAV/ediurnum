@@ -23,10 +23,12 @@ The topmost version without a date is still in development.
 - Clearer mood colours, especially in light mode; entries without a mood are outlined in the calendar.
 - Collapsible boxes show an arrow on the right.
 - The default AI instructions no longer ask for Swiss spelling.
+- The focus points of an analysis are now labelled "Your focus points".
 
 ### Fixed
 
 - Text fields and drop-downs next to each other now have the same height, so their labels line up.
+- Editing a past day with "Edit" now always creates a new version, even shortly after the last change.
 
 ## [0.1.0-beta.3] - 2026-10-09
 
