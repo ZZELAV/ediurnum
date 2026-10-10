@@ -228,13 +228,13 @@
 		gap: 0.7rem;
 		align-items: baseline;
 		padding: 0.6rem 0.4rem;
-		border-bottom: 1px solid var(--rule);
 		text-decoration: none;
 		color: var(--ink);
 		border-radius: 6px;
 	}
-	.recent li:last-child a {
-		border-bottom: 0;
+	/* Linie am Listenelement, nicht am abgerundeten Link – sonst biegen sich die Enden (wie in der Suche) */
+	.recent li + li {
+		border-top: 1px solid var(--rule);
 	}
 	.recent a:hover {
 		background: var(--paper-2);
