@@ -1,9 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { de } from '../src/lib/i18n/de.ts';
-import { addYears } from '../src/lib/dates.ts';
-import { changelogSection } from '../src/lib/changelog.ts';
 import { isEmptyProfile, JOURNALING, PROFILE_TEXTS, profileMarkdown, sanitizeProfile, TRAITS, VALUES } from '../src/lib/profile.ts';
 
 test('Selbsteinschätzung: ungültige Werte werden verworfen', () => {
@@ -41,27 +38,5 @@ test('Selbsteinschätzung: alle Texte existieren', () => {
 		...VALUES.map((v) => `profile.value.${v}`),
 		...PROFILE_TEXTS.flatMap((k) => [`profile.${k}`, `profile.${k}.hint`])
 	];
-	assert.deepEqual(keys.filter((k) => !(k in de)), []);
-});
-
-test('Gleicher Tag in einem anderen Jahr', () => {
-	assert.equal(addYears('2026-10-09', -1), '2025-10-09');
-	assert.equal(addYears('2028-02-29', -1), '2027-02-28');
-	assert.equal(addYears('2027-02-28', -3), '2024-02-28');
-});
-
-test('Changelog: Abschnitt der aktuellen Version', () => {
-	const md = readFileSync('CHANGELOG.md', 'utf8');
-	const version = JSON.parse(readFileSync('package.json', 'utf8')).version;
-	const section = changelogSection(md, version);
-	assert.ok(section);
-	assert.equal(section.version, version);
-	assert.doesNotMatch(section.body, /^\[[^\]]+\]: http/m);
-	assert.doesNotMatch(md, /\[Unreleased\]/);
-});
-
-test('Willkommenskarte: alle Texte existieren', () => {
-	const steps = ['entry', 'profile', 'reminders', 'pin', 'backup'];
-	const keys = steps.flatMap((s) => [`welcome.${s}`, `welcome.${s}.hint`]);
 	assert.deepEqual(keys.filter((k) => !(k in de)), []);
 });

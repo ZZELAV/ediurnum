@@ -21,7 +21,7 @@ export const variables = defineEnvVars({
 		schema: optional
 	},
 	LOG_LEVEL: {
-		description: 'info (Standard) oder debug',
+		description: 'error, warn, info (Standard) oder debug (zusätzlich jede Anfrage)',
 		schema: optional
 	},
 	VAPID_SUBJECT: {

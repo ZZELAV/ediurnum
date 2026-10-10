@@ -2,10 +2,49 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { renderMarkdown } from '../src/lib/markdown.ts';
 
-test('Markdown-Renderer entschärft HTML', () => {
-	const html = renderMarkdown('## Titel\n\n<script>alert(1)</script> **fett**\n\n- [x](javascript:alert(1))');
+test('HTML wird entschärft, nur http(s)-Links', () => {
+	const html = renderMarkdown('## Titel\n\n<script>alert(1)</script> **fett**\n\n- [x](javascript:alert(1))\n\n<img src=x onerror=alert(1)>');
 	assert.ok(!html.includes('<script>'));
 	assert.ok(html.includes('&lt;script&gt;'));
+	assert.ok(!html.includes('<img'));
 	assert.ok(html.includes('<strong>fett</strong>'));
 	assert.ok(!html.includes('href="javascript'));
+});
+
+test('Links öffnen in neuem Tab ohne Referrer; Anführungszeichen brechen nicht aus', () => {
+	const html = renderMarkdown('[Doku](https://example.com/a?b=1) und [x](https://e.com/"onmouseover="alert(1))');
+	assert.match(html, /<a href="https:\/\/example\.com\/a\?b=1" rel="noopener noreferrer" target="_blank">Doku<\/a>/);
+	assert.doesNotMatch(html, /" onmouseover="|"onmouseover="/);
+});
+
+test('Überschriften eine Stufe tiefer, höchstens h4', () => {
+	assert.equal(renderMarkdown('# A'), '<h2>A</h2>');
+	assert.equal(renderMarkdown('### C'), '<h4>C</h4>');
+	assert.equal(renderMarkdown('#### D'), '<h4>D</h4>');
+	assert.equal(renderMarkdown('#kein Titel'), '<p>#kein Titel</p>');
+});
+
+test('Listen, Absätze mit Zeilenumbruch, Trennlinie, Code, kursiv', () => {
+	const html = renderMarkdown('- a\n* b\n\n1. eins\n2) zwei\n\nZeile 1\r\nZeile 2\n\n---\n\n`code` und *kursiv*');
+	assert.equal(
+		html,
+		[
+			'<ul>',
+			'<li>a</li>',
+			'<li>b</li>',
+			'</ul>',
+			'<ol>',
+			'<li>eins</li>',
+			'<li>zwei</li>',
+			'</ol>',
+			'<p>Zeile 1<br>Zeile 2</p>',
+			'<hr>',
+			'<p><code>code</code> und <em>kursiv</em></p>'
+		].join('\n')
+	);
+});
+
+test('Leerer Text', () => {
+	assert.equal(renderMarkdown(''), '');
+	assert.equal(renderMarkdown('\n\n'), '');
 });

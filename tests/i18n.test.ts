@@ -41,3 +41,30 @@ test('Alle im Code verwendeten Textschlüssel existieren', () => {
 	}
 	assert.deepEqual([...missing], []);
 });
+
+test('Platzhalter wie {count} sind in beiden Sprachen gleich', () => {
+	const vars = (s: string) => [...new Set(s.match(/\{\w+\}/g) ?? [])].sort().join(',');
+	const differ = Object.keys(de).filter((k) => k in en && vars(de[k]) !== vars(en[k]));
+	assert.deepEqual(differ, []);
+});
+
+test('Einzahl-Formen (.one) haben eine Grundform, kein Text ist leer', () => {
+	const all = { ...de, ...en };
+	const orphans = Object.keys(all).filter((k) => k.endsWith('.one') && !(k.slice(0, -4) in de));
+	assert.deepEqual(orphans, []);
+	const empty = [...Object.entries(de), ...Object.entries(en)].filter(([, v]) => !v.trim()).map(([k]) => k);
+	assert.deepEqual(empty, []);
+});
+
+test('Schweizer Rechtschreibung: kein „ß“ in den deutschen Texten', () => {
+	assert.deepEqual(Object.keys(de).filter((k) => de[k].includes('ß')), []);
+});
+
+test('Willkommenskarte: alle Texte existieren', () => {
+	// welcome.ts hängt an der Datenbank – die Schritte deshalb aus dem Quelltext lesen
+	const src = readFileSync('src/lib/server/welcome.ts', 'utf8');
+	const steps = [...(src.match(/WELCOME_STEPS = \[([^\]]+)\]/)?.[1] ?? '').matchAll(/'(\w+)'/g)].map((m) => m[1]);
+	assert.ok(steps.length >= 5);
+	const keys = steps.flatMap((s) => [`welcome.${s}`, `welcome.${s}.hint`]);
+	assert.deepEqual(keys.filter((k) => !(k in de)), []);
+});
