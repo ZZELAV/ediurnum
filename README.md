@@ -19,7 +19,8 @@ with optional AI feedback for personal growth.
 - **About me**: a short self-assessment as your first entry (journaling experience, life satisfaction, personality
   based on the Big Five, values, strengths, goals) – the background for AI insights, editable any time
 - **On this day**: the entry from one year ago appears on the dashboard
-- **Past days open read-only** – edit them with “Edit”; every entry keeps a **version history** (one version per day)
+- **Past days open read-only** – edit them with “Edit”; every entry keeps a **version history** (one version per day,
+  with changes highlighted)
 - **Search** all entries from “All entries” (ignores case and accents); the calendar shows your mood per day
 - **Reminders**: weekly and monthly reviews plus your own reminders (once, daily, on chosen weekdays or monthly),
   shown in the app and as **push notifications** on registered devices
