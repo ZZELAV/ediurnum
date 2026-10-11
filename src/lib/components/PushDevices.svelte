@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import { ask } from '#lib/confirm.svelte.ts';
 	import { refreshAll } from '$app/navigation';
 	import { api } from '#lib/client.ts';
+	import { Flash } from '#lib/flash.svelte.ts';
 	import { t } from '#lib/i18n/t.ts';
 
 	interface Props {
@@ -15,7 +17,7 @@
 	let pushState = $state<PushState>('loading');
 	let endpoint = $state<string | null>(null);
 	let busy = $state(false);
-	let pushMessage = $state<string | null>(null);
+	const pushMessage = new Flash();
 
 	const registered = $derived(endpoint !== null && push.devices.some((d) => d.endpoint === endpoint));
 
@@ -68,7 +70,7 @@
 
 	async function enable() {
 		busy = true;
-		pushMessage = null;
+		pushMessage.clear();
 		try {
 			const permission = await Notification.requestPermission();
 			if (permission !== 'granted') {
@@ -85,7 +87,7 @@
 			pushState = 'on';
 			await refreshAll();
 		} catch (e) {
-			pushMessage = t('common.error') + ' ' + (e as Error).message;
+			pushMessage.show(t('common.error') + ' ' + (e as Error).message, 'error');
 		} finally {
 			busy = false;
 		}
@@ -112,7 +114,8 @@
 		busy = true;
 		const res = await api<{ sent: number }>('/api/push/test', 'POST', {});
 		busy = false;
-		pushMessage = res.ok ? t('settings.pushTestSent', { count: res.data.sent }) : t(res.error);
+		if (res.ok) pushMessage.show(t('settings.pushTestSent', { count: res.data.sent }));
+		else pushMessage.show(t(res.error), 'error');
 	}
 
 	async function removeAll() {
@@ -143,7 +146,7 @@
 		{/if}
 	</div>
 {/if}
-{#if pushMessage}<p class="faint push-msg" role="status">{pushMessage}</p>{/if}
+{#if pushMessage.current}<p class="faint push-msg" role="status" out:fade>{pushMessage.current.text}</p>{/if}
 
 <div class="devices">
 	{#if push.devices.length === 0}

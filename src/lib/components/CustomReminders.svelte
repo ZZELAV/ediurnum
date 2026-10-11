@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import { ask } from '#lib/confirm.svelte.ts';
 	import { fmtDate, t, weekdayName, WEEK_ORDER } from '#lib/i18n/t.ts';
 	import type { CustomReminder, CustomReminderView } from '#lib/reminders.ts';
+	import { Flash } from '#lib/flash.svelte.ts';
 	import CustomReminderForm from './CustomReminderForm.svelte';
 
 	interface Props {
@@ -14,7 +16,7 @@
 	let { items, today, creating = $bindable(false) }: Props = $props();
 
 	let editingId = $state<string | null>(null);
-	let message = $state<string | null>(null);
+	const message = new Flash();
 
 	function describe(r: CustomReminder): string {
 		const time = r.time;
@@ -38,18 +40,18 @@
 
 	function openNew() {
 		editingId = null;
-		message = null;
+		message.clear();
 		creating = true;
 	}
 	function openEdit(id: string) {
 		creating = false;
-		message = null;
+		message.clear();
 		editingId = id;
 	}
-	const saved = (text: string) => (message = text);
+	const saved = (text: string) => message.show(text);
 </script>
 
-{#if message}<p class="notice" role="status">{message}</p>{/if}
+{#if message.current}<p class="notice" role="status" out:fade>{message.current.text}</p>{/if}
 
 {#if items.length === 0 && !creating}
 	<p class="muted">{t('reminders.customEmpty')}</p>
@@ -102,7 +104,7 @@
 							return async ({ update }) => {
 								await update({ reset: false });
 								if (editingId === r.id) editingId = null;
-								message = t('reminders.deleted');
+								message.show(t('reminders.deleted'));
 							};
 						}}
 					>

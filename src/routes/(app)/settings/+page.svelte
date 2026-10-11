@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import { ask } from '#lib/confirm.svelte.ts';
 	import { enhance } from '$app/forms';
 	import { fmtDate, t } from '#lib/i18n/t.ts';
 	import { CHANGELOG_URL, REPO_URL } from '#lib/changelog.ts';
+	import { expiring } from '#lib/flash.svelte.ts';
 	import PasswordInput from '#lib/components/PasswordInput.svelte';
 
 	let { data, form } = $props();
@@ -23,7 +25,9 @@
 	});
 
 	type FormResult = { section?: string; success?: string; error?: string; seconds?: number } | null;
-	const result = $derived(form as FormResult);
+	// Erfolgsmeldungen verschwinden nach ein paar Sekunden, Fehler bleiben stehen
+	const shown = expiring(() => form as FormResult, (r) => !!r.error);
+	const result = $derived(shown.current);
 
 	function msg(section: string) {
 		if (result?.section !== section) return null;
@@ -39,7 +43,7 @@
 
 {#snippet feedback(section: string)}
 	{@const m = msg(section)}
-	{#if m}<p class="notice" class:error={m.kind === 'error'} role="status">{m.text}</p>{/if}
+	{#if m}<p class="notice" class:error={m.kind === 'error'} role="status" out:fade>{m.text}</p>{/if}
 {/snippet}
 
 <div class="view narrow">

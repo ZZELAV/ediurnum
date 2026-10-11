@@ -21,6 +21,7 @@ The topmost version without a date is still in development.
 ### Changed
 
 - "Close journal" is now called "Lock journal".
+- Confirmations such as "Settings saved." disappear by themselves after a few seconds. Error messages stay visible.
 - `lastEntry` in `/api/widget` is now the time of the latest save (ISO timestamp) instead of only the date, so
   dashboards can show the actual time. The Homepage example in DEPLOYMENT.md shows it as relative time ("2 hours ago").
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import { fmtDate, t, weekdayName, WEEK_ORDER } from '#lib/i18n/t.ts';
 	import type { ReminderConfig } from '#lib/reminders.ts';
@@ -20,7 +21,7 @@
 </script>
 
 <p class="faint">{t('settings.remindersIntro')}</p>
-{#if feedback}<p class="notice" class:error={feedback.kind === 'error'} role="status">{feedback.text}</p>{/if}
+{#if feedback}<p class="notice" class:error={feedback.kind === 'error'} role="status" out:fade>{feedback.text}</p>{/if}
 
 <form method="POST" action="?/reviews" use:enhance={() => async ({ update }) => update({ reset: false })}>
 	<fieldset class="reminder">

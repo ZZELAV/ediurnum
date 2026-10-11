@@ -2,13 +2,15 @@
 	import CustomReminders from '#lib/components/CustomReminders.svelte';
 	import PushDevices from '#lib/components/PushDevices.svelte';
 	import ReviewReminders from '#lib/components/ReviewReminders.svelte';
+	import { expiring } from '#lib/flash.svelte.ts';
 	import { t } from '#lib/i18n/t.ts';
 	import { minutesOf } from '#lib/reminders.ts';
 
 	let { data, form } = $props();
 
+	const reviewResult = expiring(() => form as { section?: string; success?: string } | null);
 	const reviewFeedback = $derived.by(() => {
-		const f = form as { section?: string; success?: string } | null;
+		const f = reviewResult.current;
 		return f?.section === 'reviews' && f.success ? { kind: 'ok', text: t(f.success) } : null;
 	});
 

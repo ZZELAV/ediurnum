@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import { ask } from '#lib/confirm.svelte.ts';
 	import { enhance } from '$app/forms';
 	import { api } from '#lib/client.ts';
 	import { addDays } from '#lib/dates.ts';
+	import { Flash } from '#lib/flash.svelte.ts';
 	import PinDialog from '#lib/components/PinDialog.svelte';
 	import MoodChart from '#lib/components/MoodChart.svelte';
 	import { fmtDate, fmtDateTime, t } from '#lib/i18n/t.ts';
@@ -61,10 +63,10 @@
 	let answer = $state('');
 	let error = $state<string | null>(null);
 	let answerError = $state<string | null>(null);
-	let notice = $state<string | null>(null);
+	const notice = new Flash();
 	let busy = $state(false);
 	let instructions = $state(untrack(() => data.instructions.custom || data.instructions.default));
-	let instructionsNotice = $state<string | null>(null);
+	const instructionsNotice = new Flash();
 
 	// „Letzte Woche“ = heute und die 6 Tage davor (7 Tage), entsprechend 30 und 90 Tage
 	const from = $derived(period === 'custom' ? customFrom : addDays(data.today, 1 - Number(period)));
@@ -96,9 +98,9 @@
 		if (!result) return;
 		try {
 			await navigator.clipboard.writeText(result.markdown);
-			notice = t('insights.copied');
+			notice.show(t('insights.copied'));
 		} catch {
-			notice = t('insights.copyFailed');
+			notice.show(t('insights.copyFailed'), 'error');
 		}
 	}
 </script>
@@ -125,7 +127,8 @@
 			action="?/prompt"
 			use:enhance={() => {
 				busy = true;
-				error = notice = null;
+				error = null;
+				notice.clear();
 				return async ({ result: r }) => {
 					busy = false;
 					if (r.type === 'success' && r.data) {
@@ -228,7 +231,7 @@
 					<button type="button" class="btn" onclick={download}>{t('insights.download')}</button>
 					<button type="button" class="btn ghost" onclick={copy}>{t('insights.copy')}</button>
 				</div>
-				{#if notice}<p class="faint" role="status">{notice}</p>{/if}
+				{#if notice.current}<p class="faint" role="status" out:fade>{notice.current.text}</p>{/if}
 				<p class="faint">{t('insights.howTo')}</p>
 			</div>
 		{/if}
@@ -246,12 +249,13 @@
 				action="?/import"
 				use:enhance={() => {
 					busy = true;
-					answerError = notice = null;
+					answerError = null;
+					notice.clear();
 					return async ({ result: r, update }) => {
 						busy = false;
 						if (r.type === 'success') {
 							const n = Number((r.data as { focusCount?: number })?.focusCount ?? 0);
-							notice = n > 0 ? t('insights.savedWithFocus', { count: n }) : t('insights.savedNoFocus');
+							notice.show(n > 0 ? t('insights.savedWithFocus', { count: n }) : t('insights.savedNoFocus'));
 							result = null;
 							storePending(null);
 							answer = '';
@@ -276,8 +280,8 @@
 				{#if answerError}<p class="notice error" role="alert">{t(answerError)}</p>{/if}
 				<button class="btn ghost" disabled={busy || !answer.trim()}>{t('insights.saveAnswer')}</button>
 			</form>
-		{:else if notice}
-			<p class="notice saved" role="status">{notice}</p>
+		{:else if notice.current}
+			<p class="notice saved" role="status" out:fade>{notice.current.text}</p>
 		{/if}
 	</section>
 
@@ -299,17 +303,17 @@
 					await update({ reset: false });
 					if (r.type === 'success') {
 						instructions = data.instructions.custom || data.instructions.default;
-						instructionsNotice = t(reset ? 'insights.instructionsReset' : 'insights.instructionsSaved');
+						instructionsNotice.show(t(reset ? 'insights.instructionsReset' : 'insights.instructionsSaved'));
 					}
 				};
 			}}
 		>
 			<div class="field">
 				<label for="instr" class="visually-hidden">{t('insights.instructions')}</label>
-				<textarea id="instr" name="instructions" rows="12" maxlength="8000" bind:value={instructions} oninput={() => (instructionsNotice = null)}></textarea>
+				<textarea id="instr" name="instructions" rows="12" maxlength="8000" bind:value={instructions} oninput={() => instructionsNotice.clear()}></textarea>
 			</div>
 			<p class="faint">{t('insights.instructionsFixed')}</p>
-			{#if instructionsNotice}<p class="notice" role="status">{instructionsNotice}</p>{/if}
+			{#if instructionsNotice.current}<p class="notice" role="status" out:fade>{instructionsNotice.current.text}</p>{/if}
 			<div class="row">
 				<button class="btn">{t('common.save')}</button>
 				{#if data.instructions.custom || instructions !== data.instructions.default}

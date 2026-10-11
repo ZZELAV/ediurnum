@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { autosize } from '#lib/actions.ts';
+	import { Flash } from '#lib/flash.svelte.ts';
 	import { fmtDate, t } from '#lib/i18n/t.ts';
 	import { JOURNALING, TRAITS, VALUES, sanitizeProfile, type ProfileText } from '#lib/profile.ts';
 
@@ -11,7 +13,7 @@
 	// Formularzustand: Startwerte aus dem gespeicherten Profil (nur beim Öffnen gelesen)
 	let profile = $state(sanitizeProfile(untrack(() => data.profile)));
 	let busy = $state(false);
-	let notice = $state<{ kind: 'ok' | 'error'; text: string } | null>(null);
+	const notice = new Flash();
 
 	const steps = [1, 2, 3, 4, 5];
 	const groups: { title: string; fields: ProfileText[] }[] = [
@@ -59,15 +61,15 @@
 		class="stack"
 		use:enhance={() => {
 			busy = true;
-			notice = null;
+			notice.clear();
 			return async ({ result, update }) => {
 				busy = false;
 				if (result.type === 'success') {
 					if (data.welcome) return goto('/', { refreshAll: true });
-					notice = { kind: 'ok', text: t('profile.saved') };
+					notice.show(t('profile.saved'));
 					await update({ reset: false });
 				} else {
-					notice = { kind: 'error', text: t('common.error') };
+					notice.show(t('common.error'), 'error');
 				}
 			};
 		}}
@@ -162,7 +164,7 @@
 			</section>
 		{/each}
 
-		{#if notice}<p class="notice" class:error={notice.kind === 'error'} role="status">{notice.text}</p>{/if}
+		{#if notice.current}<p class="notice" class:error={notice.current.kind === 'error'} role="status" out:fade>{notice.current.text}</p>{/if}
 
 		<div class="row">
 			<button class="btn" disabled={busy}>{data.welcome ? t('profile.saveWelcome') : t('common.save')}</button>
