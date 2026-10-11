@@ -3,7 +3,8 @@
 	import { fmtDate, fmtNumber, t } from '#lib/i18n/t.ts';
 
 	/**
-	 * Stimmungsverlauf (1–5) über einen Zeitraum: Linie mit Punkten, Lücken an Tagen ohne Stimmung.
+	 * Stimmungsverlauf (1–5) über einen Zeitraum: Linie mit Punkten, neuester Tag links,
+	 * Lücken an Tagen ohne Stimmung.
 	 * `weekly`: Punkte sind Wochendurchschnitte (Datum = Wochenbeginn). Der Gesamtdurchschnitt steht
 	 * in der Statistik als eigene Kachel und wird hier nicht wiederholt.
 	 */
@@ -20,7 +21,8 @@
 	const pad = { top: 12, right: 12, bottom: 26, left: 74 };
 
 	const span = $derived(Math.max(1, daysBetween(from, to)));
-	const x = (date: string) => pad.left + (daysBetween(from, date) / span) * (width - pad.left - pad.right);
+	// Neuestes links (wie das Monatsdiagramm der Statistik), ältestes rechts
+	const x = (date: string) => pad.left + (daysBetween(date, to) / span) * (width - pad.left - pad.right);
 	const y = (mood: number) => pad.top + ((5 - mood) / 4) * (height - pad.top - pad.bottom);
 
 	const sorted = $derived([...points].sort((a, b) => a.date.localeCompare(b.date)));
@@ -32,7 +34,7 @@
 	/** Wert als Text: Tageswert als Wort, Wochenschnitt als Zahl mit dem nächstliegenden Wort. */
 	const label = (mood: number) => (weekly ? `${fmtNumber(mood)} · ${t(`mood.${Math.round(mood)}`)}` : t(`mood.${mood}`));
 	const when = (date: string, style: 'dayMonth' | 'medium') => (weekly ? t('mood.week', { date: fmtDate(date, style) }) : fmtDate(date, style));
-	const ticks = $derived(from === to ? [from] : [from, to]);
+	const ticks = $derived(from === to ? [to] : [to, from]);
 
 	let hover = $state<{ date: string; mood: number } | null>(null);
 </script>
@@ -88,7 +90,7 @@
 			<table>
 				<caption>{t('mood.chartTitle')}</caption>
 				<tbody>
-					{#each sorted as p (p.date)}<tr><td>{when(p.date, 'medium')}</td><td>{label(p.mood)}</td></tr>{/each}
+					{#each sorted.toReversed() as p (p.date)}<tr><td>{when(p.date, 'medium')}</td><td>{label(p.mood)}</td></tr>{/each}
 				</tbody>
 			</table>
 		</div>

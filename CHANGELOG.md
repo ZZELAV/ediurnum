@@ -16,10 +16,10 @@ The topmost version without a date is still in development.
   app was closed completely in the meantime.
 - The settings link to the project on GitHub (source code, bug reports, ideas).
 - Statistics: current and longest writing streak, number of entries, average mood and energy, mood over time (as
-  weekly averages for periods longer than 90 days), mood and energy per month (latest month first), mood per
-  weekday, your most frequent feelings and how many weekly and monthly reviews you wrote – for the last 30 or 90
-  days, 12 months or everything. Locked entries count towards streaks and totals; their mood and feelings only
-  while your PIN is entered.
+  weekly averages for periods longer than 90 days), mood and energy per month, mood per weekday, your most
+  frequent feelings and how many weekly and monthly reviews you wrote – for the last 30 or 90 days, 12 months or
+  everything. Both charts over time show the latest date on the left. Locked entries count towards streaks and
+  totals; their mood and feelings only while your PIN is entered.
 - A statistics card on the dashboard shows the current streak, the average mood of the last 30 days and the number
   of entries. Dashboard, statistics and `/api/widget` use the same figures.
 - "All entries" shows every month from your first entry up to the current one, including months without entries,
