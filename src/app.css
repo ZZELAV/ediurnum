@@ -653,6 +653,48 @@ textarea.write {
 .prose li {
 	margin-bottom: 0.3em;
 }
+/* Tabellen aus KI-Antworten: bei Platzmangel seitlich scrollbar statt zusammengequetscht */
+.prose .table-wrap {
+	max-width: 100%;
+	overflow-x: auto;
+	margin: 1em 0;
+}
+.prose table {
+	border-collapse: collapse;
+	font-family: var(--font-sans);
+	font-size: 0.9rem;
+	line-height: 1.5;
+	overflow-wrap: normal;
+}
+.prose th,
+.prose td {
+	padding: 0.45rem 0.75rem;
+	border-bottom: 1px solid var(--rule);
+	text-align: left;
+	vertical-align: top;
+	min-width: 6rem;
+}
+.prose th {
+	font-weight: 600;
+	color: var(--ink-soft);
+	border-bottom-color: var(--paper-edge);
+}
+@media (max-width: 600px) {
+	/* Handy: Spalten nach Inhalt bis 14rem breit, Rest seitlich scrollen – sonst werden Textspalten zu Türmen */
+	.prose table {
+		width: max-content;
+	}
+	.prose th,
+	.prose td {
+		max-width: 14rem;
+	}
+}
+.prose .align-center {
+	text-align: center;
+}
+.prose .align-right {
+	text-align: right;
+}
 
 /* !important, weil die Feldregeln (z. B. input[type=text] mit width: 100 %) sonst stärker sind
  * und ein verstecktes Feld die Seite seitlich verbreitert */

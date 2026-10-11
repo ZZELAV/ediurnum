@@ -48,3 +48,32 @@ test('Leerer Text', () => {
 	assert.equal(renderMarkdown(''), '');
 	assert.equal(renderMarkdown('\n\n'), '');
 });
+
+test('Tabellen: Kopf, Ausrichtung, Zeilen; Zellen angepasst und entschärft', () => {
+	const html = renderMarkdown(
+		['Vorher', '', '| Bereich | Wert | Trend |', '|:--|:-:|--:|', '| Schlaf | **gut** | ↑ |', '| Arbeit | <b>x</b> |', 'Arbeit \\| Freizeit | 3 | – | zu viel', '', 'Nachher'].join('\n')
+	);
+	assert.equal(
+		html,
+		[
+			'<p>Vorher</p>',
+			'<div class="table-wrap"><table>' +
+				'<thead><tr><th class="align-left">Bereich</th><th class="align-center">Wert</th><th class="align-right">Trend</th></tr></thead>' +
+				'<tbody>' +
+				'<tr><td class="align-left">Schlaf</td><td class="align-center"><strong>gut</strong></td><td class="align-right">↑</td></tr>' +
+				'<tr><td class="align-left">Arbeit</td><td class="align-center">&lt;b&gt;x&lt;/b&gt;</td><td class="align-right"></td></tr>' +
+				'<tr><td class="align-left">Arbeit | Freizeit</td><td class="align-center">3</td><td class="align-right">–</td></tr>' +
+				'</tbody></table></div>',
+			'<p>Nachher</p>'
+		].join('\n')
+	);
+});
+
+test('Tabellen: ohne Rand-Striche und ohne Zeilen; keine Tabelle ohne passende Trennzeile', () => {
+	assert.equal(
+		renderMarkdown('A | B\n--- | ---'),
+		'<div class="table-wrap"><table><thead><tr><th>A</th><th>B</th></tr></thead><tbody></tbody></table></div>'
+	);
+	assert.equal(renderMarkdown('Text mit | Strich\n---'), '<p>Text mit | Strich</p>\n<hr>', 'Spaltenzahl passt nicht: Trennlinie');
+	assert.equal(renderMarkdown('a | b\nc | d'), '<p>a | b<br>c | d</p>', 'ohne Trennzeile');
+});
