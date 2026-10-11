@@ -36,7 +36,7 @@
 		</div>
 	</header>
 
-	<div class="split">
+	<div class="split wide-side">
 		<div class="stack">
 			{#if data.welcome}<WelcomeCard steps={data.welcome} today={data.today} />{/if}
 

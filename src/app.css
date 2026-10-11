@@ -212,6 +212,10 @@ p {
 		grid-template-columns: minmax(0, 1fr) 320px;
 		gap: 1.75rem;
 	}
+	/* breitere Seitenspalte (Dashboard: Statistik und Fokus) */
+	.split.wide-side {
+		grid-template-columns: minmax(0, 1fr) 380px;
+	}
 	/* Seitenspalte immer rechts, egal ob sie im Markup vor oder nach dem Hauptinhalt steht */
 	.split > .side {
 		grid-column: 2;
