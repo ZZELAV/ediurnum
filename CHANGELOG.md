@@ -35,7 +35,7 @@ The topmost version without a date is still in development.
 - Confirmations such as "Settings saved." disappear by themselves after a few seconds. Error messages stay visible.
 - `lastEntry` in `/api/widget` is now the time of the latest save (ISO timestamp) instead of only the date, so
   dashboards can show the actual time. The Homepage example in DEPLOYMENT.md shows it as relative time ("2 hours ago").
-
+- On large screens the side column (dashboard, entry, version history) is a little wider.
 - An entry whose content is completely deleted no longer counts as written (list, calendar, streak, widget). It
   stays with its version history and counts again once you write something.
 - Backups now have format version 2. Older backups can still be restored; a backup from a newer ediurnum version

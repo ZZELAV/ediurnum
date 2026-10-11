@@ -212,6 +212,9 @@
 		gap: 0.75rem;
 	}
 	.tile {
+		/* schmale Kacheln: lange Wörter umbrechen statt hinausragen */
+		overflow-wrap: anywhere;
+		hyphens: auto;
 		display: grid;
 		align-content: start;
 		gap: 0.2rem;
