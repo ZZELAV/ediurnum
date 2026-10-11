@@ -1,5 +1,5 @@
 /** So lange bleiben Erfolgsmeldungen sichtbar; Fehler bleiben stehen, bis die nächste Aktion sie ersetzt. */
-export const FLASH_MS = 5000;
+const FLASH_MS = 5000;
 
 export type FlashMessage = { kind: 'ok' | 'error'; text: string };
 

@@ -166,8 +166,8 @@ export function nextOccurrence(s: ReminderSchedule, today: string, nowMinutes: n
 /** Für die Fälligkeit zählen nur Datum und Abschnittsarten eines Eintrags. */
 type ReviewMeta = Pick<EntryMeta, 'date' | 'kinds'>;
 
-export const WEEKLY_GAP_DAYS = 6;
-export const MONTHLY_GAP_DAYS = 25;
+const WEEKLY_GAP_DAYS = 6;
+const MONTHLY_GAP_DAYS = 25;
 
 /** Letzter Tag (am oder vor `date`) mit diesem Abschnitt – ohne Rückblick der erste Eintrag überhaupt. */
 function lastReviewOrStart(metas: ReviewMeta[], kind: SectionKind, date: string): string | null {

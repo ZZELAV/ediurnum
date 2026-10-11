@@ -216,7 +216,7 @@ export async function sendToAll(payload: { title: string; body: string; url: str
 // ---------------------------------------------------------------- Planer
 
 /** Prüft einmal pro Minute, ob eine Erinnerung fällig ist. Pro Fälligkeitstag wird höchstens einmal gesendet. */
-export async function reminderTick(now = new Date()) {
+async function reminderTick(now = new Date()) {
 	if (listDevices().length === 0) return;
 	const cfg = loadReminders();
 	const today = todayIso(now);

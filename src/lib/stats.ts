@@ -99,7 +99,7 @@ function average(values: number[]): Average {
 const isScale = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 5;
 
 /** Bis zu so vielen Tagen zeigt der Stimmungsverlauf einzelne Tage, darüber Wochen. */
-export const TREND_DAILY_MAX_DAYS = 90;
+const TREND_DAILY_MAX_DAYS = 90;
 
 /** Montag der Woche eines Datums. */
 const mondayOf = (iso: string) => addDays(iso, -((weekdayOf(iso) + 6) % 7));

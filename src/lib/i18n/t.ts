@@ -3,7 +3,7 @@ import { isLang, locale, translate } from './index';
 import type { Lang } from '#lib/types.ts';
 
 /** Aktuelle Sprache der Seite (aus den Layout-Daten). */
-export function currentLang(): Lang {
+function currentLang(): Lang {
 	const l = page.data?.lang;
 	return isLang(l) ? l : 'de';
 }

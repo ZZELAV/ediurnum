@@ -21,7 +21,7 @@ import {
 const FORMAT_VERSION = 1;
 const IV_LEN = 12;
 const TAG_LEN = 16;
-export const KEY_LEN = 32;
+const KEY_LEN = 32;
 
 export interface KdfParams {
 	algorithm: 'argon2id';
