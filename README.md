@@ -22,8 +22,9 @@ with optional AI feedback for personal growth.
 - **Past days open read-only** – edit them with “Edit”; every entry keeps a **version history** (one version per day,
   with changes highlighted)
 - **Search** all entries from “All entries” (ignores case and accents); the calendar shows your mood per day
-- **Statistics**: current and longest writing streak, mood and energy per month, mood per weekday, your most frequent
-  feelings and how many weekly and monthly reviews you wrote – for 30 or 90 days, 12 months or everything
+- **Statistics**: current and longest writing streak, mood over time, mood and energy per month, mood per weekday,
+  your most frequent feelings and how many weekly and monthly reviews you wrote – for 30 or 90 days, 12 months or
+  everything; the key figures also appear on the dashboard
 - **Reminders**: weekly and monthly reviews plus your own reminders (once, daily, on chosen weekdays or monthly),
   shown in the app and as **push notifications** on registered devices
 - **Optional focus mode**: while you write, navigation and side column fade out; press Esc to return
@@ -32,7 +33,7 @@ with optional AI feedback for personal growth.
 - **Locked entries** with an additional PIN
 - **AI insights without API keys**: ediurnum turns the entries of a period into a Markdown file for the AI chat of your
   choice (ChatGPT, Claude, Gemini, …), optionally with your self-assessment. The instructions for the AI can be customised. Paste the answer back to keep it – its
-  focus points for the coming weeks and a chart of your mood appear on the dashboard. ediurnum never sends anything
+  focus points for the coming weeks appear on the dashboard. ediurnum never sends anything
   to an AI on its own; AI agents with your own API key are planned for a later release.
 - **Encrypted backup**, readable export (Markdown/JSON) and **delete journal** (all entries, or a complete reset)
 - German and English, light and dark theme (follows your device unless you choose one), installable as a web app

@@ -114,7 +114,8 @@ export const de: Record<string, string> = {
 	'dashboard.focusFrom': 'aus der Auswertung vom {date}',
 	'dashboard.recent': 'Letzte Einträge',
 	'dashboard.recentEmpty': 'Hier erscheinen deine früheren Tage.',
-	'dashboard.stats': '{count} Einträge insgesamt',
+	'dashboard.statsLink': 'Alle Zahlen',
+	'dashboard.statsMood': 'Ø Stimmung 30 Tage',
 	'dashboard.yearAgo': 'Heute vor einem Jahr',
 	'dashboard.yearsAgo': 'Heute vor {years} Jahren',
 
@@ -500,7 +501,6 @@ export const de: Record<string, string> = {
 	'footer.version': 'ediurnum v{version}',
 
 	// Einzahl-Formen (werden bei count = 1 verwendet)
-	'dashboard.stats.one': '1 Eintrag insgesamt',
 	'archive.entries.one': '1 Eintrag',
 	'insights.preview.one': '1 Eintrag kommt in die Datei.',
 	'insights.previewLocked.one': 'Davon ist 1 gesperrt (für KI freigegeben).',
@@ -589,8 +589,7 @@ export const de: Record<string, string> = {
 
 	// Stimmungsverlauf
 	'mood.chartTitle': 'Stimmungsverlauf',
-	'mood.chartAverage': 'Durchschnitt {value} aus {count} Tagen',
-	'mood.chartAverage.one': 'Durchschnitt {value} aus 1 Tag',
+	'mood.week': 'Woche ab {date}',
 	'mood.chartEmpty': 'In diesem Zeitraum hast du keine Stimmung angegeben.',
 
 	// Willkommenskarte

@@ -7,7 +7,6 @@
 	import { addDays } from '#lib/dates.ts';
 	import { Flash } from '#lib/flash.svelte.ts';
 	import PinDialog from '#lib/components/PinDialog.svelte';
-	import MoodChart from '#lib/components/MoodChart.svelte';
 	import { fmtDate, fmtDateTime, t } from '#lib/i18n/t.ts';
 
 	let { data } = $props();
@@ -25,7 +24,6 @@
 	// Schritt 1: erstellte Markdown-Datei; Schritt 2: Antwort aus dem Chat
 	let result = $state<{
 		markdown: string;
-		moods: { date: string; mood: number }[];
 		count: number;
 		from: string;
 		to: string;
@@ -146,7 +144,7 @@
 			<p class="step">1 · {t('insights.step1')}</p>
 			<fieldset class="field">
 				<legend>{t('insights.period')}</legend>
-				<div class="periods">
+				<div class="pills">
 					{#each periods as p (p)}
 						<label class="pill" class:on={period === p}>
 							<input type="radio" name="period" value={p} bind:group={period} />
@@ -226,7 +224,6 @@
 			<!-- Datei bereit: herunterladen oder kopieren -->
 			<div class="ready">
 				<p><strong>{t('insights.fileReady', { count: result.count })}</strong></p>
-				<MoodChart points={result.moods} from={result.from} to={result.to} />
 				<div class="row">
 					<button type="button" class="btn" onclick={download}>{t('insights.download')}</button>
 					<button type="button" class="btn ghost" onclick={copy}>{t('insights.copy')}</button>
@@ -353,7 +350,6 @@
 					</span>
 				</summary>
 				{#if a.question}<p class="faint"><em>„{a.question}“</em></p>{/if}
-				<MoodChart points={a.moods} from={a.from} to={a.to} />
 				{#if a.focusPoints.length}
 					<div class="focus card">
 						<p class="eyebrow">{t('insights.focusPoints')}</p>
@@ -404,34 +400,6 @@
 		font-size: 0.9rem;
 		color: var(--ink-soft);
 		margin-bottom: 0.4rem;
-	}
-	.periods {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-	}
-	.pill {
-		margin: 0;
-		padding: 0.35rem 0.85rem;
-		border-radius: 999px;
-		border: 1px solid var(--paper-edge);
-		background: var(--paper-2);
-		cursor: pointer;
-		font-size: 0.86rem;
-		color: var(--ink-soft);
-	}
-	.pill input {
-		position: absolute;
-		opacity: 0;
-		pointer-events: none;
-	}
-	.pill.on {
-		background: var(--accent-soft);
-		border-color: var(--accent);
-		color: var(--accent-strong);
-	}
-	.pill:has(input:focus-visible) {
-		outline: 2px solid var(--dusk);
 	}
 	.dates {
 		display: grid;

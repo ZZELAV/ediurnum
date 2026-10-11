@@ -57,8 +57,8 @@ describe('KI-Datei', () => {
 		assert.match(md, /Wie geht es mir\?/);
 		assert.match(md, /genau 3 kurze/);
 		for (const absent of ['Vor dem Zeitraum', 'Nicht für die KI', 'Geheim', 'Geleert']) assert.doesNotMatch(md, new RegExp(absent));
-		// Der Stimmungsverlauf bleibt in der App (nicht in der Datei): alle lesbaren Tage, ohne gesperrte
-		assert.deepEqual(r.data!.moods, [{ date: '2026-03-02', mood: 4 }, { date: '2026-03-05', mood: 3 }]);
+		// Der Stimmungsverlauf steht in der Statistik, nicht hier
+		assert.equal(r.data!.moods, undefined);
 		assert.doesNotMatch(md, /2026-03-05|5. März/);
 	});
 

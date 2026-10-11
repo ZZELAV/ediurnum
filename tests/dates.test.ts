@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addDays, addYears, daysBetween, isIsoDate, monthKey, todayIso } from '../src/lib/dates.ts';
+import { addDays, addMonths, addYears, daysBetween, isIsoDate, monthKey, todayIso, weekdayOf } from '../src/lib/dates.ts';
 
 test('Gültige Kalenderdaten', () => {
 	assert.ok(isIsoDate('2026-10-10'));
@@ -32,4 +32,15 @@ test('Monat und gleicher Tag in einem anderen Jahr', () => {
 	assert.equal(addYears('2026-10-09', -1), '2025-10-09');
 	assert.equal(addYears('2028-02-29', -1), '2027-02-28');
 	assert.equal(addYears('2027-02-28', -3), '2024-02-28');
+});
+
+test('Wochentag (0 = Sonntag) und Monate verschieben', () => {
+	assert.equal(weekdayOf('2026-10-11'), 0);
+	assert.equal(weekdayOf('2026-10-12'), 1);
+	assert.equal(weekdayOf('2028-02-29'), 2);
+	assert.equal(addMonths('2026-10', -1), '2026-09');
+	assert.equal(addMonths('2026-01', -1), '2025-12');
+	assert.equal(addMonths('2025-12', 1), '2026-01');
+	assert.equal(addMonths('2026-10', -22), '2024-12');
+	assert.equal(addMonths('2026-10', 15), '2028-01');
 });

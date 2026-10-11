@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { api } from '#lib/client.ts';
-	import { currentLocale, fmtDate, t } from '#lib/i18n/t.ts';
+	import { weekdayOf } from '#lib/dates.ts';
+	import { currentLocale, fmtDate, fmtMonth, t } from '#lib/i18n/t.ts';
 	import PinDialog from '#lib/components/PinDialog.svelte';
 	import type { SearchHit } from '#lib/search.ts';
 
@@ -48,16 +49,10 @@
 		runSearch('');
 	}
 
-	function monthTitle(month: string) {
-		return new Intl.DateTimeFormat(currentLocale(), { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
-			new Date(month + '-01T00:00:00Z')
-		);
-	}
-
 	/** Kalenderraster (Montag zuerst) mit leeren Zellen am Anfang. */
 	function grid(month: string) {
 		const first = new Date(month + '-01T00:00:00Z');
-		const offset = (first.getUTCDay() + 6) % 7;
+		const offset = (weekdayOf(month + '-01') + 6) % 7;
 		const daysInMonth = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
 		const cells: (string | null)[] = Array.from({ length: offset }, () => null);
 		for (let d = 1; d <= daysInMonth; d++) cells.push(`${month}-${String(d).padStart(2, '0')}`);
@@ -152,7 +147,7 @@
 				<section class="card chapter">
 					<header>
 						<div>
-							<h2>{monthTitle(m.month)}</h2>
+							<h2>{fmtMonth(m.month)}</h2>
 							<p class="faint">{t('archive.entries', { count: m.days.length })}</p>
 						</div>
 					</header>

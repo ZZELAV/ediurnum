@@ -49,6 +49,12 @@ export function fmtDate(iso: string, style: 'long' | 'medium' | 'short' | 'weekd
 	return fmt.format(date);
 }
 
+/** Monatsname zu "YYYY-MM": kurz („Okt“) oder lang mit Jahr („Oktober 2026“). */
+export function fmtMonth(month: string, style: 'short' | 'long' = 'long'): string {
+	const opts: Intl.DateTimeFormatOptions = style === 'long' ? { month: 'long', year: 'numeric' } : { month: 'short' };
+	return new Intl.DateTimeFormat(currentLocale(), { ...opts, timeZone: 'UTC' }).format(new Date(month + '-01T00:00:00Z'));
+}
+
 export function fmtDateTime(iso: string): string {
 	return new Intl.DateTimeFormat(currentLocale(), {
 		day: 'numeric',

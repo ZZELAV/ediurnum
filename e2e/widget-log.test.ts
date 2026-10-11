@@ -4,15 +4,9 @@
  */
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Client, setupJournal, startServer, type TestServer } from './helpers.ts';
+import { Client, setupJournal, startServer, zurichToday, type TestServer } from './helpers.ts';
 
 const TOKEN = 't'.repeat(40);
-
-function zurichToday(offset = 0) {
-	const d = new Date(new Date().toLocaleString('sv', { timeZone: 'Europe/Zurich' }).slice(0, 10) + 'T00:00:00Z');
-	d.setUTCDate(d.getUTCDate() + offset);
-	return d.toISOString().slice(0, 10);
-}
 
 const widget = (server: TestServer, auth?: string) =>
 	new Client(server.url).request('/api/widget', { headers: auth === undefined ? {} : { authorization: auth } });

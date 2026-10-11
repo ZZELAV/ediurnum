@@ -3,7 +3,7 @@
  */
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Client, PIN, setupJournal, startServer, type TestServer } from './helpers.ts';
+import { Client, PIN, setupJournal, startServer, zurichToday, type TestServer } from './helpers.ts';
 
 let server: TestServer;
 let c: Client;
@@ -53,7 +53,7 @@ describe('Alle Einträge', () => {
 		const titles = [...html.matchAll(/<h2 class="svelte-\w+">([^<]+)<\/h2>/g)].map((m) => m[1]);
 		const fmt = new Intl.DateTimeFormat('de-CH', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 		const expected: string[] = [];
-		const today = new Date(new Date().toLocaleString('sv', { timeZone: 'Europe/Zurich' }).slice(0, 10) + 'T00:00:00Z');
+		const today = new Date(zurichToday() + 'T00:00:00Z');
 		for (let d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)); d >= new Date(Date.UTC(2026, 1, 1)); d.setUTCMonth(d.getUTCMonth() - 1)) {
 			expected.push(fmt.format(d));
 		}

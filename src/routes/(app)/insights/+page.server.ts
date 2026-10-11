@@ -2,7 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { randomUUID } from 'node:crypto';
 import type { Actions, PageServerLoad } from './$types';
 import { isIsoDate } from '#lib/dates.ts';
-import { entriesForAi, moodSeries } from '#lib/server/entries.ts';
+import { entriesForAi } from '#lib/server/entries.ts';
 import { loadProfile } from '#lib/server/profile.ts';
 import { isEmptyProfile } from '#lib/profile.ts';
 import { log } from '#lib/server/log.ts';
@@ -22,12 +22,8 @@ export const load: PageServerLoad = ({ locals }) => {
 	const settings = loadSettings(session.dek);
 	return {
 		instructions: { custom: settings.aiInstructions, default: defaultInstructions(settings.language) },
-		analyses: listAnalyses(session.dek).map((a) => ({
-			...a,
-			// ältere Auswertungen ohne gespeicherten Verlauf: aus den aktuellen Einträgen berechnen
-			moods: a.moods ?? moodSeries(session, a.from, a.to),
-			html: renderMarkdown(a.body)
-		})),
+		// Stimmungsverlauf älterer Auswertungen (`moods`) wird nicht mehr gezeigt – er steht in der Statistik
+		analyses: listAnalyses(session.dek).map(({ moods: _, ...a }) => ({ ...a, html: renderMarkdown(a.body) })),
 		hasProfile: !isEmptyProfile(loadProfile(session.dek))
 	};
 };
@@ -69,7 +65,6 @@ export const actions: Actions = {
 		log.info('AI file created', { entries: entries.length, profile: withProfile });
 		return {
 			markdown,
-			moods: moodSeries(session, range.from, range.to),
 			count: entries.length,
 			...range,
 			filename: `ediurnum-${range.from}_${range.to}.md`
@@ -108,8 +103,7 @@ export const actions: Actions = {
 			question: String(form.get('question') ?? '').slice(0, 2000),
 			body,
 			focusPoints,
-			pinned: false,
-			moods: moodSeries(session, range.from, range.to)
+			pinned: false
 		};
 		saveAnalysis(session.dek, analysis);
 		if (focusPoints.length) pinAnalysis(session.dek, analysis.id);

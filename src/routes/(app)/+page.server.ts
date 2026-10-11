@@ -2,11 +2,11 @@ import type { Actions, PageServerLoad } from './$types';
 import { loadSettings, saveSettings } from '#lib/server/settings.ts';
 import { welcomeProgress } from '#lib/server/welcome.ts';
 import { addYears, todayIso } from '#lib/dates.ts';
-import { getEntry, listEntryMeta, moodSeries } from '#lib/server/entries.ts';
-import { pinnedAnalysis } from '#lib/server/analyses.ts';
+import { getEntry, listEntryMeta, statsDays } from '#lib/server/entries.ts';
 import { suggestionsFor } from '#lib/reminders.ts';
 import { loadReminders } from '#lib/server/reminders.ts';
 import { snippetOf } from '#lib/server/snippet.ts';
+import { computeStats, periodStart, writingSummary } from '#lib/stats.ts';
 import type { EntryMeta } from '#lib/types.ts';
 
 export const load: PageServerLoad = ({ locals }) => {
@@ -27,9 +27,12 @@ export const load: PageServerLoad = ({ locals }) => {
 		if (m) onThisDay.push({ ...preview(m, 220), years });
 	}
 
-	// Stimmungsverlauf zum Fokus: vom Beginn des ausgewerteten Zeitraums bis heute
-	const pinned = pinnedAnalysis(session.dek);
-	const focusMood = pinned ? { from: pinned.from, to: today, points: moodSeries(session, pinned.from, today) } : null;
+	// Statistik-Kachel: gleiche Quellen wie die Seite „Statistik“ und die Widget-API
+	const monthStart = periodStart('30', today, null);
+	const stats = {
+		...writingSummary(metas, today),
+		mood: computeStats(statsDays(session, monthStart), monthStart, today).mood
+	};
 
 	// Willkommenskarte, bis sie ausgeblendet wird oder alle Schritte erledigt sind
 	const steps = welcomeProgress(metas);
@@ -37,7 +40,7 @@ export const load: PageServerLoad = ({ locals }) => {
 
 	return {
 		welcome,
-		focusMood,
+		stats,
 		todayMeta: byDate.get(today) ?? null,
 		suggestions: suggestionsFor(today, metas, loadReminders()),
 		onThisDay,
@@ -45,7 +48,6 @@ export const load: PageServerLoad = ({ locals }) => {
 			.filter((m) => m.date !== today)
 			.slice(0, 6)
 			.map((m) => preview(m)),
-		total: metas.length,
 		hour: new Date().getHours()
 	};
 };

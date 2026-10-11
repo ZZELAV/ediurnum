@@ -4,7 +4,7 @@ import { WIDGET_TOKEN } from '$app/env/private';
 import { clientKey } from '#lib/server/auth.ts';
 import { listEntryMeta } from '#lib/server/entries.ts';
 import { todayIso } from '#lib/dates.ts';
-import { currentStreak } from '#lib/streak.ts';
+import { writingSummary } from '#lib/stats.ts';
 import { registerFailure, registerSuccess, throttleRemaining } from '#lib/server/vault.ts';
 
 const digest = (s: string) => createHash('sha256').update(s).digest();
@@ -29,16 +29,6 @@ export const GET: RequestHandler = (event) => {
 	}
 	registerSuccess(key);
 
-	const metas = listEntryMeta(); // neuester Tag zuerst
-	const today = todayIso();
-	return Response.json(
-		{
-			entries: metas.length,
-			// Zeitpunkt (ISO, UTC) der letzten Speicherung irgendeines Eintrags – nicht nur das Datum
-			lastEntry: metas.reduce<string | null>((max, m) => (max && max > m.updatedAt ? max : m.updatedAt), null),
-			writtenToday: metas[0]?.date === today,
-			streak: currentStreak(metas.map((m) => m.date), today)
-		},
-		{ headers: { 'cache-control': 'no-store' } }
-	);
+	// gleiche Kennzahlen wie Dashboard und Statistik
+	return Response.json(writingSummary(listEntryMeta(), todayIso()), { headers: { 'cache-control': 'no-store' } });
 };

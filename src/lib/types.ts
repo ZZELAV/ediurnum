@@ -76,5 +76,5 @@ export interface Analysis {
 	body: string; // Markdown ohne Fokus-Block
 	focusPoints: string[];
 	pinned: boolean; // aktuelle Fokuspunkte auf dem Dashboard
-	moods?: { date: string; mood: number }[]; // Stimmungsverlauf im Zeitraum (ab 0.1.0-beta.2)
+	moods?: { date: string; mood: number }[]; // nur in Auswertungen von 0.1.0-beta.2 bis beta.5; wird nicht mehr angezeigt
 }

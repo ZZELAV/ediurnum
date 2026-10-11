@@ -1,18 +1,15 @@
 <script lang="ts">
+	import MoodChart from '#lib/components/MoodChart.svelte';
 	import PinDialog from '#lib/components/PinDialog.svelte';
-	import { currentLocale, fmtDate, fmtNumber, t, weekdayName } from '#lib/i18n/t.ts';
+	import { fmtDate, fmtMonth, fmtNumber, t, weekdayName } from '#lib/i18n/t.ts';
 	import { STATS_PERIODS, type Average } from '#lib/stats.ts';
 
 	let { data } = $props();
 	const s = $derived(data.stats);
 	let pinDialog = $state(false);
 
-	const monthName = (month: string, style: 'short' | 'long') =>
-		new Intl.DateTimeFormat(currentLocale(), { month: style, year: style === 'long' ? 'numeric' : undefined, timeZone: 'UTC' }).format(
-			new Date(month + '-01T00:00:00Z')
-		);
-	// Jahreszahl unter dem ersten Monat und jedem Januar
-	const showYear = (month: string, i: number) => i === 0 || month.endsWith('-01');
+	// Neuester Monat links: Jahreszahl unter dem ersten Monat und jedem Dezember (dort beginnt das Vorjahr)
+	const showYear = (month: string, i: number) => i === 0 || month.endsWith('-12');
 
 	/** Höhe bzw. Breite eines Balkens in Prozent: Skala 1–5, damit Unterschiede sichtbar werden; „1“ bleibt als Strich sichtbar. */
 	const pct = (a: Average) => (a.avg === null ? 0 : Math.max(3, ((a.avg - 1) / 4) * 100));
@@ -64,10 +61,10 @@
 		</div>
 	</header>
 
-	{#if data.total === 0}
+	{#if data.summary.entries === 0}
 		<section class="card"><p class="muted">{t('stats.empty')}</p></section>
 	{:else}
-		<nav class="periods" aria-label={t('stats.period')}>
+		<nav class="pills periods" aria-label={t('stats.period')}>
 			{#each STATS_PERIODS as p (p)}
 				<a class="pill" class:on={data.period === p} href="?period={p}" aria-current={data.period === p ? 'page' : undefined} data-sveltekit-noscroll data-sveltekit-replacestate>
 					{t(`stats.period.${p}`)}
@@ -88,7 +85,7 @@
 			<section class="tiles">
 				<div class="card tile">
 					<span class="eyebrow">{t('stats.streak')}</span>
-					<strong>{t('stats.days', { count: s.currentStreak })}</strong>
+					<strong>{t('stats.days', { count: data.summary.streak })}</strong>
 				</div>
 				<div class="card tile">
 					<span class="eyebrow">{t('stats.longest')}</span>
@@ -114,7 +111,13 @@
 				</div>
 			</section>
 
-			<!-- Stimmung und Energie pro Monat -->
+			<!-- Stimmungsverlauf im Zeitraum -->
+			<section class="card">
+				<div class="card-title"><h2>{t('mood.chartTitle')}</h2></div>
+				<MoodChart points={s.moodTrend.points} weekly={s.moodTrend.weekly} from={s.from} to={s.to} />
+			</section>
+
+			<!-- Stimmung und Energie pro Monat, neuester links -->
 			<section class="card">
 				<div class="card-title"><h2>{t('stats.byMonth')}</h2></div>
 				<p class="legend faint">
@@ -123,12 +126,12 @@
 				</p>
 				<div class="months" role="img" aria-label={t('stats.byMonth')}>
 					{#each s.byMonth as m, i (m.month)}
-						<div class="month" title="{monthName(m.month, 'long')}: {t('stats.legend.mood')} {value(m.mood)}, {t('stats.legend.energy')} {value(m.energy)} · {t('stats.monthEntries', { count: m.written })}">
+						<div class="month" title="{fmtMonth(m.month)}: {t('stats.legend.mood')} {value(m.mood)}, {t('stats.legend.energy')} {value(m.energy)} · {t('stats.monthEntries', { count: m.written })}">
 							<div class="cols">
 								<span class="col mood" style:height="{pct(m.mood)}%"></span>
 								<span class="col energy" style:height="{pct(m.energy)}%"></span>
 							</div>
-							<span class="month-label">{monthName(m.month, 'short')}</span>
+							<span class="month-label">{fmtMonth(m.month, 'short')}</span>
 							<span class="year">{showYear(m.month, i) ? m.month.slice(0, 4) : ''}</span>
 						</div>
 					{/each}
@@ -139,7 +142,7 @@
 					<tbody>
 						{#each s.byMonth as m (m.month)}
 							<tr>
-								<td>{monthName(m.month, 'long')}</td>
+								<td>{fmtMonth(m.month)}</td>
 								<td>{t('stats.legend.mood')} {value(m.mood)}</td>
 								<td>{t('stats.legend.energy')} {value(m.energy)}</td>
 								<td>{t('stats.monthEntries', { count: m.written })}</td>
@@ -193,25 +196,8 @@
 		margin: 0.25rem 0 0;
 	}
 	.periods {
-		display: flex;
-		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.4rem;
 		margin-bottom: 1rem;
-	}
-	.pill {
-		padding: 0.35rem 0.85rem;
-		border-radius: 999px;
-		border: 1px solid var(--paper-edge);
-		background: var(--paper-2);
-		font-size: 0.86rem;
-		color: var(--ink-soft);
-		text-decoration: none;
-	}
-	.pill.on {
-		background: var(--accent-soft);
-		border-color: var(--accent);
-		color: var(--accent-strong);
 	}
 	.range {
 		margin-left: auto;

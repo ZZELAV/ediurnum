@@ -1,4 +1,4 @@
-import { addDays, daysBetween, isIsoDate } from './dates.ts';
+import { addDays, daysBetween, isIsoDate, weekdayOf } from './dates.ts';
 import type { EntryMeta, Lang, SectionKind } from './types';
 
 /**
@@ -108,10 +108,6 @@ export function sanitizeReminders(input: unknown, lang: Lang): ReminderConfig {
 			.slice(0, MAX_CUSTOM_REMINDERS),
 		lang
 	};
-}
-
-function weekdayOf(iso: string): number {
-	return new Date(iso + 'T00:00:00Z').getUTCDay();
 }
 
 /** Letzter Tag mit dem gewünschten Wochentag am oder vor `date`. */

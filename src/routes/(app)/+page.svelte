@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { fmtDate, t } from '#lib/i18n/t.ts';
+	import { fmtDate, fmtNumber, t } from '#lib/i18n/t.ts';
 	import { dismiss, isDismissed } from '#lib/suggest.ts';
-	import MoodChart from '#lib/components/MoodChart.svelte';
 	import WelcomeCard from '#lib/components/WelcomeCard.svelte';
 	import type { SectionKind } from '#lib/types.ts';
 
@@ -35,7 +34,6 @@
 			<p class="eyebrow">{fmtDate(data.today, 'long')}</p>
 			<h1 class="greet">{data.name ? t('greeting.named', { greeting: t(greeting), name: data.name }) : t(greeting)}.</h1>
 		</div>
-		<p class="faint">{t('dashboard.stats', { count: data.total })}</p>
 	</header>
 
 	<div class="split">
@@ -125,15 +123,34 @@
 		</div>
 
 		<aside class="stack side">
+			<section class="card stats">
+				<div class="card-title">
+					<h2>{t('stats.title')}</h2>
+					<a href="/stats" class="faint">{t('dashboard.statsLink')} →</a>
+				</div>
+				<dl>
+					<div>
+						<dt class="eyebrow">{t('stats.streak')}</dt>
+						<dd>{t('stats.days', { count: data.stats.streak })}</dd>
+					</div>
+					<div>
+						<dt class="eyebrow">{t('dashboard.statsMood')}</dt>
+						<dd>
+							{#if data.stats.mood.avg === null}{t('stats.none')}{:else}{fmtNumber(data.stats.mood.avg)}<small>· {t(`mood.${Math.round(data.stats.mood.avg)}`)}</small>{/if}
+						</dd>
+					</div>
+					<div>
+						<dt class="eyebrow">{t('stats.written')}</dt>
+						<dd>{data.stats.entries}</dd>
+					</div>
+				</dl>
+			</section>
 			<section class="card focus">
 				<h2>{t('dashboard.focus')}</h2>
 				{#if data.focus && data.focus.points.length}
 					<ol>
 						{#each data.focus.points as p, i (i)}<li>{p}</li>{/each}
 					</ol>
-					{#if data.focusMood}
-						<MoodChart points={data.focusMood.points} from={data.focusMood.from} to={data.focusMood.to} compact />
-					{/if}
 					<p class="faint"><a href="/insights#a-{data.focus.id}">{t('dashboard.focusFrom', { date: fmtDate(data.focus.createdAt, 'medium') })}</a></p>
 				{:else}
 					<p class="muted">{t('dashboard.focusEmpty')}</p>
@@ -147,8 +164,25 @@
 	.greet {
 		font-style: italic;
 	}
-	.view-head .faint {
+	.stats dl {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.75rem;
 		margin: 0;
+	}
+	.stats dt {
+		margin: 0 0 0.2rem;
+	}
+	.stats dd {
+		margin: 0;
+		font-size: 1.15rem;
+		font-weight: 600;
+	}
+	.stats small {
+		display: block;
+		font-size: 0.8rem;
+		font-weight: 400;
+		color: var(--ink-soft);
 	}
 	.today {
 		display: flex;

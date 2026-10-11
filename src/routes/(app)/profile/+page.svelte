@@ -148,10 +148,10 @@
 					<div class="field">
 						<p class="question">{t('profile.values')}</p>
 						<p class="faint">{t('profile.valuesHint')}</p>
-						<div class="chips">
+						<div class="pills">
 							{#each VALUES as v (v)}
 								{@const on = profile.values.includes(v)}
-								<button type="button" class="chip-btn" class:on aria-pressed={on} onclick={() => toggleValue(v)}>
+								<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggleValue(v)}>
 									{t(`profile.value.${v}`)}
 								</button>
 							{/each}
@@ -192,35 +192,6 @@
 	legend {
 		padding: 0;
 		margin-bottom: 0.5rem;
-	}
-	.pills,
-	.chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-	}
-	.pill {
-		margin: 0;
-		padding: 0.35rem 0.85rem;
-		border-radius: 999px;
-		border: 1px solid var(--paper-edge);
-		background: var(--paper-2);
-		cursor: pointer;
-		font-size: 0.86rem;
-		color: var(--ink-soft);
-	}
-	.pill input {
-		position: absolute;
-		opacity: 0;
-		pointer-events: none;
-	}
-	.pill.on {
-		background: var(--accent-soft);
-		border-color: var(--accent);
-		color: var(--accent-strong);
-	}
-	.pill:has(input:focus-visible) {
-		outline: 2px solid var(--dusk);
 	}
 	.poles {
 		display: grid;
@@ -271,20 +242,5 @@
 			grid-row: 1;
 			justify-content: space-between;
 		}
-	}
-	.chip-btn {
-		font: inherit;
-		font-size: 0.86rem;
-		padding: 0.3rem 0.8rem;
-		border-radius: 999px;
-		border: 1px solid var(--paper-edge);
-		background: var(--paper-2);
-		color: var(--ink-soft);
-		cursor: pointer;
-	}
-	.chip-btn.on {
-		background: var(--accent-soft);
-		border-color: var(--accent);
-		color: var(--accent-strong);
 	}
 </style>

@@ -72,10 +72,10 @@
 				<Scale bind:value={values[f.id] as number | null} labelPrefix="energy" name={t(`section.${kind}.${f.id}`)} />
 			{:else if f.type === 'chips'}
 				<p class="question">{t(`section.${kind}.${f.id}`)}</p>
-				<div class="chips">
+				<div class="pills">
 					{#each f.options ?? [] as opt (opt)}
 						{@const on = ((values[f.id] as string[]) ?? []).includes(opt)}
-						<button type="button" class="chip-btn" class:on aria-pressed={on} onclick={() => toggleChip(f.id, opt)}>
+						<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggleChip(f.id, opt)}>
 							{t(`emotion.${opt}`)}
 						</button>
 					{/each}
@@ -122,28 +122,7 @@
 		font-family: var(--font-serif);
 		color: var(--ink-faint);
 	}
-	.chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
+	.pills {
 		margin-top: 0.4rem;
-	}
-	.chip-btn {
-		font: inherit;
-		font-size: 0.85rem;
-		padding: 0.3rem 0.8rem;
-		border-radius: 999px;
-		border: 1px solid var(--paper-edge);
-		background: var(--paper-2);
-		color: var(--ink-soft);
-		cursor: pointer;
-	}
-	.chip-btn:hover {
-		border-color: var(--accent);
-	}
-	.chip-btn.on {
-		background: var(--accent-soft);
-		border-color: var(--accent);
-		color: var(--accent-strong);
 	}
 </style>

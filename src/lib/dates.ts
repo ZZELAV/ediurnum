@@ -35,3 +35,15 @@ export function addYears(iso: string, years: number): string {
 	const candidate = `${String(y).padStart(4, '0')}-${md}`;
 	return isIsoDate(candidate) ? candidate : `${String(y).padStart(4, '0')}-02-28`;
 }
+
+/** Wochentag eines Datums, 0 = Sonntag. */
+export function weekdayOf(iso: string): number {
+	return new Date(iso + 'T00:00:00Z').getUTCDay();
+}
+
+/** Monat ("YYYY-MM") verschoben um `months` Monate. */
+export function addMonths(month: string, months: number): string {
+	const [y, m] = month.split('-').map(Number);
+	const total = y * 12 + (m - 1) + months;
+	return `${String(Math.floor(total / 12)).padStart(4, '0')}-${String((total % 12) + 1).padStart(2, '0')}`;
+}

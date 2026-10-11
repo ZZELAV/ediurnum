@@ -578,6 +578,41 @@ textarea.write {
 	background: var(--dusk-soft);
 }
 
+/* Auswahl als Pillen (Zeitraum, Antworten, Gefühle): Knopf, Link oder Label mit verstecktem Radio */
+.pills {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+.pill {
+	margin: 0;
+	padding: 0.35rem 0.85rem;
+	border-radius: 999px;
+	border: 1px solid var(--paper-edge);
+	background: var(--paper-2);
+	font: inherit;
+	font-size: 0.86rem;
+	color: var(--ink-soft);
+	text-decoration: none;
+	cursor: pointer;
+}
+.pill:hover {
+	border-color: var(--accent);
+}
+.pill.on {
+	background: var(--accent-soft);
+	border-color: var(--accent);
+	color: var(--accent-strong);
+}
+.pill input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+.pill:has(input:focus-visible) {
+	outline: 2px solid var(--dusk);
+}
+
 .chip {
 	display: inline-flex;
 	align-items: center;

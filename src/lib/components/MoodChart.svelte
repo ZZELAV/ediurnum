@@ -2,43 +2,44 @@
 	import { daysBetween } from '#lib/dates.ts';
 	import { fmtDate, fmtNumber, t } from '#lib/i18n/t.ts';
 
-	/** Stimmungsverlauf (1–5) über einen Zeitraum: Linie mit Punkten, Lücken an Tagen ohne Stimmung. */
+	/**
+	 * Stimmungsverlauf (1–5) über einen Zeitraum: Linie mit Punkten, Lücken an Tagen ohne Stimmung.
+	 * `weekly`: Punkte sind Wochendurchschnitte (Datum = Wochenbeginn). Der Gesamtdurchschnitt steht
+	 * in der Statistik als eigene Kachel und wird hier nicht wiederholt.
+	 */
 	let {
 		points,
 		from,
 		to,
-		compact = false
-	}: { points: { date: string; mood: number }[]; from: string; to: string; compact?: boolean } = $props();
+		weekly = false
+	}: { points: { date: string; mood: number }[]; from: string; to: string; weekly?: boolean } = $props();
 
 	// Breite erst nach dem Messen bekannt – vorher nichts zeichnen, sonst ragt die Grafik auf dem Handy kurz hinaus
 	let width = $state(0);
-	// kompakt (z. B. in der Seitenspalte): niedriger, Beschriftung nur bei 1, 3 und 5
-	const height = $derived(compact ? 140 : 190);
-	const pad = $derived({ top: 12, right: 12, bottom: 26, left: compact ? 66 : 74 });
-	const labelled = $derived(compact ? [1, 3, 5] : [1, 2, 3, 4, 5]);
+	const height = 190;
+	const pad = { top: 12, right: 12, bottom: 26, left: 74 };
 
 	const span = $derived(Math.max(1, daysBetween(from, to)));
 	const x = (date: string) => pad.left + (daysBetween(from, date) / span) * (width - pad.left - pad.right);
 	const y = (mood: number) => pad.top + ((5 - mood) / 4) * (height - pad.top - pad.bottom);
 
 	const sorted = $derived([...points].sort((a, b) => a.date.localeCompare(b.date)));
-	// Aufeinanderfolgende Tage verbinden; grössere Lücken (> 3 Tage) gestrichelt
+	// Benachbarte Punkte verbinden; Lücken (mehr als 3 Tage bzw. eine ausgelassene Woche) gestrichelt
+	const maxStep = $derived(weekly ? 7 : 3);
 	const segments = $derived(
-		sorted.slice(1).map((p, i) => ({ a: sorted[i], b: p, gap: daysBetween(sorted[i].date, p.date) > 3 }))
+		sorted.slice(1).map((p, i) => ({ a: sorted[i], b: p, gap: daysBetween(sorted[i].date, p.date) > maxStep }))
 	);
-	const average = $derived(sorted.length ? sorted.reduce((s, p) => s + p.mood, 0) / sorted.length : null);
+	/** Wert als Text: Tageswert als Wort, Wochenschnitt als Zahl mit dem nächstliegenden Wort. */
+	const label = (mood: number) => (weekly ? `${fmtNumber(mood)} · ${t(`mood.${Math.round(mood)}`)}` : t(`mood.${mood}`));
+	const when = (date: string, style: 'dayMonth' | 'medium') => (weekly ? t('mood.week', { date: fmtDate(date, style) }) : fmtDate(date, style));
 	const ticks = $derived(from === to ? [from] : [from, to]);
 
 	let hover = $state<{ date: string; mood: number } | null>(null);
 </script>
 
 <figure class="mood-chart" bind:clientWidth={width}>
-	<figcaption>
-		<span class="title">{t('mood.chartTitle')}</span>
-		{#if average !== null}
-			<span class="faint">{t('mood.chartAverage', { value: fmtNumber(average), count: sorted.length })}</span>
-		{/if}
-	</figcaption>
+	<!-- sichtbarer Titel steht in der Karte drumherum -->
+	<figcaption class="visually-hidden">{t('mood.chartTitle')}</figcaption>
 
 	{#if sorted.length === 0}
 		<p class="faint">{t('mood.chartEmpty')}</p>
@@ -48,9 +49,7 @@
 			<svg {width} {height} role="img" aria-label={t('mood.chartTitle')}>
 				{#each [1, 2, 3, 4, 5] as m (m)}
 					<line class="grid" x1={pad.left} x2={width - pad.right} y1={y(m)} y2={y(m)} />
-					{#if labelled.includes(m)}
-						<text class="axis" x={pad.left - 8} y={y(m)} dy="0.32em" text-anchor="end">{t(`mood.${m}`)}</text>
-					{/if}
+					<text class="axis" x={pad.left - 8} y={y(m)} dy="0.32em" text-anchor="end">{t(`mood.${m}`)}</text>
 				{/each}
 				{#each ticks as d, i (i)}
 					<text class="axis" x={x(d)} y={height - 6} text-anchor={i === 0 ? 'start' : 'end'}>{fmtDate(d, 'short')}</text>
@@ -59,7 +58,7 @@
 					<line class="line" class:gap={s.gap} x1={x(s.a.date)} y1={y(s.a.mood)} x2={x(s.b.date)} y2={y(s.b.mood)} />
 				{/each}
 				{#each sorted as p (p.date)}
-					<circle class="dot" class:on={hover?.date === p.date} cx={x(p.date)} cy={y(p.mood)} r={hover?.date === p.date ? 5.5 : 4} />
+					<circle class="dot" class:on={hover?.date === p.date} cx={x(p.date)} cy={y(p.mood)} r={hover?.date === p.date ? 5.5 : weekly ? 3 : 4} />
 					<!-- grössere, unsichtbare Trefferfläche für Maus und Finger -->
 					<circle
 						class="hit"
@@ -78,39 +77,31 @@
 					style:left="{Math.min(Math.max(x(hover.date), 70), width - 70)}px"
 					style:top="{y(hover.mood) - 10}px"
 				>
-					<strong>{t(`mood.${hover.mood}`)}</strong>
-					<span>{fmtDate(hover.date, 'dayMonth')}</span>
+					<strong>{label(hover.mood)}</strong>
+					<span>{when(hover.date, 'dayMonth')}</span>
 				</div>
 			{/if}
 			{/if}
 		</div>
-		<table class="visually-hidden">
-			<caption>{t('mood.chartTitle')}</caption>
-			<tbody>
-				{#each sorted as p (p.date)}<tr><td>{fmtDate(p.date, 'medium')}</td><td>{p.mood}/5 ({t(`mood.${p.mood}`)})</td></tr>{/each}
-			</tbody>
-		</table>
+		<!-- im div: eine Tabelle hielte sich nicht an die Breite von 1 px und liesse die Seite seitlich überlaufen -->
+		<div class="visually-hidden">
+			<table>
+				<caption>{t('mood.chartTitle')}</caption>
+				<tbody>
+					{#each sorted as p (p.date)}<tr><td>{when(p.date, 'medium')}</td><td>{label(p.mood)}</td></tr>{/each}
+				</tbody>
+			</table>
+		</div>
 	{/if}
 </figure>
 
 <style>
 	.mood-chart {
-		margin: 1rem 0;
+		margin: 0;
 		min-width: 0;
 		/* Breite nur vom Platz drumherum, nicht vom gezeichneten SVG – sonst bliebe die Grafik nach dem
 		   Schmalerwerden (Handy drehen, Fenster verkleinern) so breit wie zuvor gemessen */
 		contain: inline-size;
-	}
-	figcaption {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: baseline;
-		gap: 0.2rem 0.7rem;
-		margin-bottom: 0.4rem;
-	}
-	.title {
-		font-weight: 600;
-		font-size: 0.9rem;
 	}
 	.plot {
 		position: relative;

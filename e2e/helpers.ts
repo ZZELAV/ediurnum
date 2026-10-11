@@ -15,6 +15,13 @@ const ROOT = new URL('..', import.meta.url);
 export const PASSWORD = 'e2e-Passwort-lang-genug';
 export const PIN = '482913';
 
+/** Heutiges Datum (plus `offset` Tage) in der Zeitzone des Testservers (TZ=Europe/Zurich). */
+export function zurichToday(offset = 0) {
+	const d = new Date(new Date().toLocaleString('sv', { timeZone: 'Europe/Zurich' }).slice(0, 10) + 'T00:00:00Z');
+	d.setUTCDate(d.getUTCDate() + offset);
+	return d.toISOString().slice(0, 10);
+}
+
 function freePort(): Promise<number> {
 	return new Promise((resolve, reject) => {
 		const srv = createServer();

@@ -107,7 +107,8 @@ export const en: Record<string, string> = {
 	'dashboard.focusFrom': 'from the analysis of {date}',
 	'dashboard.recent': 'Recent entries',
 	'dashboard.recentEmpty': 'Your previous days will appear here.',
-	'dashboard.stats': '{count} entries in total',
+	'dashboard.statsLink': 'All figures',
+	'dashboard.statsMood': 'Ø mood 30 days',
 	'dashboard.yearAgo': 'One year ago today',
 	'dashboard.yearsAgo': '{years} years ago today',
 
@@ -484,7 +485,6 @@ export const en: Record<string, string> = {
 
 	'footer.version': 'ediurnum v{version}',
 
-	'dashboard.stats.one': '1 entry in total',
 	'archive.entries.one': '1 entry',
 	'insights.preview.one': '1 entry goes into the file.',
 	'insights.previewLocked.one': 'Of these, 1 is locked (allowed for AI).',
@@ -573,8 +573,7 @@ export const en: Record<string, string> = {
 
 	// Mood chart
 	'mood.chartTitle': 'Mood over time',
-	'mood.chartAverage': 'Average {value} over {count} days',
-	'mood.chartAverage.one': 'Average {value} from 1 day',
+	'mood.week': 'Week of {date}',
 	'mood.chartEmpty': 'You did not record a mood in this period.',
 
 	// Welcome card

@@ -262,27 +262,14 @@ export function entriesForAi(
 	return { entries, skippedLocked };
 }
 
-/** Stimmung pro Tag in einem Zeitraum (für den Verlauf in den Einsichten). Gesperrte Einträge nur mit PIN. */
-export function moodSeries(session: Session, from: string, to: string): { date: string; mood: number }[] {
-	const rows = getDb()
-		.prepare('SELECT * FROM entries WHERE date >= ? AND date <= ? ORDER BY date ASC')
-		.all(from, to) as unknown as EntryRow[];
-	const out: { date: string; mood: number }[] = [];
-	for (const r of rows) {
-		const key = keyFor(session, r.locked === 1);
-		if (!key) continue;
-		const mood = decryptJson<EntryContent>(key, r.payload, aad(r.id, r.revision)).mood;
-		if (typeof mood === 'number' && mood >= 1 && mood <= 5) out.push({ date: r.date, mood });
-	}
-	return out;
-}
-
 /**
- * Alle geschriebenen Tage für die Statistik, älteste zuerst: Datum und Abschnittsarten immer,
+ * Geschriebene Tage für die Statistik (ab `from`, sonst alle), älteste zuerst: Datum und Abschnittsarten immer,
  * Stimmung, Energie und Gefühle nur, wenn der Eintrag lesbar ist (gesperrt → nur mit PIN).
  */
-export function statsDays(session: Session): StatsDay[] {
-	const rows = getDb().prepare('SELECT * FROM entries WHERE empty = 0 ORDER BY date ASC').all() as unknown as EntryRow[];
+export function statsDays(session: Session, from = ''): StatsDay[] {
+	const rows = getDb()
+		.prepare('SELECT * FROM entries WHERE empty = 0 AND date >= ? ORDER BY date ASC')
+		.all(from) as unknown as EntryRow[];
 	return rows.map((r) => {
 		const key = keyFor(session, r.locked === 1);
 		const c = key ? decryptJson<EntryContent>(key, r.payload, aad(r.id, r.revision)) : null;

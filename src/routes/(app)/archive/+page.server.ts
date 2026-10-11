@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { monthKey, todayIso } from '#lib/dates.ts';
+import { addMonths, monthKey, todayIso } from '#lib/dates.ts';
 import { getEntry, listEntryMeta } from '#lib/server/entries.ts';
 import { snippetOf } from '#lib/server/snippet.ts';
 
@@ -8,11 +8,7 @@ type Day = { date: string; mood: number | null; locked: boolean; kinds: string[]
 /** Alle Monate vom laufenden zurück bis `oldest` (beide eingeschlossen), neuester zuerst. */
 function monthsBack(current: string, oldest: string): string[] {
 	const out: string[] = [];
-	let [y, m] = current.split('-').map(Number);
-	for (let key = current; key >= oldest; key = `${y}-${String(m).padStart(2, '0')}`) {
-		out.push(key);
-		if (--m === 0) [y, m] = [y - 1, 12];
-	}
+	for (let key = current; key >= oldest; key = addMonths(key, -1)) out.push(key);
 	return out;
 }
 

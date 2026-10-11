@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeStats, periodStart, PLEASANT_EMOTIONS, type StatsDay } from '../src/lib/stats.ts';
+import { computeStats, currentStreak, periodStart, PLEASANT_EMOTIONS, writingSummary, type StatsDay } from '../src/lib/stats.ts';
 import { EMOTIONS } from '../src/lib/templates.ts';
 
 const day = (date: string, mood: number | null = null, extra: Partial<StatsDay> = {}): StatsDay => ({
@@ -25,13 +25,11 @@ test('Anzahl, Schreibquote und Serien', () => {
 	assert.equal(s.days, 13);
 	assert.equal(s.written, 6, 'Tag vor dem Zeitraum zählt nicht');
 	assert.deepEqual(s.longest, { length: 4, from: '2026-09-30', to: '2026-10-03' });
-	assert.equal(s.currentStreak, 2, 'heute noch offen: Serie bis gestern');
 });
 
-test('Aktuelle Serie zählt über den Zeitraum hinaus, längste nur innerhalb', () => {
+test('Längste Serie nur innerhalb des Zeitraums', () => {
 	const days = ['2026-09-08', '2026-09-09', '2026-09-10', '2026-09-11', '2026-09-12'].map((d) => day(d));
 	const s = computeStats(days, '2026-09-11', '2026-09-12');
-	assert.equal(s.currentStreak, 5);
 	assert.equal(s.longest?.length, 2);
 	assert.equal(computeStats([], '2026-09-11', '2026-09-12').longest, null);
 });
@@ -48,22 +46,49 @@ test('Stimmung: Durchschnitt nur über Tage mit Stimmung, pro Monat und pro Woch
 	assert.deepEqual(
 		s.byMonth.map((m) => [m.month, m.written, m.mood.avg]),
 		[
-			['2026-09', 1, 2],
-			['2026-10', 3, 4.5]
-		]
+			['2026-10', 3, 4.5],
+			['2026-09', 1, 2]
+		],
+		'neuester Monat zuerst'
+	);
+	assert.deepEqual(
+		s.moodTrend,
+		{
+			weekly: false,
+			points: [
+				{ date: '2026-09-28', mood: 2 },
+				{ date: '2026-10-05', mood: 4 },
+				{ date: '2026-10-11', mood: 5 }
+			]
+		},
+		'Verlauf pro Tag, ohne Tage ohne Stimmung'
 	);
 	assert.deepEqual(s.byWeekday[0], { weekday: 1, avg: 3, count: 2 });
 	assert.deepEqual(s.byWeekday[1], { weekday: 2, avg: null, count: 0 });
 	assert.deepEqual(s.byWeekday[6], { weekday: 0, avg: 5, count: 1 });
 });
 
+test('Stimmungsverlauf: über 90 Tage als Wochendurchschnitt, erste Woche ab Beginn des Zeitraums', () => {
+	const days = [day('2026-07-01', 2), day('2026-07-04', 4), day('2026-07-06', 5), day('2026-07-07', null), day('2026-09-30', 1)];
+	assert.equal(computeStats(days, '2026-07-04', '2026-10-01').moodTrend.weekly, false, '90 Tage: noch pro Tag');
+	const s = computeStats(days, '2026-07-01', '2026-10-01'); // 93 Tage, 1.7. ist ein Mittwoch
+	assert.deepEqual(s.moodTrend, {
+		weekly: true,
+		points: [
+			{ date: '2026-07-01', mood: 3 },
+			{ date: '2026-07-06', mood: 5 },
+			{ date: '2026-09-28', mood: 1 }
+		]
+	});
+});
+
 test('Monate lückenlos, auch über den Jahreswechsel', () => {
 	const s = computeStats([day('2026-02-03', 3)], '2025-11-20', '2026-02-10');
 	assert.deepEqual(
 		s.byMonth.map((m) => m.month),
-		['2025-11', '2025-12', '2026-01', '2026-02']
+		['2026-02', '2026-01', '2025-12', '2025-11']
 	);
-	assert.equal(s.byMonth[1].mood.avg, null);
+	assert.equal(s.byMonth[2].mood.avg, null);
 	assert.equal(s.monthlyReviews.total, 4);
 });
 
@@ -122,9 +147,33 @@ test('Gesperrte Einträge ohne PIN: zählen für Anzahl, Serien und Rückblicke,
 	const days = [day('2026-10-09', 4), locked('2026-10-10', ['gefuehl']), day('2026-10-11', 2)];
 	const s = computeStats(days, '2026-10-01', '2026-10-11');
 	assert.equal(s.written, 3);
-	assert.equal(s.currentStreak, 3);
 	assert.equal(s.hidden, 1);
 	assert.deepEqual(s.mood, { avg: 3, count: 2 });
 	assert.equal(s.weeklyReviews.done, 1);
 	assert.equal(computeStats([locked('2026-09-01')], '2026-10-01', '2026-10-11').hidden, 0, 'nur im Zeitraum');
+});
+
+test('Aktuelle Serie: mit heutigem Eintrag, sonst bis gestern, über Monats- und Jahresgrenzen', () => {
+	assert.equal(currentStreak(['2026-10-10', '2026-10-09', '2026-10-08', '2026-10-06'], '2026-10-10'), 3);
+	assert.equal(currentStreak(['2026-10-09', '2026-10-08'], '2026-10-10'), 2, 'heute noch offen');
+	assert.equal(currentStreak(['2026-10-08', '2026-10-07'], '2026-10-10'), 0, 'gestern ausgelassen');
+	assert.equal(currentStreak([], '2026-10-10'), 0);
+	assert.equal(currentStreak(['2026-01-02', '2026-01-01', '2025-12-31', '2025-12-30'], '2026-01-02'), 4);
+	assert.equal(currentStreak(['2026-03-01', '2026-02-28'], '2026-03-01'), 2);
+});
+
+test('Kennzahlen aus den Metadaten (Widget, Dashboard, Statistik)', () => {
+	assert.deepEqual(writingSummary([], '2026-10-10'), { entries: 0, lastEntry: null, writtenToday: false, streak: 0 });
+	const metas = [
+		{ date: '2026-10-09', updatedAt: '2026-10-10T07:00:00.000Z' }, // gestern, heute nachgetragen
+		{ date: '2026-10-10', updatedAt: '2026-10-10T06:00:00.000Z' },
+		{ date: '2026-10-07', updatedAt: '2026-10-07T20:00:00.000Z' }
+	];
+	assert.deepEqual(writingSummary(metas, '2026-10-10'), {
+		entries: 3,
+		lastEntry: '2026-10-10T07:00:00.000Z',
+		writtenToday: true,
+		streak: 2
+	});
+	assert.equal(writingSummary(metas, '2026-10-11').writtenToday, false);
 });

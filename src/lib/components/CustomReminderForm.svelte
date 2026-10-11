@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { weekdayOf } from '#lib/dates.ts';
 	import { t, weekdayName, WEEK_ORDER } from '#lib/i18n/t.ts';
 	import { CUSTOM_REPEATS, type CustomReminder, type CustomRepeat } from '#lib/reminders.ts';
 
@@ -12,7 +13,7 @@
 	let { reminder, today, onclose, onsaved }: Props = $props();
 
 	// Formularzustand – Startwerte aus der bestehenden Erinnerung (nur beim Öffnen gelesen)
-	const initial = (() => ({ reminder, weekday: new Date(today + 'T00:00:00Z').getUTCDay() }))();
+	const initial = (() => ({ reminder, weekday: weekdayOf(today) }))();
 	let repeat = $state<CustomRepeat>(initial.reminder?.repeat ?? 'daily');
 	let weekdays = $state<number[]>(initial.reminder?.weekdays.length ? [...initial.reminder.weekdays] : [initial.weekday]);
 	let error = $state<string | null>(null);
