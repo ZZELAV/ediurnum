@@ -86,6 +86,7 @@ npm run dev      # http://localhost:5173, data in ./data
 npm test         # unit tests
 npm run check    # type check
 npm run build    # production build in ./build
+npm run test:e2e       # end-to-end tests against the built server (run build first)
 ```
 
 Tech stack: SvelteKit 3, Svelte 5, TypeScript, `node:sqlite`, `web-push`.

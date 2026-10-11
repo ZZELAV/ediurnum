@@ -17,7 +17,7 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 1. **Semantic Versioning** in `package.json`:
    - `PATCH` für Fehlerbehebungen, `MINOR` für neue Funktionen, `MAJOR` für inkompatible Änderungen
      (z. B. Änderungen am Datenbankschema ohne Migration oder am Backup-Format).
-   - Beta-Phase: Vorabversionen `0.1.0-beta.N` (Tag `v0.1.0-beta.N`), die fertige Version wird `0.1.0`.
+   - Beta-Phase: Vorabversionen `0.1.0-beta.N` (Tag `v0.1.0-beta.N`), die erste fertige Version wird `1.0.0` (nach der Testwoche mit 0.1.0-beta.6 auf dem Server).
 2. **CHANGELOG.md** im Format *Keep a Changelog* pflegen:
    - **Kein `[Unreleased]`-Abschnitt.** Mit der ersten Änderung nach einem Release wird die nächste Version angelegt: `## [x.y.z]` (noch ohne Datum) im CHANGELOG und dieselbe Version in `package.json`/`package-lock.json` (`npm version --no-git-tag-version x.y.z`). Die Einstellungen zeigen genau diesen Abschnitt (passend zur Version in `package.json`).
    - Jede Änderung dort in der passenden Kategorie (`Added`, `Changed`, `Fixed`, `Security`, `Removed`, `Deprecated`) eintragen – **auf Englisch** (öffentliches Repo), aus Sicht des Nutzers, kurz.

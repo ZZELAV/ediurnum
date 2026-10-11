@@ -4,7 +4,7 @@ All notable changes to ediurnum are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [Semantic Versioning](https://semver.org).
 The topmost version without a date is still in development.
 
-## [0.1.0-beta.6]
+## [0.1.0-beta.6] - 2026-10-11
 
 ### Added
 
@@ -20,6 +20,7 @@ The topmost version without a date is still in development.
   frequent feelings and how many weekly and monthly reviews you wrote – for the last 30 or 90 days, 12 months or
   everything. Both charts over time show the latest date on the left. Locked entries count towards streaks and
   totals; their mood and feelings only while your PIN is entered.
+- Tables in AI answers are shown as tables (scrollable sideways on small screens).
 - A statistics card on the dashboard shows the current streak, the average mood of the last 30 days and the number
   of entries. Dashboard, statistics and `/api/widget` use the same figures.
 - "All entries" shows every month from your first entry up to the current one, including months without entries,
@@ -65,6 +66,8 @@ The topmost version without a date is still in development.
 
 ### Fixed
 
+- The journal now also locks after the set time without activity when no browser has it open. Before, the server
+  kept such sessions open for up to 12 hours (unless "lock after leaving the app" was on).
 - Saving an entry quickly several times in a row (auto-save, Ctrl+S, leaving the page) could in rare cases store an
   older version last.
 - Invalid requests to the API return "400 Bad Request" instead of a server error.
@@ -207,6 +210,7 @@ First public beta of ediurnum – a private, self-hosted, encrypted journal for 
 - Optional focus mode while writing, German and English, light and dark theme, installable web app,
   Docker Compose setup for self-hosting.
 
+[0.1.0-beta.6]: https://github.com/ZZELAV/ediurnum/compare/v0.1.0-beta.5...v0.1.0-beta.6
 [0.1.0-beta.5]: https://github.com/ZZELAV/ediurnum/compare/v0.1.0-beta.4...v0.1.0-beta.5
 [0.1.0-beta.4]: https://github.com/ZZELAV/ediurnum/compare/v0.1.0-beta.3...v0.1.0-beta.4
 [0.1.0-beta.3]: https://github.com/ZZELAV/ediurnum/compare/v0.1.0-beta.2...v0.1.0-beta.3

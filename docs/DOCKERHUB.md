@@ -12,11 +12,12 @@ weekly and monthly reviews, reminders and optional AI insights through the AI ch
 
 - One entry per day in 5–10 minutes: guided questions (experienced, feelings, learning & growth), free thoughts, mood
 - **Search** across all entries and a calendar that shows your mood per day
+- **Statistics**: writing streaks, mood over time, mood and energy per month and weekday, most frequent feelings
 - “Your first steps” on the dashboard to get started (first entry, About me, reminders, PIN, backup)
 - Weekly and monthly reviews, your own reminders and **push notifications** (also on iPhone as an installed web app)
 - **About me**: a short self-assessment (personality, values, goals) as background for AI insights
 - **AI insights without API keys**: a Markdown file for ChatGPT, Claude, Gemini, … with customisable instructions –
-  ediurnum never sends anything to an AI on its own; focus points and a mood chart appear on the dashboard
+  ediurnum never sends anything to an AI on its own; focus points appear on the dashboard
 - Version history per entry (one version per day, changes highlighted), “on this day”, focus mode, German and English, light and dark theme, installable web app
 - **Encryption**: AES-256-GCM with a random master key (= recovery key), password via Argon2id, PIN-locked entries,
   encrypted backups, recovery key test in the settings; the journal locks itself after inactivity
@@ -46,10 +47,10 @@ Step-by-step guide (proxy, push notifications, updates, backups):
 | Tag | Meaning |
 |---|---|
 | `latest` | newest release |
-| `0.1.0-beta.5`, … | a specific release – see the [changelog](https://github.com/ZZELAV/ediurnum/blob/main/CHANGELOG.md) |
+| `0.1.0-beta.6`, … | a specific release – see the [changelog](https://github.com/ZZELAV/ediurnum/blob/main/CHANGELOG.md) |
 
 Images are built for `linux/amd64` and `linux/arm64` (e.g. Raspberry Pi 4/5). Pin a version in `.env` with
-`EDIURNUM_VERSION=0.1.0-beta.5`.
+`EDIURNUM_VERSION=0.1.0-beta.6`.
 
 ## Configuration
 
