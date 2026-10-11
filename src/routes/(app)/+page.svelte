@@ -36,7 +36,7 @@
 		</div>
 	</header>
 
-	<div class="split wide-side">
+	<div class="split">
 		<div class="stack">
 			{#if data.welcome}<WelcomeCard steps={data.welcome} today={data.today} />{/if}
 
@@ -179,7 +179,7 @@
 		font-weight: 600;
 	}
 	.stats small {
-		display: block;
+		margin-left: 0.3rem;
 		font-size: 0.8rem;
 		font-weight: 400;
 		color: var(--ink-soft);

@@ -209,12 +209,9 @@ p {
 }
 @media (min-width: 1100px) {
 	.split {
-		grid-template-columns: minmax(0, 1fr) 320px;
+		/* Seitenspalte wächst mit dem Fenster (320–380 px), damit die Schreibspalte bei 1100 px nicht zu schmal wird */
+		grid-template-columns: minmax(0, 1fr) clamp(320px, 30vw, 380px);
 		gap: 1.75rem;
-	}
-	/* breitere Seitenspalte (Dashboard: Statistik und Fokus) */
-	.split.wide-side {
-		grid-template-columns: minmax(0, 1fr) 380px;
 	}
 	/* Seitenspalte immer rechts, egal ob sie im Markup vor oder nach dem Hauptinhalt steht */
 	.split > .side {
