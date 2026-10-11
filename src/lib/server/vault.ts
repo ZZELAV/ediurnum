@@ -53,7 +53,7 @@ const state: VaultState = ((globalThis as unknown as Record<symbol, VaultState>)
 });
 const sessions = state.sessions;
 const ABSOLUTE_MAX_MS = 12 * 60 * 60 * 1000;
-export const PIN_UNLOCK_MS = 10 * 60 * 1000;
+const PIN_UNLOCK_MS = 10 * 60 * 1000;
 
 export function isInitialized(): boolean {
 	return getMeta('wrapped_dek') !== null;
@@ -123,23 +123,33 @@ export function createSession(dek: Buffer, idleMinutes: number, leaveMinutes = 0
 	return s;
 }
 
-export function getSession(token: string | undefined): Session | null {
-	if (!token) return null;
-	const s = sessions.get(token);
-	if (!s) return null;
-	const now = Date.now();
+/**
+ * Beendet die Sitzung, wenn sie abgelaufen ist (Inaktivität, Höchstdauer, App verlassen), und schliesst eine
+ * abgelaufene PIN. Zählt selbst nicht als Aktivität – sonst hielte der regelmässige Aufräumer jede Sitzung offen.
+ */
+function expire(token: string, s: Session, now: number): boolean {
 	const left = s.awayMs > 0 && s.awaySince > 0 && now - s.awaySince > s.awayMs;
 	if (now - s.lastSeen > s.idleMs || now - s.createdAt > ABSOLUTE_MAX_MS || left) {
 		const reason = now - s.createdAt > ABSOLUTE_MAX_MS ? 'max-duration' : left ? 'left-app' : 'inactivity';
 		log.info('journal closed automatically', { reason });
 		destroySession(token);
-		return null;
+		return true;
 	}
-	s.lastSeen = now;
 	if (s.lockKey && now > s.lockUntil) {
 		s.lockKey.fill(0);
 		s.lockKey = null;
 	}
+	return false;
+}
+
+/** Sitzung zu einer Anfrage; die Anfrage zählt als Aktivität. */
+export function getSession(token: string | undefined): Session | null {
+	if (!token) return null;
+	const s = sessions.get(token);
+	if (!s) return null;
+	const now = Date.now();
+	if (expire(token, s, now)) return null;
+	s.lastSeen = now;
 	return s;
 }
 
@@ -182,9 +192,11 @@ export function closePinInOtherSessions(keep: Session) {
 	}
 }
 
+// Abgelaufene Sitzungen auch ohne Anfrage beenden (Schlüssel aus dem Arbeitsspeicher) – ohne sie zu verlängern
 if (state.sweeper) clearInterval(state.sweeper);
 state.sweeper = setInterval(() => {
-	for (const token of [...sessions.keys()]) getSession(token);
+	const now = Date.now();
+	for (const [token, s] of [...sessions]) expire(token, s, now);
 }, 60_000).unref();
 
 // --------------------------------------------------------------------------
