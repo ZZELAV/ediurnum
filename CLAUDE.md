@@ -43,6 +43,7 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 - `src/lib/idle.ts` – sperrt das Tagebuch nach Inaktivität (Lebenszeichen GET `/api/session`) und nach Verlassen der App (sendBeacon POST `/api/session`; der Server sperrt nach `leaveMinutes`, auch wenn die App inzwischen beendet ist).
 - `src/lib/templates.ts` – geführte Fragen. **Feld-IDs nie umbenennen** (alte Antworten hängen daran).
 - Checkboxen erscheinen global als Schalter (`app.css`, Abschnitt Formulare) – keine eigenen Checkbox-Stile bauen; für Ein/Aus-Optionen `role="switch"` setzen.
+- Bestätigungen („Gespeichert.“) verschwinden nach `FLASH_MS` von selbst: `Flash` bzw. `expiring()` (für `form`) aus `src/lib/flash.svelte.ts`, Element mit `out:fade`. Fehler bleiben stehen.
 - Passwort- und PIN-Felder immer mit `PasswordInput.svelte` (Auge zum Anzeigen).
 - Handy/iPhone: Raster immer mit `minmax(0, 1fr)` bzw. `minmax(min(100%, Xpx), 1fr)`, Felder in Flex-Zeilen mit `min-width: 0` – iOS gibt Eingabefeldern sonst eine Mindestbreite und sie ragen rechts hinaus. Nach Layout-Änderungen alle Seiten bei 320 px Breite auf `scrollWidth` prüfen.
 - `Referrer-Policy` bleibt `same-origin`: Bei `no-referrer` senden Browser bei normalen Formularen `Origin: null`, SvelteKit lehnt das als Cross-Site ab.
