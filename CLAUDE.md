@@ -38,6 +38,8 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 - `src/lib/server/entries.ts` – ein Eintrag pro Tag; höchstens eine Version pro Kalendertag (TZ): Die erste Bearbeitung an einem neuen Tag archiviert die bisherige Fassung.
 - `src/lib/server/ai/` – Prompt-Aufbau (`buildChatMarkdown` für die Markdown-Datei, `parseResponse` für zurückkopierte Antworten) und Anbieter-Adapter für KI-Agenten mit API-Schlüssel (in der Oberfläche vorerst ausgeblendet, kommt in einem späteren Release).
 - `src/lib/reminders.ts` – Fälligkeit der Rückblicke (gemeinsam für App-Hinweise und Push); `src/lib/server/reminders.ts` – Zeitplan, VAPID, Geräte, Planer (läuft minütlich, gestartet in `hooks.server.ts` → `init`); `src/service-worker.ts` – nur Push, bewusst ohne Offline-Cache.
+- `src/lib/stats.ts` – Statistik als reine Funktion (`computeStats`); Daten aus `statsDays` in `entries.ts`: Datum und Abschnittsarten immer, Stimmung/Energie/Gefühle gesperrter Einträge nur mit offener PIN. Seite `/stats`, Zeitraum per `?period=`.
+- Navigation (`(app)/+layout.svelte`): Einstellungen stehen nicht in der Hauptnavigation, sondern beim Sperren (Seitenleiste unten, Handy oben rechts).
 - `src/lib/profile.ts` – Selbsteinschätzung „Über mich“ (verschlüsselt in `meta.profile`, im Backup enthalten, optional in der KI-Datei). **Feld-IDs nie umbenennen.**
 - `src/lib/server/log.ts` – Protokoll fürs Docker-Log (`LOG_LEVEL`); nie Inhalte, Passwörter oder Schlüssel loggen.
 - `src/lib/idle.ts` – sperrt das Tagebuch nach Inaktivität (Lebenszeichen GET `/api/session`) und nach Verlassen der App (sendBeacon POST `/api/session`; der Server sperrt nach `leaveMinutes`, auch wenn die App inzwischen beendet ist).

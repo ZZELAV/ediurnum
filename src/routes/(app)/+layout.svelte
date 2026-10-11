@@ -55,8 +55,10 @@
 		{ href: '/archive', key: 'nav.archive', icon: 'calendar', match: (p: string) => p.startsWith('/archive') },
 		{ href: '/insights', key: 'nav.insights', icon: 'spark', match: (p: string) => p.startsWith('/insights') },
 		{ href: '/reminders', key: 'nav.reminders', icon: 'bell', match: (p: string) => p.startsWith('/reminders') },
-		{ href: '/settings', key: 'nav.settings', icon: 'gear', match: (p: string) => p.startsWith('/settings') }
+		{ href: '/stats', key: 'nav.stats', icon: 'chart', match: (p: string) => p.startsWith('/stats') }
 	];
+	// Einstellungen stehen nicht in der Navigation, sondern beim Sperren (Seitenleiste unten, Handy oben)
+	const settingsActive = $derived(page.url.pathname.startsWith('/settings'));
 </script>
 
 {#snippet icon(name: string)}
@@ -71,6 +73,8 @@
 			<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" /><path d="M10 20.5a2 2 0 0 0 4 0" />
 		{:else if name === 'gear'}
 			<circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+		{:else if name === 'chart'}
+			<path d="M4 20h16" /><rect x="5.5" y="11" width="3" height="6" rx="1" /><rect x="10.5" y="6" width="3" height="11" rx="1" /><rect x="15.5" y="9" width="3" height="8" rx="1" />
 		{:else if name === 'lock'}
 			<rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" />
 		{/if}
@@ -95,6 +99,9 @@
 			{/each}
 		</nav>
 		<div class="side-foot">
+			<a href="/settings" class="side-link" class:active={settingsActive} aria-current={settingsActive ? 'page' : undefined}>
+				{@render icon('gear')}<span>{t('nav.settings')}</span>
+			</a>
 			<form method="POST" action="/logout">
 				<button class="lock-btn">{@render icon('lock')}<span>{t('nav.lock')}</span></button>
 			</form>
@@ -108,9 +115,19 @@
 			<span class="logo" aria-hidden="true">e</span>
 			<span class="name">ediurnum</span>
 		</a>
-		<form method="POST" action="/logout">
-			<button class="btn quiet icon" title={t('nav.lock')} aria-label={t('nav.lock')}>{@render icon('lock')}</button>
-		</form>
+		<div class="top-actions">
+			<a
+				href="/settings"
+				class="btn quiet icon"
+				class:active={settingsActive}
+				title={t('nav.settings')}
+				aria-label={t('nav.settings')}
+				aria-current={settingsActive ? 'page' : undefined}>{@render icon('gear')}</a
+			>
+			<form method="POST" action="/logout">
+				<button class="btn quiet icon" title={t('nav.lock')} aria-label={t('nav.lock')}>{@render icon('lock')}</button>
+			</form>
+		</div>
 	</header>
 
 	<div class="content">
@@ -186,6 +203,7 @@
 		gap: 0.2rem;
 	}
 	.side-nav a,
+	.side-link,
 	.lock-btn {
 		white-space: nowrap;
 		display: flex;
@@ -199,17 +217,21 @@
 		font-size: 0.95rem;
 	}
 	.side-nav a:hover,
+	.side-link:hover,
 	.lock-btn:hover {
 		background: var(--paper-2);
 		color: var(--ink);
 	}
-	.side-nav a.active {
+	.side-nav a.active,
+	.side-link.active {
 		background: var(--accent-soft);
 		color: var(--accent-strong);
 		font-weight: 500;
 	}
 	.side-foot {
 		margin-top: auto;
+		display: grid;
+		gap: 0.2rem;
 	}
 	.lock-btn {
 		white-space: nowrap;
@@ -254,6 +276,15 @@
 			background: color-mix(in srgb, var(--desk) 88%, transparent);
 			backdrop-filter: blur(10px);
 			border-bottom: 1px solid var(--paper-edge);
+		}
+		.top-actions {
+			display: flex;
+			align-items: center;
+			gap: 0.25rem;
+		}
+		.top-actions .active {
+			color: var(--accent-strong);
+			background: var(--accent-soft);
 		}
 		.mobile-top .name {
 			font-size: 1.1rem;

@@ -4,6 +4,7 @@ import { getDb, nowIso, transaction } from './db';
 import { todayIso } from '#lib/dates.ts';
 import type { Session } from './vault';
 import { filledKinds, isEmptyContent } from '#lib/templates.ts';
+import type { StatsDay } from '#lib/stats.ts';
 import type { Entry, EntryContent, EntryMeta, RevisionInfo, SectionKind } from '#lib/types.ts';
 
 interface EntryRow {
@@ -274,4 +275,26 @@ export function moodSeries(session: Session, from: string, to: string): { date: 
 		if (typeof mood === 'number' && mood >= 1 && mood <= 5) out.push({ date: r.date, mood });
 	}
 	return out;
+}
+
+/**
+ * Alle geschriebenen Tage für die Statistik, älteste zuerst: Datum und Abschnittsarten immer,
+ * Stimmung, Energie und Gefühle nur, wenn der Eintrag lesbar ist (gesperrt → nur mit PIN).
+ */
+export function statsDays(session: Session): StatsDay[] {
+	const rows = getDb().prepare('SELECT * FROM entries WHERE empty = 0 ORDER BY date ASC').all() as unknown as EntryRow[];
+	return rows.map((r) => {
+		const key = keyFor(session, r.locked === 1);
+		const c = key ? decryptJson<EntryContent>(key, r.payload, aad(r.id, r.revision)) : null;
+		const feeling = c?.sections.gefuehl;
+		return {
+			date: r.date,
+			kinds: toMeta(r).kinds,
+			content: c && {
+				mood: c.mood,
+				energy: typeof feeling?.energy === 'number' ? feeling.energy : null,
+				emotions: Array.isArray(feeling?.emotions) ? feeling.emotions : []
+			}
+		};
+	});
 }

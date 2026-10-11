@@ -15,12 +15,18 @@ The topmost version without a date is still in development.
   By default after 1 minute; adjustable in the settings (1, 5 or 15 minutes, or never). This also works when the
   app was closed completely in the meantime.
 - The settings link to the project on GitHub (source code, bug reports, ideas).
+- Statistics: current and longest writing streak, number of entries, average mood and energy, mood and energy per
+  month, mood per weekday, your most frequent feelings and how many weekly and monthly reviews you wrote – for the
+  last 30 or 90 days, 12 months or everything. Locked entries count towards streaks and totals; their mood and
+  feelings only while your PIN is entered.
 - "All entries" shows every month from your first entry up to the current one, including months without entries,
   so you can fill in any day.
 
 ### Changed
 
 - "Close journal" is now called "Lock journal".
+- Statistics take the place of the settings in the navigation. The settings are now next to "Lock journal": at the
+  bottom of the sidebar on a computer, at the top right on a phone.
 - Confirmations such as "Settings saved." disappear by themselves after a few seconds. Error messages stay visible.
 - `lastEntry` in `/api/widget` is now the time of the latest save (ISO timestamp) instead of only the date, so
   dashboards can show the actual time. The Homepage example in DEPLOYMENT.md shows it as relative time ("2 hours ago").
