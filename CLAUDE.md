@@ -11,7 +11,7 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 - `npm run test:e2e` – Ende-zu-Ende-Tests (`e2e/`): startet den gebauten Server (`server.js`) mit leerem Datenordner und prüft über HTTP; vorher `npm run build`
 - `npm run test:all` – Unit-Tests, Build und Ende-zu-Ende-Tests
 - `npm run build` – Produktions-Build nach `build/`
-- `npm run convert [-- datei.ediurnum]` – Konverter-Skript: Backup → Markdown/JSON/PDF (interaktiv)
+- `npm run convert [-- datei.ediurnum]` – Konverter-Skript: Backup → Markdown/JSON/PDF (interaktiv, Fragen immer auf Englisch)
 
 ## Versionierung (Pflicht bei jeder Änderung)
 

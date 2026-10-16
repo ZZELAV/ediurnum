@@ -251,9 +251,8 @@ npm ci
 npm run convert -- path/to/ediurnum-backup-2026-10-16.ediurnum
 ```
 
-The questions are in German if your system language is German (`LANG`, e.g. add `-e LANG=de` to the Docker
-command), otherwise in English; the export uses the language set in the journal. Delete the readable file when you
-no longer need it.
+The script asks in English; the export itself uses the language set in the journal. Delete the readable file when
+you no longer need it.
 
 ## 12. Removing ediurnum
 

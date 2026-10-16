@@ -37,7 +37,7 @@ function convert(answers: string[], args = [backupFile]) {
 	const r = spawnSync(process.execPath, ['--disable-warning=ExperimentalWarning', 'scripts/convert.ts', ...args], {
 		input: answers.join('\n') + '\n',
 		encoding: 'utf8',
-		env: { ...process.env, LANG: 'de_CH.UTF-8', TZ: 'Europe/Zurich' }
+		env: { ...process.env, LANG: 'de_CH.UTF-8', TZ: 'Europe/Zurich' } // Fragen trotzdem auf Englisch
 	});
 	return { code: r.status, out: r.stdout + r.stderr };
 }
@@ -61,9 +61,9 @@ describe('Konverter-Skript', () => {
 	test('Markdown ohne PIN ist identisch mit dem Export der App', async () => {
 		const r = convert([recoveryKey, '', '1', '']);
 		assert.equal(r.code, 0, r.out);
-		assert.match(r.out, /1 Eintrag gespeichert/);
-		assert.match(r.out, /1 gesperrter Eintrag ist nicht enthalten/);
-		assert.match(r.out, /nicht verschlüsselt/);
+		assert.match(r.out, /1 entry saved/);
+		assert.match(r.out, /1 locked entry is not included/);
+		assert.match(r.out, /not encrypted/);
 		assert.doesNotMatch(r.out, new RegExp(recoveryKey), 'Schlüssel erscheint nicht in der Ausgabe');
 		const app = await (await c.get('/api/export/plain?format=md')).text();
 		assert.equal(readFileSync(outFile('md'), 'utf8'), app);
@@ -73,7 +73,7 @@ describe('Konverter-Skript', () => {
 	test('Mit PIN auch gesperrte Einträge; JSON wie in der App aufgebaut', () => {
 		const r = convert([recoveryKey, '000000', PIN, '2', '']);
 		assert.equal(r.code, 0, r.out);
-		assert.match(r.out, /Die PIN stimmt nicht/);
+		assert.match(r.out, /Wrong PIN/);
 		const json = JSON.parse(readFileSync(outFile('json'), 'utf8'));
 		assert.equal(json.format, 'ediurnum-plain');
 		assert.equal(json.skippedLocked, 0);
@@ -94,19 +94,19 @@ describe('Konverter-Skript', () => {
 		const before = readFileSync(outFile('md'), 'utf8');
 		const r = convert([recoveryKey, '', '1', '', 'n']);
 		assert.equal(r.code, 1);
-		assert.match(r.out, /Überschreiben\?/);
-		assert.match(r.out, /Abgebrochen/);
+		assert.match(r.out, /Overwrite\?/);
+		assert.match(r.out, /Cancelled/);
 		assert.equal(readFileSync(outFile('md'), 'utf8'), before);
 	});
 
 	test('Falscher Schlüssel, Tippfehler und fehlende Datei werden gemeldet', () => {
 		const wrong = convert(['ABCD-EFGH', recoveryKey.replace(/^.{4}/, 'ZZZZ'), recoveryKey.slice(0, -1) + (recoveryKey.endsWith('A') ? 'B' : 'A')]);
 		assert.equal(wrong.code, 1);
-		assert.match(wrong.out, /nicht die richtige Länge/);
-		assert.match(wrong.out, /Zu viele Fehlversuche/);
+		assert.match(wrong.out, /does not have the right length/);
+		assert.match(wrong.out, /Too many failed attempts/);
 		const missing = convert([], [join(dir, 'gibt-es-nicht.ediurnum')]);
 		assert.equal(missing.code, 1);
-		assert.match(missing.out, /Datei nicht gefunden/);
+		assert.match(missing.out, /File not found/);
 		assert.ok(!existsSync(join(dir, 'gibt-es-nicht.md')));
 	});
 });
