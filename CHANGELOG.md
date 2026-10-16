@@ -6,6 +6,13 @@ The topmost version without a date is still in development.
 
 ## [1.0.0]
 
+### Added
+
+- Filter in “All entries”: show only days with certain moods, with a weekly or monthly review or with certain
+  feelings from the weekly review. Days that don't match look like days without an entry, and each month shows how
+  many of its entries match. The filter also applies to search results and is kept when you open an entry and come
+  back. Without your PIN, locked entries can only be filtered by review.
+
 ### Fixed
 
 - The three fields under “What am I grateful for today?” no longer grow past the right edge when the text gets

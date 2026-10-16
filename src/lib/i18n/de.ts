@@ -243,6 +243,12 @@ export const de: Record<string, string> = {
 	'archive.lockedHint': 'gesperrt',
 	'archive.legend': 'Legende',
 	'archive.legendNoMood': 'ohne Stimmung',
+	'archive.filter': 'Filter',
+	'archive.filterEmotions': 'Gefühle (Wochenrückblick)',
+	'archive.filterReset': 'Filter zurücksetzen',
+	'archive.filterCount': '{count} Einträge passen zum Filter.',
+	'archive.filterHidden': '{count} gesperrte Einträge lassen sich ohne PIN nur nach Rückblicken filtern.',
+	'archive.entriesOf': '{matched} von {count} Einträgen',
 	'search.label': 'Einträge durchsuchen',
 	'search.placeholder': 'Einträge durchsuchen …',
 	'search.count': '{count} Einträge gefunden',
@@ -502,6 +508,9 @@ export const de: Record<string, string> = {
 
 	// Einzahl-Formen (werden bei count = 1 verwendet)
 	'archive.entries.one': '1 Eintrag',
+	'archive.filterCount.one': '1 Eintrag passt zum Filter.',
+	'archive.filterHidden.one': '1 gesperrter Eintrag lässt sich ohne PIN nur nach Rückblicken filtern.',
+	'archive.entriesOf.one': '{matched} von 1 Eintrag',
 	'insights.preview.one': '1 Eintrag kommt in die Datei.',
 	'insights.previewLocked.one': 'Davon ist 1 gesperrt (für KI freigegeben).',
 	'insights.previewLockedNeedPin.one': '1 freigegebener gesperrter Eintrag wird nur mit PIN übertragen.',

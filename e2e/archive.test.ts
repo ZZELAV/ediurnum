@@ -70,6 +70,15 @@ describe('Alle Einträge', () => {
 		await c.api('/api/pin', undefined, 'DELETE');
 	});
 
+	test('Daten für den Filter: Gefühle und Rückblicke, gesperrte Einträge ohne PIN nicht lesbar', async () => {
+		const html = await (await c.get('/archive')).text();
+		assert.match(html, /date:"2026-03-02",mood:2,locked:false,readable:true,kinds:\[[^\]]*"gefuehl"[^\]]*\],emotions:\["joy"\]/);
+		assert.match(html, /date:"2026-03-05",mood:null,locked:true,readable:false,kinds:\[[^\]]*\],emotions:\[\]/);
+		await c.api('/api/pin', { pin: PIN });
+		assert.match(await (await c.get('/archive')).text(), /date:"2026-03-05",mood:null,locked:true,readable:true/);
+		await c.api('/api/pin', undefined, 'DELETE');
+	});
+
 	test('Ohne Anmeldung zur Anmeldung umgeleitet', async () => {
 		const res = await new Client(server.url).get('/archive');
 		assert.equal(res.status, 303);

@@ -1,12 +1,40 @@
 <script lang="ts">
+	import type { Snapshot } from '@sveltejs/kit';
 	import { untrack } from 'svelte';
 	import { api } from '#lib/client.ts';
 	import { weekdayOf } from '#lib/dates.ts';
+	import { matchesFilter, type DayFilter } from '#lib/filter.ts';
 	import { currentLocale, fmtDate, fmtMonth, t } from '#lib/i18n/t.ts';
 	import PinDialog from '#lib/components/PinDialog.svelte';
 	import type { SearchHit } from '#lib/search.ts';
+	import { EMOTIONS } from '#lib/templates.ts';
 
 	let { data } = $props();
+
+	// Filter für Kalender und Suchergebnisse – nur im Browser. Bleibt erhalten, wenn man aus einem Eintrag zurückkommt.
+	let filter = $state<DayFilter>({ moods: [], kinds: [], emotions: [] });
+	let filterOpen = $state(false);
+	export const snapshot: Snapshot<{ filter: DayFilter; open: boolean }> = {
+		capture: () => ({ filter: $state.snapshot(filter), open: filterOpen }),
+		restore: (v) => ((filter = v.filter), (filterOpen = v.open))
+	};
+
+	const filtering = $derived(filter.moods.length + filter.kinds.length + filter.emotions.length);
+	const days = $derived(new Map(data.months.flatMap((m) => m.days.map((d) => [d.date, d]))));
+	const passes = (date: string) => !filtering || matchesFilter(days.get(date)!, filter);
+	const matched = $derived([...days.keys()].filter(passes).length);
+	// Gesperrte Einträge ohne PIN: Stimmung und Gefühle unbekannt, sie passen nur zu Rückblicken
+	const unreadable = $derived(filter.moods.length || filter.emotions.length ? [...days.values()].filter((d) => !d.readable).length : 0);
+
+	function toggle(list: (string | number)[], value: string | number) {
+		const i = list.indexOf(value);
+		if (i === -1) list.push(value);
+		else list.splice(i, 1);
+	}
+
+	function resetFilter() {
+		filter = { moods: [], kinds: [], emotions: [] };
+	}
 
 	// Suche beim Tippen (kurz verzögert). Der Begriff geht per POST an den Server und steht nie in der
 	// Adresse – sonst landete er im Browserverlauf und in den Protokollen des Reverse-Proxys.
@@ -84,26 +112,92 @@
 			<a class="btn" href="/entry/{data.today}">{t('dashboard.write')}</a>
 			</div>
 		{:else}
-			<form class="search" role="search" onsubmit={(e) => (e.preventDefault(), runSearch(query, 0))}>
-				<label for="q" class="visually-hidden">{t('search.label')}</label>
-				<input
-					id="q"
-					type="search"
-					autocomplete="off"
-					placeholder={t('search.placeholder')}
-					bind:value={query}
-					oninput={() => runSearch(query)}
-					onkeydown={(e) => e.key === 'Escape' && query && (e.preventDefault(), clear())}
-				/>
-			</form>
+			<div class="tools">
+				<form class="search" role="search" onsubmit={(e) => (e.preventDefault(), runSearch(query, 0))}>
+					<label for="q" class="visually-hidden">{t('search.label')}</label>
+					<input
+						id="q"
+						type="search"
+						autocomplete="off"
+						placeholder={t('search.placeholder')}
+						bind:value={query}
+						oninput={() => runSearch(query)}
+						onkeydown={(e) => e.key === 'Escape' && query && (e.preventDefault(), clear())}
+					/>
+				</form>
+				<button
+					type="button"
+					class="btn ghost"
+					aria-expanded={filterOpen}
+					aria-controls="archive-filter"
+					onclick={() => (filterOpen = !filterOpen)}
+				>
+					{t('archive.filter')}
+					{#if filtering}<span class="badge">{filtering}</span>{/if}
+				</button>
+			</div>
 			{#if failed}<p class="notice error" role="alert">{t('common.error')}</p>{/if}
+
+			{#if filterOpen}
+				<section id="archive-filter" class="card filter" aria-label={t('archive.filter')}>
+					<div>
+						<p class="faint group">{t('entry.mood')}</p>
+						<div class="pills">
+							{#each [1, 2, 3, 4, 5] as m (m)}
+								{@const on = filter.moods.includes(m)}
+								<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.moods, m)}>
+									<span class="swatch m{m}" aria-hidden="true"></span>{t(`mood.${m}`)}
+								</button>
+							{/each}
+						</div>
+					</div>
+					<div>
+						<p class="faint group">{t('stats.reviews')}</p>
+						<div class="pills">
+							{#each [['gefuehl', 'weekly'], ['wachstum', 'monthly']] as const as [kind, label] (kind)}
+								{@const on = filter.kinds.includes(kind)}
+								<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.kinds, kind)}>
+									{t(`entry.suggest.${label}`)}
+								</button>
+							{/each}
+						</div>
+					</div>
+					<div>
+						<p class="faint group">{t('archive.filterEmotions')}</p>
+						<div class="pills">
+							{#each EMOTIONS as e (e)}
+								{@const on = filter.emotions.includes(e)}
+								<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.emotions, e)}>
+									{t(`emotion.${e}`)}
+								</button>
+							{/each}
+						</div>
+					</div>
+					{#if filtering}
+						<button type="button" class="btn ghost small reset" onclick={resetFilter}>{t('archive.filterReset')}</button>
+					{/if}
+				</section>
+			{/if}
+
+			{#if filtering}
+				<div class="filter-info faint" aria-live="polite">
+					{#if !search}<p>{t('archive.filterCount', { count: matched })}</p>{/if}
+					{#if unreadable}
+						<p>
+							{t('archive.filterHidden', { count: unreadable })}
+							<button type="button" class="btn quiet small" onclick={() => (pinDialog = true)}>{t('pin.title')}</button>
+						</p>
+					{/if}
+				</div>
+			{/if}
 		{/if}
 
 		{#if search}
+			{@const results = search.results.filter((r) => passes(r.date))}
 			<section class="card results" aria-live="polite">
 				<p class="faint count">
-					{search.results.length
-						? t('search.count', { count: search.results.length })
+					{results.length
+						? t('search.count', { count: results.length })
 						: t('search.none', { query: search.query })}
 				</p>
 				{#if search.skippedLocked > 0}
@@ -113,7 +207,7 @@
 					</p>
 				{/if}
 				<ul>
-					{#each search.results as r (r.date)}
+					{#each results as r (r.date)}
 						<li>
 							<a href="/entry/{r.date}">
 								<span class="when">
@@ -148,7 +242,11 @@
 					<header>
 						<div>
 							<h2>{fmtMonth(m.month)}</h2>
-							<p class="faint">{t('archive.entries', { count: m.days.length })}</p>
+							<p class="faint">
+								{filtering
+									? t('archive.entriesOf', { count: m.days.length, matched: m.days.filter((d) => passes(d.date)).length })
+									: t('archive.entries', { count: m.days.length })}
+							</p>
 						</div>
 					</header>
 					<div class="cal">
@@ -158,7 +256,8 @@
 								<span></span>
 							{:else}
 								{@const d = byDate.get(cell)}
-								{#if d}
+								<!-- Tage, die nicht zum Filter passen, erscheinen wie Tage ohne Eintrag -->
+								{#if d && passes(cell)}
 									<a
 										href="/entry/{cell}"
 										class="day has m{d.mood ?? 0}"
@@ -182,9 +281,46 @@
 	</div>
 
 <style>
-	.search {
+	.tools {
+		display: flex;
+		gap: 0.5rem;
+		max-width: 38rem;
 		margin-bottom: 1rem;
-		max-width: 32rem;
+	}
+	.search {
+		flex: 1 1 0;
+		min-width: 0;
+	}
+	.badge {
+		min-width: 1.3rem;
+		padding: 0 0.35rem;
+		border-radius: 999px;
+		background: var(--accent);
+		color: var(--paper);
+		font-size: 0.75rem;
+		line-height: 1.3rem;
+		text-align: center;
+	}
+	.filter {
+		display: grid;
+		gap: 1rem;
+		max-width: 48rem;
+		margin-bottom: 1rem;
+	}
+	.filter .group {
+		margin: 0 0 0.4rem;
+		font-size: 0.85rem;
+	}
+	.filter .pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+	.filter .reset {
+		justify-self: start;
+	}
+	.filter-info p {
+		margin: 0 0 1rem;
 	}
 	.legend {
 		display: flex;
