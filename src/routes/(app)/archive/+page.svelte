@@ -146,7 +146,7 @@
 						onclick={() => (filterOpen = !filterOpen)}
 					>
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-							<path d="M3 5h18l-7 8.5V19l-4 2v-7.5z" />
+							<path d="M4 7h16M7 12h10M10 17h4" />
 						</svg>
 						{t('archive.filter')}
 						{#if filtering}<span class="badge">{filtering}</span>{/if}
@@ -317,8 +317,10 @@
 		line-height: 1.3rem;
 		text-align: center;
 	}
+	/* Flex, damit sich der Knopf auf die Höhe des Suchfelds streckt */
 	.filter-menu {
 		position: relative;
+		display: flex;
 	}
 	/* Dropdown rechtsbündig unter dem Knopf; auf dem Handy höchstens so breit wie der Bildschirm */
 	.filter {
