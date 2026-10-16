@@ -13,11 +13,22 @@
 
 	// Filter für Kalender und Suchergebnisse – nur im Browser. Bleibt erhalten, wenn man aus einem Eintrag zurückkommt.
 	let filter = $state<DayFilter>({ moods: [], kinds: [], emotions: [] });
-	let filterOpen = $state(false);
-	export const snapshot: Snapshot<{ filter: DayFilter; open: boolean }> = {
-		capture: () => ({ filter: $state.snapshot(filter), open: filterOpen }),
-		restore: (v) => ((filter = v.filter), (filterOpen = v.open))
+	export const snapshot: Snapshot<DayFilter> = {
+		capture: () => $state.snapshot(filter),
+		restore: (v) => (filter = v)
 	};
+
+	// Auswahl als Dropdown unter dem Knopf; schliesst bei Klick daneben und mit Escape
+	let filterOpen = $state(false);
+	let filterMenu = $state<HTMLElement>();
+	function closeOnOutside(e: Event) {
+		if (filterOpen && !filterMenu?.contains(e.target as Node)) filterOpen = false;
+	}
+	function closeOnEscape(e: KeyboardEvent) {
+		if (e.key !== 'Escape' || !filterOpen) return;
+		filterOpen = false;
+		filterMenu?.querySelector('button')?.focus();
+	}
 
 	const filtering = $derived(filter.moods.length + filter.kinds.length + filter.emotions.length);
 	const days = $derived(new Map(data.months.flatMap((m) => m.days.map((d) => [d.date, d]))));
@@ -95,6 +106,7 @@
 </script>
 
 <svelte:head><title>{t('archive.title')} · ediurnum</title></svelte:head>
+<svelte:window onpointerdown={closeOnOutside} onkeydown={closeOnEscape} />
 
 <PinDialog bind:open={pinDialog} />
 
@@ -125,59 +137,63 @@
 						onkeydown={(e) => e.key === 'Escape' && query && (e.preventDefault(), clear())}
 					/>
 				</form>
-				<button
-					type="button"
-					class="btn ghost"
-					aria-expanded={filterOpen}
-					aria-controls="archive-filter"
-					onclick={() => (filterOpen = !filterOpen)}
-				>
-					{t('archive.filter')}
-					{#if filtering}<span class="badge">{filtering}</span>{/if}
-				</button>
+				<div class="filter-menu" bind:this={filterMenu}>
+					<button
+						type="button"
+						class="btn ghost"
+						aria-expanded={filterOpen}
+						aria-controls="archive-filter"
+						onclick={() => (filterOpen = !filterOpen)}
+					>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<path d="M3 5h18l-7 8.5V19l-4 2v-7.5z" />
+						</svg>
+						{t('archive.filter')}
+						{#if filtering}<span class="badge">{filtering}</span>{/if}
+					</button>
+					{#if filterOpen}
+						<section id="archive-filter" class="card filter" aria-label={t('archive.filter')}>
+							<div>
+								<p class="faint group">{t('entry.mood')}</p>
+								<div class="pills">
+									{#each [1, 2, 3, 4, 5] as m (m)}
+										{@const on = filter.moods.includes(m)}
+										<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.moods, m)}>
+											<span class="swatch m{m}" aria-hidden="true"></span>{t(`mood.${m}`)}
+										</button>
+									{/each}
+								</div>
+							</div>
+							<div>
+								<p class="faint group">{t('stats.reviews')}</p>
+								<div class="pills">
+									{#each [['gefuehl', 'weekly'], ['wachstum', 'monthly']] as const as [kind, label] (kind)}
+										{@const on = filter.kinds.includes(kind)}
+										<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.kinds, kind)}>
+											{t(`entry.suggest.${label}`)}
+										</button>
+									{/each}
+								</div>
+							</div>
+							<div>
+								<p class="faint group">{t('archive.filterEmotions')}</p>
+								<div class="pills">
+									{#each EMOTIONS as e (e)}
+										{@const on = filter.emotions.includes(e)}
+										<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.emotions, e)}>
+											{t(`emotion.${e}`)}
+										</button>
+									{/each}
+								</div>
+							</div>
+							{#if filtering}
+								<button type="button" class="btn ghost small reset" onclick={resetFilter}>{t('archive.filterReset')}</button>
+							{/if}
+						</section>
+					{/if}
+				</div>
 			</div>
 			{#if failed}<p class="notice error" role="alert">{t('common.error')}</p>{/if}
-
-			{#if filterOpen}
-				<section id="archive-filter" class="card filter" aria-label={t('archive.filter')}>
-					<div>
-						<p class="faint group">{t('entry.mood')}</p>
-						<div class="pills">
-							{#each [1, 2, 3, 4, 5] as m (m)}
-								{@const on = filter.moods.includes(m)}
-								<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.moods, m)}>
-									<span class="swatch m{m}" aria-hidden="true"></span>{t(`mood.${m}`)}
-								</button>
-							{/each}
-						</div>
-					</div>
-					<div>
-						<p class="faint group">{t('stats.reviews')}</p>
-						<div class="pills">
-							{#each [['gefuehl', 'weekly'], ['wachstum', 'monthly']] as const as [kind, label] (kind)}
-								{@const on = filter.kinds.includes(kind)}
-								<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.kinds, kind)}>
-									{t(`entry.suggest.${label}`)}
-								</button>
-							{/each}
-						</div>
-					</div>
-					<div>
-						<p class="faint group">{t('archive.filterEmotions')}</p>
-						<div class="pills">
-							{#each EMOTIONS as e (e)}
-								{@const on = filter.emotions.includes(e)}
-								<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.emotions, e)}>
-									{t(`emotion.${e}`)}
-								</button>
-							{/each}
-						</div>
-					</div>
-					{#if filtering}
-						<button type="button" class="btn ghost small reset" onclick={resetFilter}>{t('archive.filterReset')}</button>
-					{/if}
-				</section>
-			{/if}
 
 			{#if filtering}
 				<div class="filter-info faint" aria-live="polite">
@@ -301,11 +317,21 @@
 		line-height: 1.3rem;
 		text-align: center;
 	}
+	.filter-menu {
+		position: relative;
+	}
+	/* Dropdown rechtsbündig unter dem Knopf; auf dem Handy höchstens so breit wie der Bildschirm */
 	.filter {
+		position: absolute;
+		top: calc(100% + 0.4rem);
+		right: 0;
+		z-index: 20;
+		width: min(28rem, calc(100vw - 2rem));
+		/* scrollt bei wenig Höhe; Platz für Kopfzeile, Suche und (Handy) die Navigationsleiste unten */
+		max-height: min(34rem, calc(100dvh - 17rem));
+		overflow-y: auto;
 		display: grid;
 		gap: 1rem;
-		max-width: 48rem;
-		margin-bottom: 1rem;
 	}
 	.filter .group {
 		margin: 0 0 0.4rem;
