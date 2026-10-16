@@ -2,12 +2,14 @@ import {
 	decrypt,
 	defaultKdfParams,
 	deriveKey,
-	deriveLockKey,
 	encrypt,
 	formatRecoveryKey,
 	generateKey,
 	keyFingerprint,
+	lockKeyFromPin,
+	pinCheck,
 	randomToken,
+	unlockWithPin,
 	type KdfParams
 } from './crypto';
 import { getMeta, nowIso, setMeta, transaction } from './db';
@@ -20,8 +22,6 @@ import { MAX_PASSWORD, validatePin } from './validation';
  */
 
 const WRAP_AAD = 'ediurnum/wrapped-dek';
-const PIN_CHECK_AAD = 'ediurnum/pin-check';
-const PIN_CHECK_TEXT = 'ediurnum-pin-ok';
 
 export interface Session {
 	token: string;
@@ -207,24 +207,13 @@ export function hasPin(): boolean {
 	return getMeta('pin_kdf') !== null;
 }
 
-async function lockKeyFromPin(dek: Buffer, pin: string, params: KdfParams): Promise<Buffer> {
-	const pinKey = await deriveKey(pin, params);
-	return deriveLockKey(dek, pinKey);
-}
-
 /** Prüft die PIN und liefert den Sperr-Schlüssel (oder null). */
 export async function verifyPin(dek: Buffer, pin: string): Promise<Buffer | null> {
 	const kdf = getMeta('pin_kdf');
 	const check = getMeta('pin_check');
 	// Ungültiges Format gar nicht erst ableiten (spart Argon2 bei unsinnigen Eingaben)
 	if (!kdf || !check || validatePin(pin) !== null) return null;
-	const lockKey = await lockKeyFromPin(dek, pin, JSON.parse(kdf) as KdfParams);
-	try {
-		const ok = decrypt(lockKey, Buffer.from(check, 'base64'), PIN_CHECK_AAD).toString('utf8') === PIN_CHECK_TEXT;
-		return ok ? lockKey : null;
-	} catch {
-		return null;
-	}
+	return unlockWithPin(dek, pin, kdf, check);
 }
 
 /** Berechnet einen neuen Sperr-Schlüssel für eine neue PIN (Speichern erfolgt im Aufrufer). */
@@ -232,7 +221,7 @@ export async function prepareNewPin(dek: Buffer, pin: string) {
 	const params = defaultKdfParams();
 	params.memory = 32768;
 	const lockKey = await lockKeyFromPin(dek, pin, params);
-	const check = encrypt(lockKey, PIN_CHECK_TEXT, PIN_CHECK_AAD).toString('base64');
+	const check = pinCheck(lockKey);
 	return {
 		lockKey,
 		commit: () => {

@@ -22,6 +22,9 @@ WORKDIR /app
 COPY --from=build --chown=node:node /app/build ./build
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/package.json /app/server.js ./
+# Konverter-Skript (Backup → Markdown/JSON/PDF): läuft direkt als TypeScript und braucht dafür die Quellen aus src/lib
+COPY --from=build --chown=node:node /app/scripts ./scripts
+COPY --from=build --chown=node:node /app/src/lib ./src/lib
 USER node
 VOLUME ["/data"]
 EXPOSE 3000

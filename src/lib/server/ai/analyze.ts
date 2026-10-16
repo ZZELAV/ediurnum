@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { complete } from './providers.ts';
-import { SECTIONS } from '#lib/templates.ts';
+import { formatEntries, plain } from '../export.ts';
 import { translate } from '#lib/i18n/index.ts';
 import { isEmptyProfile, profileMarkdown, type Profile } from '#lib/profile.ts';
 import type { AiAgent, Analysis, Entry, Lang } from '#lib/types.ts';
@@ -91,51 +91,6 @@ export function buildSystemPrompt(agent: PromptOptions, lang: Lang, format: 'api
 	]
 		.filter(Boolean)
 		.join('\n\n');
-}
-
-/**
- * Text aus dem Tagebuch für die Datei: Zeilen, die mit „#“ beginnen, würden sonst zu Überschriften
- * und brächten die Gliederung der Datei (Auftrag, Einträge, Tage) durcheinander.
- */
-const plain = (text: string) => text.trim().replace(/^(\s*)#/gm, '$1\\#');
-
-export function formatEntries(entries: Entry[], lang: Lang): string {
-	const t = (key: string) => translate(lang, key);
-	const dateFmt = new Intl.DateTimeFormat(lang === 'de' ? 'de-CH' : 'en-GB', {
-		weekday: 'long',
-		day: 'numeric',
-		month: 'long',
-		year: 'numeric',
-		timeZone: 'UTC'
-	});
-	const out: string[] = [];
-	for (const e of entries) {
-		if (!e.content) continue;
-		const c = e.content;
-		const lines: string[] = [`### ${dateFmt.format(new Date(e.date + 'T00:00:00Z'))}`];
-		if (c.mood) lines.push(`${t('entry.mood')}: ${c.mood}/5 (${t(`mood.${c.mood}`)})`);
-		for (const def of SECTIONS) {
-			const sec = c.sections[def.kind];
-			if (!sec) continue;
-			const parts: string[] = [];
-			for (const f of def.fields) {
-				const v = sec[f.id];
-				const label = t(`section.${def.kind}.${f.id}`);
-				if (typeof v === 'string' && v.trim()) parts.push(`- ${label}: ${plain(v)}`);
-				else if (typeof v === 'number') parts.push(`- ${label}: ${v}/5`);
-				else if (Array.isArray(v)) {
-					const vals = v.filter((x) => x.trim());
-					if (!vals.length) continue;
-					const shown = f.type === 'chips' ? vals.map((x) => t(`emotion.${x}`)) : vals.map(plain);
-					parts.push(`- ${label}: ${shown.join('; ')}`);
-				}
-			}
-			if (parts.length) lines.push(`**${t(`section.${def.kind}.title`)}**`, ...parts);
-		}
-		if (c.free.trim()) lines.push(`**${t('entry.free')}**`, plain(c.free));
-		out.push(lines.join('\n'));
-	}
-	return out.join('\n\n');
 }
 
 export function buildUserPrompt(entries: Entry[], lang: Lang, from: string, to: string, question: string): string {

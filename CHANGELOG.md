@@ -12,6 +12,11 @@ The topmost version without a date is still in development.
   feelings from the weekly review. Days that don't match look like days without an entry, and each month shows how
   many of its entries match. The filter also applies to search results and is kept when you open an entry and come
   back. Without your PIN, locked entries can only be filtered by review.
+- PDF export: *Settings → Backup & export* now also offers your entries as a PDF, set in the app's fonts (Lora and
+  Inter) with mood colours and page numbers. Emojis are left out.
+- Backup converter: a small interactive command-line script turns an encrypted backup into Markdown, JSON or PDF
+  without a running app – from the Docker image or a clone of the repository (`npm run convert`). It asks for the
+  recovery key (hidden input) and optionally your PIN for locked entries. See DEPLOYMENT.md → Backups.
 
 ### Fixed
 

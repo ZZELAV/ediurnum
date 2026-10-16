@@ -1,25 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { decryptJson, encryptJson } from './crypto';
+import { decryptJson, encryptJson, entryAad as aad } from './crypto';
 import { getDb, nowIso, transaction } from './db';
 import { todayIso } from '#lib/dates.ts';
 import type { Session } from './vault';
 import { filledKinds, isEmptyContent } from '#lib/templates.ts';
 import type { StatsDay } from '#lib/stats.ts';
-import type { Entry, EntryContent, EntryMeta, RevisionInfo, SectionKind } from '#lib/types.ts';
-
-interface EntryRow {
-	id: string;
-	date: string;
-	kinds: string;
-	locked: number;
-	ai_allowed: number;
-	empty: number;
-	revision: number;
-	rev_started_at: string;
-	created_at: string;
-	updated_at: string;
-	payload: Uint8Array;
-}
+import type { Entry, EntryContent, EntryMeta, RevisionInfo } from '#lib/types.ts';
+import { toMeta, type EntryRow } from './records.ts';
 
 interface RevisionRow {
 	entry_id: string;
@@ -34,21 +21,6 @@ export class LockedError extends Error {
 	constructor() {
 		super('locked');
 	}
-}
-
-const aad = (id: string, revision: number) => `entry:${id}:rev:${revision}`;
-
-function toMeta(r: EntryRow): EntryMeta {
-	return {
-		id: r.id,
-		date: r.date,
-		kinds: (r.kinds ? r.kinds.split(',') : []) as SectionKind[],
-		locked: r.locked === 1,
-		aiAllowed: r.ai_allowed === 1,
-		revision: r.revision,
-		createdAt: r.created_at,
-		updatedAt: r.updated_at
-	};
 }
 
 function keyFor(session: Session, locked: boolean): Buffer | null {

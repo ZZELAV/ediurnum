@@ -227,6 +227,33 @@ stay as they are.
   Restore it on a new installation with *Restore* and your recovery key.
 - **On the server:** `./data` contains the encrypted database. For a consistent copy, stop the container briefly
   (`docker compose stop`, copy, `docker compose start`) or use the in-app backup.
+- **Readable copy:** *Settings → Backup & export* also offers Markdown, JSON and PDF. These files are **not
+  encrypted**; locked entries are only included while your PIN is entered.
+
+### Converting a backup without the app
+
+The backup converter turns an encrypted `.ediurnum` backup into a readable Markdown, JSON or PDF file – for example
+if your server is gone or you want a copy of an old backup. It asks for the recovery key (input hidden) and, if the
+backup contains locked entries, optionally for your PIN. The file is written next to the backup unless you choose
+another name.
+
+With the Docker image (no Node.js needed on the host) – run it in the folder that contains the backup; `-u` lets the
+container write the result with your own user:
+
+```bash
+docker run --rm -it -v "$PWD:/work" -u "$(id -u):$(id -g)" zzelav/ediurnum node scripts/convert.ts /work/ediurnum-backup-2026-10-16.ediurnum
+```
+
+Without Docker, from a clone of the repository (Node.js ≥ 24.7):
+
+```bash
+npm ci
+npm run convert -- path/to/ediurnum-backup-2026-10-16.ediurnum
+```
+
+The questions are in German if your system language is German (`LANG`, e.g. add `-e LANG=de` to the Docker
+command), otherwise in English; the export uses the language set in the journal. Delete the readable file when you
+no longer need it.
 
 ## 12. Removing ediurnum
 

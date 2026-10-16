@@ -197,6 +197,7 @@
 			<div class="row">
 				<a class="btn ghost small" href="/api/export/plain?format=md" download>{t('settings.exportMd')}</a>
 				<a class="btn ghost small" href="/api/export/plain?format=json" download>{t('settings.exportJson')}</a>
+				<a class="btn ghost small" href="/api/export/plain?format=pdf" download>{t('settings.exportPdf')}</a>
 			</div>
 		</section>
 

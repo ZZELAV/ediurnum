@@ -21,6 +21,8 @@ weekly and monthly reviews, reminders and optional AI insights through the AI ch
 - Version history per entry (one version per day, changes highlighted), “on this day”, focus mode, German and English, light and dark theme, installable web app
 - **Encryption**: AES-256-GCM with a random master key (= recovery key), password via Argon2id, PIN-locked entries,
   encrypted backups, recovery key test in the settings; the journal locks itself after inactivity
+- Readable export as Markdown, JSON or **PDF**, and a **backup converter** that turns an encrypted backup into these
+  formats without a running app: `docker run --rm -it -v "$PWD:/work" -u "$(id -u):$(id -g)" zzelav/ediurnum node scripts/convert.ts /work/<backup>.ediurnum`
 
 ## Quick start
 

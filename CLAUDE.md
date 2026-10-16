@@ -11,6 +11,7 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 - `npm run test:e2e` – Ende-zu-Ende-Tests (`e2e/`): startet den gebauten Server (`server.js`) mit leerem Datenordner und prüft über HTTP; vorher `npm run build`
 - `npm run test:all` – Unit-Tests, Build und Ende-zu-Ende-Tests
 - `npm run build` – Produktions-Build nach `build/`
+- `npm run convert [-- datei.ediurnum]` – Konverter-Skript: Backup → Markdown/JSON/PDF (interaktiv)
 
 ## Versionierung (Pflicht bei jeder Änderung)
 
@@ -35,6 +36,11 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
 - `server.js` – Startskript für den Produktivbetrieb: lädt den Server von adapter-node und übernimmt Protokoll und Host aus `ORIGIN` (adapter-node 6 kennt `ORIGIN` nicht mehr; ohne das Skript wäre Betrieb über `http://` nicht möglich).
 - `src/lib/server/crypto.ts` – AES-256-GCM, Argon2id, Wiederherstellungsschlüssel-Format. Datensätze sind per AAD an ihre ID gebunden.
 - `src/lib/server/vault.ts` – Hauptschlüssel nur im RAM pro Sitzung; PIN → Sperr-Schlüssel (HKDF aus Hauptschlüssel + PIN-Schlüssel).
+- Backup und lesbarer Export ohne Datenbank-Import, damit auch das Konverter-Skript `scripts/convert.ts` sie nutzt
+  (läuft direkt als TypeScript, auch im Docker-Image; relative Importe dort mit `.ts`): `backup-file.ts` (Dateiformat,
+  Einträge aus Backups entschlüsseln), `records.ts` (Zeile `entries`), `export.ts` (`entryDocs` → Markdown/JSON, auch
+  für die KI-Datei), `pdf/pdf.ts` (PDF mit pdf-lib, Schriften in `pdf/fonts/`; die App lädt sie per `?inline` über `pdf/fonts.ts`).
+  `backup.ts` enthält nur den Datenbank-Teil (Backup erstellen/einspielen).
 - `src/lib/server/entries.ts` – ein Eintrag pro Tag; höchstens eine Version pro Kalendertag (TZ): Die erste Bearbeitung an einem neuen Tag archiviert die bisherige Fassung.
 - `src/lib/server/ai/` – Prompt-Aufbau (`buildChatMarkdown` für die Markdown-Datei, `parseResponse` für zurückkopierte Antworten) und Anbieter-Adapter für KI-Agenten mit API-Schlüssel (in der Oberfläche vorerst ausgeblendet, kommt in einem späteren Release).
 - `src/lib/reminders.ts` – Fälligkeit der Rückblicke (gemeinsam für App-Hinweise und Push); `src/lib/server/reminders.ts` – Zeitplan, VAPID, Geräte, Planer (läuft minütlich, gestartet in `hooks.server.ts` → `init`); `src/service-worker.ts` – nur Push, bewusst ohne Offline-Cache.

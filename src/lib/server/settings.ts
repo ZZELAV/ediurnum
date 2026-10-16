@@ -1,8 +1,6 @@
-import { decryptJson, encryptJson } from './crypto';
+import { decryptJson, encryptJson, SETTINGS_AAD as AAD } from './crypto';
 import { getMeta, setMeta } from './db';
 import type { AiAgent, PublicAiAgent, Settings } from '#lib/types.ts';
-
-const AAD = 'ediurnum/settings';
 
 export function defaultSettings(): Settings {
 	return {

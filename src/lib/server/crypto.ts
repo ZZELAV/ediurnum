@@ -99,6 +99,32 @@ export function deriveLockKey(dek: Buffer, pinKey: Buffer): Buffer {
 	return Buffer.from(hkdfSync('sha256', Buffer.concat([dek, pinKey]), Buffer.alloc(0), 'ediurnum/lock/v1', KEY_LEN));
 }
 
+export async function lockKeyFromPin(dek: Buffer, pin: string, params: KdfParams): Promise<Buffer> {
+	return deriveLockKey(dek, await deriveKey(pin, params));
+}
+
+// Prüfwert der PIN (meta.pin_check): ein bekannter Text, mit dem Sperr-Schlüssel verschlüsselt
+const PIN_CHECK_AAD = 'ediurnum/pin-check';
+const PIN_CHECK_TEXT = 'ediurnum-pin-ok';
+
+export function pinCheck(lockKey: Buffer): string {
+	return encrypt(lockKey, PIN_CHECK_TEXT, PIN_CHECK_AAD).toString('base64');
+}
+
+/** Leitet aus der PIN den Sperr-Schlüssel ab und prüft ihn am Prüfwert; null bei falscher PIN. */
+export async function unlockWithPin(dek: Buffer, pin: string, kdf: string, check: string): Promise<Buffer | null> {
+	const lockKey = await lockKeyFromPin(dek, pin, JSON.parse(kdf) as KdfParams);
+	try {
+		return decrypt(lockKey, Buffer.from(check, 'base64'), PIN_CHECK_AAD).toString('utf8') === PIN_CHECK_TEXT ? lockKey : null;
+	} catch {
+		return null;
+	}
+}
+
+/** Zusatzdaten (AAD) der Datensätze – binden den verschlüsselten Inhalt an Eintrag und Version bzw. an die Einstellungen. */
+export const entryAad = (id: string, revision: number) => `entry:${id}:rev:${revision}`;
+export const SETTINGS_AAD = 'ediurnum/settings';
+
 /** Kurzer, nicht geheimer Fingerabdruck eines Schlüssels (zum Vergleichen von Backups). */
 export function keyFingerprint(key: Buffer): string {
 	return createHash('sha256').update('ediurnum/fingerprint/v1').update(key).digest('hex').slice(0, 16);
