@@ -453,10 +453,12 @@ input[type='checkbox']:disabled {
 	line-height: 1.7;
 	border-color: transparent;
 	resize: none;
-	field-sizing: content;
 }
+/* Nur Textfelder wachsen mit dem Inhalt (in die Höhe). Einzeilige Felder behalten ihre Breite und
+ * scrollen – mit `field-sizing: content` würden sie mit dem Text in die Breite wachsen und rechts hinausragen. */
 textarea.write {
 	min-height: 4.6rem;
+	field-sizing: content;
 }
 .write::placeholder {
 	color: var(--ink-faint);

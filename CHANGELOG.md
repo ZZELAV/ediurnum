@@ -4,6 +4,13 @@ All notable changes to ediurnum are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [Semantic Versioning](https://semver.org).
 The topmost version without a date is still in development.
 
+## [1.0.0]
+
+### Fixed
+
+- The three fields under “What am I grateful for today?” no longer grow past the right edge when the text gets
+  long; the text scrolls inside the field instead.
+
 ## [0.1.0-beta.6] - 2026-10-11
 
 ### Added
