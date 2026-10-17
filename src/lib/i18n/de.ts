@@ -122,6 +122,7 @@ export const de: Record<string, string> = {
 	// Entry
 	'entry.title': 'Eintrag',
 	'entry.mood': 'Stimmung',
+	'entry.energy': 'Energie',
 	'entry.moodQuestion': 'Wie geht es dir heute?',
 	'entry.free': 'Freie Gedanken',
 	'entry.freeHint': 'Alles, was sonst keinen Platz hat …',

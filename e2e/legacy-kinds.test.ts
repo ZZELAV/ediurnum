@@ -248,6 +248,9 @@ describe('Database in the 1.0.0 format (schema 3, legacy section kinds)', () => 
 		for (const path of ['/', '/archive', '/stats', '/insights', '/reminders', '/entry/2026-09-07', '/entry/2026-09-08/history', `/entry/${LOCKED}`]) {
 			assert.equal((await c.get(path)).status, 200, path);
 		}
+		// past day read-only: energy in one line like the mood, with the colour of its value
+		const day = (await (await c.get('/entry/2026-09-07')).text()).replace(/<!--[\s\S]*?-->/g, '');
+		assert.match(day, /class="dot m4[^"]*"[^>]*><\/span>\s*<span[^>]*>Energie<\/span>\s*<strong[^>]*>wach<\/strong>/);
 		const history = await (await c.get('/entry/2026-09-08/history')).text();
 		assert.match(history, /Erste Fassung/, 'legacy revision shown');
 		assert.match(history, /Zweite Fassung/);

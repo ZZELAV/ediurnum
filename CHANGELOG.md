@@ -8,6 +8,8 @@ The topmost version without a date is still in development.
 
 ### Changed
 
+- Past days and the version history show the energy of the weekly review like the mood: one line with its
+  colour („● Energy awake“).
 - The three sections are stored under English names (daily, feelings, growth). Existing journals are updated
   automatically on the first start – nothing changes in the app, and locked entries stay locked.
 - Backups use format version 3. Older backups can still be restored; backups from 1.1.0 can't be restored in 1.0.0

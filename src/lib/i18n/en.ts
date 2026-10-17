@@ -114,6 +114,7 @@ export const en: Record<string, string> = {
 
 	'entry.title': 'Entry',
 	'entry.mood': 'Mood',
+	'entry.energy': 'Energy',
 	'entry.moodQuestion': 'How are you today?',
 	'entry.free': 'Free thoughts',
 	'entry.freeHint': 'Everything that has no other place …',

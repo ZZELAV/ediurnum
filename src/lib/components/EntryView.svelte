@@ -34,7 +34,14 @@
 			<h3>{t(`section.${def.kind}.title`)}</h3>
 			{#each def.fields as f (f.id)}
 				{@const v = values![f.id]}
-				{#if show(v)}
+				{#if show(v) && f.type === 'scale'}
+					<!-- energy: one line like the mood, the colours of the scale -->
+					<p class="mood">
+						<span class="dot m{v}" aria-hidden="true"></span>
+						<span class="faint">{t('entry.energy')}</span>
+						<strong>{t(`energy.${v}`)}</strong>
+					</p>
+				{:else if show(v)}
 					<div class="qa">
 						<p class="q">{t(`section.${def.kind}.${f.id}`)}</p>
 						{#if f.type === 'lines'}
@@ -45,8 +52,6 @@
 							<p class="chips">
 								{#each v as string[] as x (x)}<span class="chip dusk">{t(`emotion.${x}`)}</span>{/each}
 							</p>
-						{:else if f.type === 'scale'}
-							<p class="a">{t(`energy.${v}`)}</p>
 						{:else}
 							<p class="a pre">{v}</p>
 						{/if}
