@@ -1,13 +1,13 @@
 /**
- * Konverter: macht aus einem verschlüsselten Backup (.ediurnum) eine lesbare Datei (Markdown, JSON oder PDF) –
- * ohne laufende App, z. B. als Notfallzugriff. Fragt alles interaktiv ab; Schlüssel und PIN werden unsichtbar
- * eingegeben und nie als Argument übergeben oder gespeichert.
+ * Converter: turns an encrypted backup (.ediurnum) into a readable file (Markdown, JSON or PDF) –
+ * without a running app, e.g. as emergency access. Asks for everything interactively; key and PIN are typed
+ * hidden and never passed as an argument or stored.
  *
  *   npm run convert [-- backup.ediurnum]
  *   docker run --rm -it -v "$PWD:/work" -u "$(id -u):$(id -g)" zzelav/ediurnum node scripts/convert.ts /work/backup.ediurnum
  *
- * Fragen und Meldungen immer auf Englisch; der Export selbst in der Sprache der Einstellungen im Backup.
- * Nutzt dieselben Module wie die App (backup-file.ts, export.ts, pdf/pdf.ts).
+ * Questions and messages always in English; the export itself in the language of the settings in the backup.
+ * Uses the same modules as the app (backup-file.ts, export.ts, pdf/pdf.ts).
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -28,7 +28,7 @@ import { exportPdf, FONT_FILES } from '#lib/server/pdf/pdf.ts';
 import { translate } from '#lib/i18n/index.ts';
 import { todayIso } from '#lib/dates.ts';
 
-/** Texte des Skripts (nur Englisch). Meldungen, die auch die App kennt (z. B. `backup.wrongKey`), kommen aus der i18n. */
+/** Texts of the script (English only). Messages the app knows as well (e.g. `backup.wrongKey`) come from the i18n. */
 const T = {
 	title: 'ediurnum – convert a backup',
 	intro: 'Turns an encrypted backup (.ediurnum) into a readable file: Markdown, JSON or PDF. Cancel with Ctrl+C.',
@@ -56,17 +56,17 @@ function cancel(): never {
 }
 process.on('SIGINT', cancel);
 
-// Eine einzige Eingabe für alle Fragen (bei umgeleiteter Eingabe gehen so keine Zeilen verloren). Das Terminal
-// bleibt im normalen Zeilenmodus und zeigt die Eingabe selbst an – ausser bei verdeckten Fragen (siehe ask).
+// a single input for all questions (so no lines are lost with redirected input). The terminal
+// stays in normal line mode and shows the input itself – except for hidden questions (see ask).
 const tty = process.stdin.isTTY === true;
 const rl = createInterface({ input: process.stdin, terminal: false });
 const lines = rl[Symbol.asyncIterator]();
-/** Ctrl+C im Rohmodus (dort löst es kein SIGINT aus) */
+/** Ctrl+C in raw mode (there it doesn't raise SIGINT) */
 const onRawData = (chunk: Buffer) => chunk.includes(3) && cancel();
 
 /**
- * Verdeckt: Rohmodus, damit das Terminal die Tasten nicht anzeigt. Dann kommen Steuerzeichen mit,
- * die Rücktaste wird hier ausgewertet.
+ * Hidden: raw mode, so the terminal doesn't show the keys. Control characters then come along,
+ * backspace is handled here.
  */
 async function ask(question: string, hidden = false): Promise<string> {
 	process.stdout.write(question);
@@ -95,12 +95,12 @@ function fail(message: string): never {
 	process.exit(1);
 }
 
-/** Fehlercodes aus den Modulen (z. B. `backup.wrongKey`) als Text */
+/** Error codes from the modules (e.g. `backup.wrongKey`) as text */
 const message = (err: unknown) => (err instanceof Error && /^[a-z]+\.[A-Za-z]+$/.test(err.message) ? t(err.message) : String(err));
 
 console.log(`${T.title}\n${T.intro}\n`);
 
-// 1. Backup-Datei
+// 1. backup file
 const file = resolve(process.argv[2] || (await ask(T.file)));
 if (!existsSync(file)) fail(T.fileMissing(file));
 const text = readFileSync(file, 'utf8');
@@ -113,7 +113,7 @@ try {
 const createdAt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long', timeStyle: 'short' });
 console.log(T.backupInfo(createdAt.format(new Date(header.createdAt)), header.appVersion));
 
-// 2. Wiederherstellungsschlüssel
+// 2. recovery key
 async function unlockBackup(): Promise<{ dek: Buffer; data: BackupData }> {
 	for (let i = 0; i < MAX_TRIES; i++) {
 		try {
@@ -127,7 +127,7 @@ async function unlockBackup(): Promise<{ dek: Buffer; data: BackupData }> {
 }
 const { dek, data } = await unlockBackup();
 
-// 3. PIN für gesperrte Einträge (optional)
+// 3. PIN for locked entries (optional)
 let lockKey: Buffer | null = null;
 const locked = lockedCount(data);
 if (locked && data.meta.pin_kdf) {
@@ -135,21 +135,21 @@ if (locked && data.meta.pin_kdf) {
 	for (let i = 0; ; i++) {
 		if (i === MAX_TRIES) fail(T.tooManyTries);
 		const pin = await ask(T.pin, true);
-		if (!pin) break; // leer: gesperrte Einträge auslassen
+		if (!pin) break; // empty: leave out locked entries
 		lockKey = await unlockBackupPin(data, dek, pin);
 		if (lockKey) break;
 		console.log(T.pinWrong);
 	}
 }
 
-// 4. Format und Ausgabedatei (Standard: neben dem Backup)
+// 4. format and output file (default: next to the backup)
 const choice = await ask(T.format);
 const format = choice === '2' ? 'json' : choice === '3' ? 'pdf' : 'md';
 const suggested = join(dirname(file), `ediurnum-export-${todayIso()}.${format}`);
 const target = resolve((await ask(T.output(suggested))) || suggested);
 if (existsSync(target) && (await ask(T.overwrite)).toLowerCase() !== 'y') fail(T.cancelled);
 
-// 5. Umwandeln und speichern (nur für den eigenen Benutzer lesbar)
+// 5. convert and save (readable only for the own user)
 const lang = backupLanguage(data, dek);
 const { entries, skippedLocked } = backupEntries(data, dek, lockKey);
 let body: string | Uint8Array;
