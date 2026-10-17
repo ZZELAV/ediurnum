@@ -4,18 +4,18 @@ import { diffWords, hasChanges } from '../src/lib/diff.ts';
 
 const show = (parts: ReturnType<typeof diffWords>) =>
 	parts.map((p) => (p.kind === 'add' ? `[+${p.text}]` : p.kind === 'del' ? `[-${p.text}]` : p.text)).join('');
-/** Text vorher bzw. nachher aus den Teilen zusammengesetzt */
+/** Text before or after, put together from the parts */
 const before = (parts: ReturnType<typeof diffWords>) => parts.filter((p) => p.kind !== 'add').map((p) => p.text).join('');
 const after = (parts: ReturnType<typeof diffWords>) => parts.filter((p) => p.kind !== 'del').map((p) => p.text).join('');
 
-test('Gleiche Texte haben keine Änderungen', () => {
+test('equal texts have no changes', () => {
 	const parts = diffWords('Ein ruhiger Tag', 'Ein ruhiger Tag');
 	assert.equal(hasChanges(parts), false);
 	assert.equal(show(parts), 'Ein ruhiger Tag');
 	assert.deepEqual(diffWords('', ''), []);
 });
 
-test('Ergänzung, Streichung und Ersetzung', () => {
+test('addition, removal and replacement', () => {
 	assert.equal(show(diffWords('Kaffee gekocht.', 'Kaffee gekocht. Mit Lena telefoniert.')), 'Kaffee gekocht.[+ Mit Lena telefoniert.]');
 	assert.equal(show(diffWords('Ein guter Tag', 'Ein schwerer Tag')), 'Ein [-guter][+schwerer] Tag');
 	assert.equal(show(diffWords('Heute war schön', 'Heute schön')), 'Heute [-war ]schön');
@@ -24,17 +24,17 @@ test('Ergänzung, Streichung und Ersetzung', () => {
 	assert.ok(hasChanges(diffWords('a', 'b')));
 });
 
-test('Mehrere ersetzte Wörter erscheinen als ein Block', () => {
+test('several replaced words appear as one block', () => {
 	assert.equal(show(diffWords('Ich war sehr müde heute', 'Ich war richtig gut gelaunt heute')), 'Ich war [-sehr müde][+richtig gut gelaunt] heute');
 });
 
-test('Zeilenumbrüche und Leerraum bleiben erhalten', () => {
+test('line breaks and whitespace are kept', () => {
 	const parts = diffWords('Zeile eins\nZeile zwei', 'Zeile eins\n\nZeile drei');
 	assert.equal(after(parts), 'Zeile eins\n\nZeile drei');
 	assert.equal(before(parts), 'Zeile eins\nZeile zwei');
 });
 
-test('Vorher- und Nachher-Text lassen sich immer exakt zurückgewinnen', () => {
+test('before and after texts can always be recovered exactly', () => {
 	const samples = [
 		['Ein Tag am See.', 'Ein langer Tag am See, mit Lena.'],
 		['a b c d e f', 'f e d c b a'],
@@ -48,7 +48,7 @@ test('Vorher- und Nachher-Text lassen sich immer exakt zurückgewinnen', () => {
 	}
 });
 
-test('Zufällige Texte: Vorher/Nachher exakt, keine leeren Teile, keine doppelten Arten nebeneinander', () => {
+test('random texts: before/after exact, no empty parts, no two parts of the same kind next to each other', () => {
 	let seed = 42;
 	const rnd = () => (seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
 	const words = ['ich', 'war', 'heute', 'am', 'See', 'müde', 'froh', 'mit', 'Lena', '.'];

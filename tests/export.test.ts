@@ -51,7 +51,7 @@ const full: EntryContent = {
 };
 
 describe('Markdown', () => {
-	test('Aufbau wie bisher (KI-Datei und Export): Datum, Stimmung, Abschnitte, Felder, freie Gedanken', () => {
+	test('layout as before (AI file and export): date, mood, sections, fields, free thoughts', () => {
 		const expected = [
 			'### Freitag, 16. Oktober 2026',
 			'Stimmung: 4/5 (gut)',
@@ -67,12 +67,12 @@ describe('Markdown', () => {
 		assert.equal(formatEntries([entry('2026-10-16', full)], 'de'), expected);
 	});
 
-	test('Export: Titel, Tage als ##, gesperrte (ohne Inhalt) fehlen', () => {
+	test('export: title, days as ##, locked ones (without content) are left out', () => {
 		const md = exportMarkdown([entry('2026-10-15', { mood: null, sections: {}, free: 'A' }), { ...entry('2026-10-16', full), content: null }], 'en');
 		assert.match(md, /^# ediurnum – Journal\n\n## Thursday, 15 October 2026\n\*\*Free thoughts\*\*\nA\n$/);
 	});
 
-	test('JSON enthält Einträge und Anzahl ausgelassener gesperrter', () => {
+	test('JSON contains the entries and the number of skipped locked ones', () => {
 		const json = JSON.parse(exportJson([entry('2026-10-16', full)], 2));
 		assert.equal(json.format, 'ediurnum-plain');
 		assert.equal(json.skippedLocked, 2);
@@ -84,24 +84,24 @@ describe('PDF', () => {
 	const dir = new URL('../src/lib/server/pdf/fonts/', import.meta.url);
 	const fonts = Object.fromEntries(Object.values(FONT_FILES).flat().map((f) => [f, readFileSync(new URL(f, dir))]));
 
-	test('Gültiges PDF mit Titel, Sprache und mehreren Seiten bei vielen Einträgen', async () => {
+	test('valid PDF with title, language and several pages for many entries', async () => {
 		const many = Array.from({ length: 40 }, (_, i) => entry(`2026-01-${String((i % 28) + 1).padStart(2, '0')}`, full));
 		const bytes = await exportPdf(many, 'de', 1, fonts);
 		assert.equal(Buffer.from(bytes.subarray(0, 5)).toString(), '%PDF-');
 		const pdf = await PDFDocument.load(bytes);
 		assert.ok(pdf.getPageCount() > 3, `${pdf.getPageCount()} Seiten`);
 		assert.equal(pdf.getTitle(), 'ediurnum – Tagebuch');
-		assert.ok(!Buffer.from(bytes).includes('Kaffee'), 'Text nur als Glyphen der eingebetteten Schrift');
+		assert.ok(!Buffer.from(bytes).includes('Kaffee'), 'text only as glyphs of the embedded font');
 	});
 
-	test('Überlange Wörter, Emojis, Zeichen aus Latin Extended und leere Exporte gehen', async () => {
+	test('overlong words, emojis, Latin Extended characters and empty exports work', async () => {
 		const odd: EntryContent = { mood: 1, sections: {}, free: 'x'.repeat(400) + ' 🌻 ŝ ő\r\n\n\tEnde' };
 		assert.equal((await PDFDocument.load(await exportPdf([entry('2026-10-16', odd)], 'en', 0, fonts))).getPageCount(), 1);
 		assert.equal((await PDFDocument.load(await exportPdf([], 'de', 0, fonts))).getPageCount(), 1);
 	});
 });
 
-describe('Backup lesen (auch für das Konverter-Skript)', async () => {
+describe('Reading backups (also for the converter script)', async () => {
 	const dek = generateKey();
 	const params = { ...defaultKdfParams(), memory: 8192 };
 	const lockKey = await lockKeyFromPin(dek, '1234', params);
@@ -131,14 +131,14 @@ describe('Backup lesen (auch für das Konverter-Skript)', async () => {
 			row('a', '2026-03-01', { ...full, free: 'erster' }),
 			row('c', '2026-03-03', { ...full, free: 'gesperrt' }, { locked: 1 }),
 			row('d', '2026-03-04', empty, { empty: 1 }),
-			row('e', '2026-03-05', empty, { empty: undefined }) // Format-Version 1 kennt "empty" nicht
+			row('e', '2026-03-05', empty, { empty: undefined }) // format version 1 doesn't know "empty"
 		]),
 		revisions: [],
 		analyses: []
 	};
 	const text = encodeBackup(dek, data, '1.0.0');
 
-	test('Kopf ohne Schlüssel lesbar, enthält keinen Klartext', () => {
+	test('header readable without a key, contains no plain text', () => {
 		const header = parseBackupHeader(text);
 		assert.equal(header.appVersion, '1.0.0');
 		assert.ok(!text.includes('erster'));
@@ -146,11 +146,11 @@ describe('Backup lesen (auch für das Konverter-Skript)', async () => {
 		assert.throws(() => parseBackupHeader(JSON.stringify({ ...header, version: 99 })), /backup.tooNew/);
 	});
 
-	test('Falscher Schlüssel wird erkannt', () => {
+	test('a wrong key is detected', () => {
 		assert.throws(() => readBackup(text, generateKey()), /backup.wrongKey/);
 	});
 
-	test('Einträge ältester zuerst; gesperrte nur mit PIN; geleerte fehlen', async () => {
+	test('entries oldest first; locked ones only with the PIN; cleared ones are left out', async () => {
 		const read = readBackup(text, dek);
 		assert.equal(backupLanguage(read, dek), 'en');
 		assert.equal(lockedCount(read), 1);
@@ -169,7 +169,7 @@ describe('Backup lesen (auch für das Konverter-Skript)', async () => {
 		assert.equal(withPin.skippedLocked, 0);
 	});
 
-	test('Backups up to format version 2 with legacy section kinds read like current ones', async () => {
+	test('backups up to format version 2 with legacy section kinds read like current ones', async () => {
 		const legacyContent = {
 			...full,
 			sections: { erlebt: full.sections.daily, gefuehl: full.sections.feelings, wachstum: { learned: 'Neu' } }

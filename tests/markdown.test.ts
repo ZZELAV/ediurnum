@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { renderMarkdown } from '../src/lib/markdown.ts';
 
-test('HTML wird entschärft, nur http(s)-Links', () => {
+test('HTML is escaped, only http(s) links', () => {
 	const html = renderMarkdown('## Titel\n\n<script>alert(1)</script> **fett**\n\n- [x](javascript:alert(1))\n\n<img src=x onerror=alert(1)>');
 	assert.ok(!html.includes('<script>'));
 	assert.ok(html.includes('&lt;script&gt;'));
@@ -11,20 +11,20 @@ test('HTML wird entschärft, nur http(s)-Links', () => {
 	assert.ok(!html.includes('href="javascript'));
 });
 
-test('Links öffnen in neuem Tab ohne Referrer; Anführungszeichen brechen nicht aus', () => {
+test('links open in a new tab without a referrer; quotes do not break out', () => {
 	const html = renderMarkdown('[Doku](https://example.com/a?b=1) und [x](https://e.com/"onmouseover="alert(1))');
 	assert.match(html, /<a href="https:\/\/example\.com\/a\?b=1" rel="noopener noreferrer" target="_blank">Doku<\/a>/);
 	assert.doesNotMatch(html, /" onmouseover="|"onmouseover="/);
 });
 
-test('Überschriften eine Stufe tiefer, höchstens h4', () => {
+test('headings one level lower, at most h4', () => {
 	assert.equal(renderMarkdown('# A'), '<h2>A</h2>');
 	assert.equal(renderMarkdown('### C'), '<h4>C</h4>');
 	assert.equal(renderMarkdown('#### D'), '<h4>D</h4>');
 	assert.equal(renderMarkdown('#kein Titel'), '<p>#kein Titel</p>');
 });
 
-test('Listen, Absätze mit Zeilenumbruch, Trennlinie, Code, kursiv', () => {
+test('lists, paragraphs with line breaks, horizontal rule, code, italic', () => {
 	const html = renderMarkdown('- a\n* b\n\n1. eins\n2) zwei\n\nZeile 1\r\nZeile 2\n\n---\n\n`code` und *kursiv*');
 	assert.equal(
 		html,
@@ -49,7 +49,7 @@ test('Leerer Text', () => {
 	assert.equal(renderMarkdown('\n\n'), '');
 });
 
-test('Tabellen: Kopf, Ausrichtung, Zeilen; Zellen angepasst und entschärft', () => {
+test('tables: header, alignment, rows; cells adjusted and escaped', () => {
 	const html = renderMarkdown(
 		['Vorher', '', '| Bereich | Wert | Trend |', '|:--|:-:|--:|', '| Schlaf | **gut** | ↑ |', '| Arbeit | <b>x</b> |', 'Arbeit \\| Freizeit | 3 | – | zu viel', '', 'Nachher'].join('\n')
 	);
@@ -69,11 +69,11 @@ test('Tabellen: Kopf, Ausrichtung, Zeilen; Zellen angepasst und entschärft', ()
 	);
 });
 
-test('Tabellen: ohne Rand-Striche und ohne Zeilen; keine Tabelle ohne passende Trennzeile', () => {
+test('tables: without edge pipes and without rows; no table without a matching separator row', () => {
 	assert.equal(
 		renderMarkdown('A | B\n--- | ---'),
 		'<div class="table-wrap"><table><thead><tr><th>A</th><th>B</th></tr></thead><tbody></tbody></table></div>'
 	);
-	assert.equal(renderMarkdown('Text mit | Strich\n---'), '<p>Text mit | Strich</p>\n<hr>', 'Spaltenzahl passt nicht: Trennlinie');
-	assert.equal(renderMarkdown('a | b\nc | d'), '<p>a | b<br>c | d</p>', 'ohne Trennzeile');
+	assert.equal(renderMarkdown('Text mit | Strich\n---'), '<p>Text mit | Strich</p>\n<hr>', 'column count does not match: horizontal rule');
+	assert.equal(renderMarkdown('a | b\nc | d'), '<p>a | b<br>c | d</p>', 'without a separator row');
 });

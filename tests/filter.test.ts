@@ -6,12 +6,12 @@ const none: DayFilter = { moods: [], kinds: [], emotions: [] };
 const day = { mood: 2, kinds: ['daily', 'feelings'], emotions: ['tired', 'stressed'] };
 const locked = { mood: null, kinds: ['daily', 'growth'], emotions: [] };
 
-test('Ohne Auswahl passt jeder Tag', () => {
+test('without a selection every day matches', () => {
 	assert.equal(matchesFilter(day, none), true);
 	assert.equal(matchesFilter(locked, none), true);
 });
 
-test('Innerhalb einer Gruppe genügt ein Treffer', () => {
+test('within a group one match is enough', () => {
 	assert.equal(matchesFilter(day, { ...none, moods: [1, 2] }), true);
 	assert.equal(matchesFilter(day, { ...none, moods: [4, 5] }), false);
 	assert.equal(matchesFilter(day, { ...none, kinds: ['feelings', 'growth'] }), true);
@@ -20,13 +20,13 @@ test('Innerhalb einer Gruppe genügt ein Treffer', () => {
 	assert.equal(matchesFilter(day, { ...none, emotions: ['joy'] }), false);
 });
 
-test('Alle gewählten Gruppen müssen passen', () => {
+test('all selected groups have to match', () => {
 	assert.equal(matchesFilter(day, { moods: [2], kinds: ['feelings'], emotions: ['tired'] }), true);
 	assert.equal(matchesFilter(day, { moods: [2], kinds: ['growth'], emotions: ['tired'] }), false);
 	assert.equal(matchesFilter(day, { moods: [3], kinds: ['feelings'], emotions: [] }), false);
 });
 
-test('Tag ohne Stimmung oder Gefühle (z. B. gesperrt ohne PIN) passt nur zu Rückblicken', () => {
+test('a day without mood or feelings (e.g. locked without PIN) only matches reviews', () => {
 	assert.equal(matchesFilter(locked, { ...none, moods: [1, 2, 3, 4, 5] }), false);
 	assert.equal(matchesFilter(locked, { ...none, emotions: ['joy'] }), false);
 	assert.equal(matchesFilter(locked, { ...none, kinds: ['growth'] }), true);

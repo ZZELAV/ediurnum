@@ -16,32 +16,32 @@ import {
 } from '../src/lib/server/crypto.ts';
 
 describe('AES-256-GCM', () => {
-	test('Verschlüsseln und Entschlüsseln ergibt den Originaltext (auch Unicode)', () => {
+	test('encrypting and decrypting gives the original text (also Unicode)', () => {
 		const key = generateKey();
 		const text = 'Liebes Tagebuch … Grüsse 🌻';
 		assert.equal(decrypt(key, encrypt(key, text, 'entry:1:rev:1'), 'entry:1:rev:1').toString('utf8'), text);
 	});
 
-	test('Gleicher Text ergibt jedes Mal anderen Geheimtext (zufälliger IV)', () => {
+	test('the same text gives a different ciphertext every time (random IV)', () => {
 		const key = generateKey();
 		assert.notDeepEqual(encrypt(key, 'gleich', 'a'), encrypt(key, 'gleich', 'a'));
 	});
 
-	test('Aufbau: Version 1, 12 Byte IV, 16 Byte Tag, dann Geheimtext', () => {
+	test('layout: version 1, 12-byte IV, 16-byte tag, then the ciphertext', () => {
 		const blob = encrypt(generateKey(), 'abc', 'a');
 		assert.equal(blob[0], 1);
 		assert.equal(blob.length, 1 + 12 + 16 + 3);
-		assert.ok(!blob.includes(Buffer.from('abc')), 'kein Klartext im Ergebnis');
+		assert.ok(!blob.includes(Buffer.from('abc')), 'no plain text in the result');
 	});
 
-	test('Falscher Kontext (AAD) oder falscher Schlüssel schlägt fehl', () => {
+	test('a wrong context (AAD) or a wrong key fails', () => {
 		const key = generateKey();
 		const blob = encrypt(key, 'geheim', 'entry:1:rev:1');
 		assert.throws(() => decrypt(key, blob, 'entry:2:rev:1'));
 		assert.throws(() => decrypt(generateKey(), blob, 'entry:1:rev:1'));
 	});
 
-	test('Jede Veränderung wird erkannt (IV, Tag, Geheimtext, Version, Länge)', () => {
+	test('every change is detected (IV, tag, ciphertext, version, length)', () => {
 		const key = generateKey();
 		const blob = encrypt(key, 'geheim', 'x');
 		for (const i of [1, 13, 29, blob.length - 1]) {
@@ -55,15 +55,15 @@ describe('AES-256-GCM', () => {
 		assert.throws(() => decrypt(key, blob.subarray(0, 20), 'x'), /Unknown encryption format/);
 	});
 
-	test('JSON hin und zurück', () => {
+	test('JSON round trip', () => {
 		const key = generateKey();
 		const value = { mood: 4, sections: { daily: { gratitude: ['a', ''] } }, free: 'ü' };
 		assert.deepEqual(decryptJson(key, encryptJson(key, value, 'k'), 'k'), value);
 	});
 });
 
-describe('Wiederherstellungsschlüssel', () => {
-	test('Format: 14 Vierergruppen aus A–Z (ohne I, O) und 2–9', () => {
+describe('Recovery key', () => {
+	test('format: 14 groups of four from A–Z (without I, O) and 2–9', () => {
 		for (let i = 0; i < 50; i++) {
 			const key = generateKey();
 			const text = formatRecoveryKey(key);
@@ -72,7 +72,7 @@ describe('Wiederherstellungsschlüssel', () => {
 		}
 	});
 
-	test('Kleinschreibung, Leerzeichen und fehlende Bindestriche sind erlaubt', () => {
+	test('lower case, spaces and missing hyphens are allowed', () => {
 		const key = generateKey();
 		const text = formatRecoveryKey(key);
 		assert.ok(parseRecoveryKey(text.toLowerCase()).equals(key));
@@ -81,7 +81,7 @@ describe('Wiederherstellungsschlüssel', () => {
 		assert.ok(parseRecoveryKey(`  ${text}\n`).equals(key));
 	});
 
-	test('Fehler haben Textschlüssel für die Oberfläche', () => {
+	test('errors have text keys for the interface', () => {
 		const text = formatRecoveryKey(generateKey());
 		assert.throws(() => parseRecoveryKey('ABCD'), /^Error: recovery\.invalidLength$/);
 		assert.throws(() => parseRecoveryKey(text + 'A'), /recovery\.invalidLength/);
@@ -92,10 +92,10 @@ describe('Wiederherstellungsschlüssel', () => {
 	});
 });
 
-describe('Schlüsselableitung', () => {
+describe('Key derivation', () => {
 	const fast = () => ({ ...defaultKdfParams(), memory: 8192, passes: 1 });
 
-	test('Standard: Argon2id, 64 MiB, 3 Durchgänge, zufälliges Salz', () => {
+	test('default: Argon2id, 64 MiB, 3 passes, random salt', () => {
 		const a = defaultKdfParams();
 		assert.equal(a.algorithm, 'argon2id');
 		assert.equal(a.memory, 65536);
@@ -104,7 +104,7 @@ describe('Schlüsselableitung', () => {
 		assert.notEqual(a.salt, defaultKdfParams().salt);
 	});
 
-	test('Deterministisch, passwort- und salzabhängig', async () => {
+	test('deterministic, depends on password and salt', async () => {
 		const params = fast();
 		const a = await deriveKey('ein langes Passwort', params);
 		assert.equal(a.length, 32);
@@ -113,7 +113,7 @@ describe('Schlüsselableitung', () => {
 		assert.ok(!a.equals(await deriveKey('ein langes Passwort', fast())));
 	});
 
-	test('Umlaute zählen gleich, egal wie sie eingegeben werden (NFC/NFD)', async () => {
+	test('umlauts count the same, however they are typed (NFC/NFD)', async () => {
 		const params = fast();
 		const composed = 'Grüsse aus Zürich';
 		const decomposed = composed.normalize('NFD');
@@ -121,7 +121,7 @@ describe('Schlüsselableitung', () => {
 		assert.ok((await deriveKey(composed, params)).equals(await deriveKey(decomposed, params)));
 	});
 
-	test('Sperr-Schlüssel hängt von Hauptschlüssel und PIN ab', () => {
+	test('the lock key depends on master key and PIN', () => {
 		const dek = generateKey();
 		const pinA = generateKey();
 		const lock = deriveLockKey(dek, pinA);
@@ -133,7 +133,7 @@ describe('Schlüsselableitung', () => {
 });
 
 describe('Hilfsfunktionen', () => {
-	test('Fingerabdruck: kurz, stabil, verrät den Schlüssel nicht', () => {
+	test('fingerprint: short, stable, does not reveal the key', () => {
 		const key = generateKey();
 		const fp = keyFingerprint(key);
 		assert.match(fp, /^[0-9a-f]{16}$/);
@@ -142,7 +142,7 @@ describe('Hilfsfunktionen', () => {
 		assert.ok(!key.toString('hex').includes(fp));
 	});
 
-	test('Zufällige Tokens sind URL-tauglich und verschieden', () => {
+	test('random tokens are URL-safe and different', () => {
 		const a = randomToken();
 		assert.match(a, /^[A-Za-z0-9_-]{43}$/);
 		assert.notEqual(a, randomToken());

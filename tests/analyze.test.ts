@@ -17,49 +17,49 @@ const entry = (date: string, content: EntryContent): Entry => ({
 
 const options = { tone: 'balanced' as const, persona: '', maxFocusPoints: 3, instructions: '' };
 
-test('Antwort mit Abschnitt „## Fokuspunkte“ am Schluss', () => {
+test('answer with a section „## Fokuspunkte“ at the end', () => {
 	const r = parseResponse('## Überblick\nGut.\n\n## Fokuspunkte\n- Mehr schlafen\n- **Sport** treiben\n3. Lesen\n');
 	assert.deepEqual(r.focusPoints, ['Mehr schlafen', 'Sport treiben', 'Lesen']);
 	assert.equal(r.body, '## Überblick\nGut.');
 });
 
-test('Überschrift mit Zusatz, fett oder ohne Markdown (markiert und kopiert)', () => {
+test('heading with an addition, in bold or without Markdown (selected and copied)', () => {
 	assert.deepEqual(parseResponse('Text\n\n## Fokuspunkte für die nächsten Wochen\n- A\n- B').focusPoints, ['A', 'B']);
 	assert.deepEqual(parseResponse('Text\n\n**Fokuspunkte:**\n- A').focusPoints, ['A']);
 	assert.deepEqual(parseResponse('Überblick\nText\n\nFokuspunkte\nMehr schlafen\nSport treiben').focusPoints, ['Mehr schlafen', 'Sport treiben']);
 	assert.deepEqual(parseResponse('Overview\n\n### Focus points\n1) Sleep\n2) Run').focusPoints, ['Sleep', 'Run']);
 });
 
-test('Nur die letzte Fokus-Überschrift zählt; Erwähnungen im Text nicht', () => {
+test('only the last focus heading counts, not mentions in the text', () => {
 	const r = parseResponse('## Überblick\nDie Fokuspunkte vom letzten Mal hast du umgesetzt.\n\n## Fokuspunkte\n- Neu');
 	assert.deepEqual(r.focusPoints, ['Neu']);
 	assert.match(r.body, /Fokuspunkte vom letzten Mal/);
 });
 
-test('Folgt nach den Fokuspunkten noch ein Abschnitt, bleibt er im Text', () => {
+test('a section after the focus points stays in the text', () => {
 	const r = parseResponse('## Fokuspunkte\n- A\n\n## Schlusswort\nAlles Gute');
 	assert.deepEqual(r.focusPoints, ['A']);
 	assert.equal(r.body, '## Schlusswort\nAlles Gute');
 });
 
-test('Doppelte Fokuspunkte entfallen, höchstens sieben', () => {
+test('duplicate focus points are dropped, at most seven', () => {
 	assert.deepEqual(parseResponse('## Fokuspunkte\n- A\n- A\n- B').focusPoints, ['A', 'B']);
 	const many = Array.from({ length: 10 }, (_, i) => `- P${i}`).join('\n');
 	assert.equal(parseResponse(`## Fokuspunkte\n${many}`).focusPoints.length, 7);
 });
 
-test('<focus>-Block (KI-Agent) und Windows-Zeilenenden', () => {
+test('<focus> block (AI agent) and Windows line endings', () => {
 	assert.deepEqual(parseResponse('Text\r\n<focus>\r\n- A\r\n- B\r\n</focus>').focusPoints, ['A', 'B']);
 	assert.deepEqual(parseResponse('Text\r\n\r\n## Focus points\r\n- A\r\n').focusPoints, ['A']);
 });
 
-test('Ohne Fokuspunkte bleibt die ganze Antwort erhalten', () => {
+test('without focus points the whole answer is kept', () => {
 	assert.deepEqual(parseResponse('  Nur Text  '), { body: 'Nur Text', focusPoints: [] });
-	// leere Fokus-Überschrift: nichts abschneiden
+	// empty focus heading: cut nothing off
 	assert.deepEqual(parseResponse('Text\n\n## Fokuspunkte\n'), { body: 'Text\n\n## Fokuspunkte', focusPoints: [] });
 });
 
-test('KI-Datei: Auftrag, Ton, Anzahl Fokuspunkte, Einträge chronologisch mit Inhalt', () => {
+test('AI file: instructions, tone, number of focus points, entries in chronological order with content', () => {
 	const md = buildChatMarkdown({
 		options,
 		lang: 'de',
@@ -79,12 +79,12 @@ test('KI-Datei: Auftrag, Ton, Anzahl Fokuspunkte, Einträge chronologisch mit In
 	assert.match(md, /Am See/);
 	assert.match(md, /Freude/);
 	assert.ok(md.indexOf('Gedanken') < md.indexOf('Zweiter Tag'));
-	// Standard-Überschriften der Antwort stehen als Code, nicht als echte Überschriften
+	// the default headings of the answer appear as code, not as real headings
 	assert.doesNotMatch(md, /^## Überblick$/m);
 	assert.ok(md.includes(defaultInstructions('de').split('\n')[0]));
 });
 
-test('KI-Datei: Überschriften im Tagebuchtext werden entschärft', () => {
+test('AI file: headings in the journal text are escaped', () => {
 	const md = buildChatMarkdown({
 		options,
 		lang: 'de',
@@ -98,7 +98,7 @@ test('KI-Datei: Überschriften im Tagebuchtext werden entschärft', () => {
 	assert.match(md, /Text #hashtag/);
 });
 
-test('KI-Datei auf Englisch mit eigenem Auftrag', () => {
+test('AI file in English with own instructions', () => {
 	const md = buildChatMarkdown({
 		options: { ...options, instructions: 'Be brief.' },
 		lang: 'en',

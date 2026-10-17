@@ -17,23 +17,23 @@ const entry: EntryContent = {
 const text = (hit: ReturnType<typeof matchEntry>) => hit!.parts.map((p) => p.text).join('');
 const marked = (hit: ReturnType<typeof matchEntry>) => hit!.parts.filter((p) => p.hit).map((p) => p.text);
 
-test('Suche ignoriert Gross-/Kleinschreibung und Akzente', () => {
+test('search ignores case and accents', () => {
 	const hit = matchEntry(entry, searchTerms('CAFE'), t);
 	assert.equal(hit?.field, 'section.daily.gratitude');
 	assert.deepEqual(marked(hit), ['Café']);
 });
 
-test('Alle Begriffe müssen vorkommen, auch in verschiedenen Feldern', () => {
+test('all terms have to occur, also in different fields', () => {
 	assert.ok(matchEntry(entry, searchTerms('see anna'), t));
 	assert.equal(matchEntry(entry, searchTerms('see berge'), t), null);
 });
 
-test('Gefühle werden in der Sprache der App gefunden', () => {
+test('feelings are found in the language of the app', () => {
 	const hit = matchEntry(entry, searchTerms('freude'), t);
 	assert.equal(hit?.field, 'section.feelings.emotions');
 });
 
-test('Lange Texte werden um die Fundstelle gekürzt', () => {
+test('long texts are shortened around the match', () => {
 	const long: EntryContent = { mood: null, sections: {}, free: 'wort '.repeat(60) + 'Treffer ' + 'wort '.repeat(60) };
 	const hit = matchEntry(long, searchTerms('treffer'), t);
 	assert.ok(text(hit).startsWith('… '));
@@ -46,31 +46,31 @@ test('Leere Suche findet nichts', () => {
 	assert.equal(matchEntry(entry, [], t), null);
 });
 
-test('„ss“ und „ß“ gelten als gleich, die Markierung trifft das Original', () => {
+test('„ss“ and „ß“ count as equal, the highlight hits the original', () => {
 	const c: EntryContent = { mood: null, sections: {}, free: 'Über die Straße gegangen.' };
 	assert.deepEqual(marked(matchEntry(c, searchTerms('strasse'), t)), ['Straße']);
 	assert.deepEqual(marked(matchEntry(c, searchTerms('STRAẞE'), t)), ['Straße']);
 	assert.deepEqual(marked(matchEntry(c, searchTerms('uber'), t)), ['Über']);
 });
 
-test('Zerlegte Akzente im Text werden ganz markiert', () => {
+test('decomposed accents in the text are highlighted completely', () => {
 	const c: EntryContent = { mood: null, sections: {}, free: 'Im Café gesessen' };
 	assert.deepEqual(marked(matchEntry(c, searchTerms('café'), t)), ['Café']);
 });
 
-test('Alle Fundstellen im Auszug sind markiert, kurzer Text ohne Auslassung', () => {
+test('all matches in the excerpt are highlighted, short text without an ellipsis', () => {
 	const c: EntryContent = { mood: null, sections: {}, free: 'See, dann\n\nwieder  See und Berge' };
 	const hit = matchEntry(c, searchTerms('see berge'), t);
 	assert.equal(text(hit), 'See, dann wieder See und Berge');
 	assert.deepEqual(marked(hit), ['See', 'See', 'Berge']);
 });
 
-test('Suchbegriffe: doppelte entfernt, höchstens acht', () => {
+test('search terms: duplicates removed, at most eight', () => {
 	assert.deepEqual(searchTerms('See see SEE'), ['see']);
 	assert.equal(searchTerms('a b c d e f g h i j').length, 8);
 });
 
-test('Leere Felder und Listen ergeben keinen Treffer', () => {
+test('empty fields and lists give no match', () => {
 	const c: EntryContent = { mood: 3, sections: { daily: { gratitude: ['', ' '], highlight: '  ' } }, free: '' };
 	assert.equal(matchEntry(c, searchTerms('a'), t), null);
 });

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { de } from '../src/lib/i18n/de.ts';
 import { isEmptyProfile, JOURNALING, PROFILE_TEXTS, profileMarkdown, sanitizeProfile, TRAITS, VALUES } from '../src/lib/profile.ts';
 
-test('Selbsteinschätzung: ungültige Werte werden verworfen', () => {
+test('self-assessment: invalid values are discarded', () => {
 	const p = sanitizeProfile({
 		journaling: 'sometimes',
 		satisfaction: 9,
@@ -21,7 +21,7 @@ test('Selbsteinschätzung: ungültige Werte werden verworfen', () => {
 	assert.equal(isEmptyProfile(sanitizeProfile({})), true);
 });
 
-test('Selbsteinschätzung: Markdown für die KI', () => {
+test('self-assessment: Markdown for the AI', () => {
 	const tr = (k: string) => de[k] ?? k;
 	const md = profileMarkdown(sanitizeProfile({ journaling: 'none', traits: { stability: 2 }, values: ['calm'], texts: { goals: 'A\nB' } }), 'Anna', tr);
 	assert.match(md, /- Name: Anna/);
@@ -31,7 +31,7 @@ test('Selbsteinschätzung: Markdown für die KI', () => {
 	assert.match(md, /: A B$/m);
 });
 
-test('Selbsteinschätzung: alle Texte existieren', () => {
+test('self-assessment: all texts exist', () => {
 	const keys = [
 		...JOURNALING.map((j) => `profile.journaling.${j}`),
 		...TRAITS.flatMap((t) => [`profile.trait.${t}`, `profile.trait.${t}.low`, `profile.trait.${t}.high`]),

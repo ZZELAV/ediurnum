@@ -11,35 +11,35 @@ const day = (date: string, mood: number | null = null, extra: Partial<StatsDay> 
 });
 const locked = (date: string, kinds: StatsDay['kinds'] = ['daily']): StatsDay => ({ date, kinds, content: null });
 
-test('Zeitraum: letzte 30/90/365 Tage inklusive heute, „Alles“ ab dem ersten Eintrag', () => {
+test('period: last 30/90/365 days including today, „all“ from the first entry', () => {
 	assert.equal(periodStart('30', '2026-10-11', '2025-01-01'), '2026-09-12');
 	assert.equal(periodStart('90', '2026-10-11', null), '2026-07-14');
 	assert.equal(periodStart('365', '2026-10-11', null), '2025-10-12');
 	assert.equal(periodStart('all', '2026-10-11', '2025-03-04'), '2025-03-04');
-	assert.equal(periodStart('all', '2026-10-11', null), '2026-10-11', 'ohne Einträge nur heute');
+	assert.equal(periodStart('all', '2026-10-11', null), '2026-10-11', 'without entries only today');
 });
 
-test('Anzahl, Schreibquote und Serien', () => {
+test('count, writing rate and streaks', () => {
 	const days = ['2026-09-28', '2026-09-30', '2026-10-01', '2026-10-02', '2026-10-03', '2026-10-09', '2026-10-10'].map((d) => day(d));
 	const s = computeStats(days, '2026-09-29', '2026-10-11');
 	assert.equal(s.days, 13);
-	assert.equal(s.written, 6, 'Tag vor dem Zeitraum zählt nicht');
+	assert.equal(s.written, 6, 'a day before the period does not count');
 	assert.deepEqual(s.longest, { length: 4, from: '2026-09-30', to: '2026-10-03' });
 });
 
-test('Längste Serie nur innerhalb des Zeitraums', () => {
+test('longest streak only within the period', () => {
 	const days = ['2026-09-08', '2026-09-09', '2026-09-10', '2026-09-11', '2026-09-12'].map((d) => day(d));
 	const s = computeStats(days, '2026-09-11', '2026-09-12');
 	assert.equal(s.longest?.length, 2);
 	assert.equal(computeStats([], '2026-09-11', '2026-09-12').longest, null);
 });
 
-test('Stimmung: Durchschnitt nur über Tage mit Stimmung, pro Monat und pro Wochentag (Montag zuerst)', () => {
+test('mood: average only over days with a mood, per month and per weekday (Monday first)', () => {
 	const days = [
-		day('2026-09-28', 2), // Montag
-		day('2026-10-05', 4), // Montag
-		day('2026-10-06', null), // Dienstag ohne Stimmung
-		day('2026-10-11', 5) // Sonntag
+		day('2026-09-28', 2), // Monday
+		day('2026-10-05', 4), // Monday
+		day('2026-10-06', null), // Tuesday without a mood
+		day('2026-10-11', 5) // Sunday
 	];
 	const s = computeStats(days, '2026-09-01', '2026-10-11');
 	assert.deepEqual(s.mood, { avg: 11 / 3, count: 3 });
@@ -49,7 +49,7 @@ test('Stimmung: Durchschnitt nur über Tage mit Stimmung, pro Monat und pro Woch
 			['2026-10', 3, 4.5],
 			['2026-09', 1, 2]
 		],
-		'neuester Monat zuerst'
+		'newest month first'
 	);
 	assert.deepEqual(
 		s.moodTrend,
@@ -61,17 +61,17 @@ test('Stimmung: Durchschnitt nur über Tage mit Stimmung, pro Monat und pro Woch
 				{ date: '2026-10-11', mood: 5 }
 			]
 		},
-		'Verlauf pro Tag, ohne Tage ohne Stimmung'
+		'trend per day, without days without a mood'
 	);
 	assert.deepEqual(s.byWeekday[0], { weekday: 1, avg: 3, count: 2 });
 	assert.deepEqual(s.byWeekday[1], { weekday: 2, avg: null, count: 0 });
 	assert.deepEqual(s.byWeekday[6], { weekday: 0, avg: 5, count: 1 });
 });
 
-test('Stimmungsverlauf: über 90 Tage als Wochendurchschnitt, erste Woche ab Beginn des Zeitraums', () => {
+test('mood trend: above 90 days as weekly averages, first week from the start of the period', () => {
 	const days = [day('2026-07-01', 2), day('2026-07-04', 4), day('2026-07-06', 5), day('2026-07-07', null), day('2026-09-30', 1)];
-	assert.equal(computeStats(days, '2026-07-04', '2026-10-01').moodTrend.weekly, false, '90 Tage: noch pro Tag');
-	const s = computeStats(days, '2026-07-01', '2026-10-01'); // 93 Tage, 1.7. ist ein Mittwoch
+	assert.equal(computeStats(days, '2026-07-04', '2026-10-01').moodTrend.weekly, false, '90 days: still per day');
+	const s = computeStats(days, '2026-07-01', '2026-10-01'); // 93 days, 1 July is a Wednesday
 	assert.deepEqual(s.moodTrend, {
 		weekly: true,
 		points: [
@@ -82,17 +82,17 @@ test('Stimmungsverlauf: über 90 Tage als Wochendurchschnitt, erste Woche ab Beg
 	});
 });
 
-test('Monate lückenlos, auch über den Jahreswechsel', () => {
+test('months without gaps, also across the turn of the year', () => {
 	const s = computeStats([day('2026-02-03', 3)], '2025-11-20', '2026-02-10');
 	assert.deepEqual(
 		s.byMonth.map((m) => m.month),
 		['2026-02', '2026-01', '2025-12', '2025-11']
 	);
 	assert.equal(s.byMonth[2].mood.avg, null);
-	assert.equal(s.monthlyReviews.total, 3, '83 Tage ≈ 3 Monate');
+	assert.equal(s.monthlyReviews.total, 3, '83 days ≈ 3 months');
 });
 
-test('Ungültige Werte zählen nicht', () => {
+test('invalid values do not count', () => {
 	const s = computeStats(
 		[
 			day('2026-10-01', 7),
@@ -105,10 +105,10 @@ test('Ungültige Werte zählen nicht', () => {
 	);
 	assert.deepEqual(s.mood, { avg: 3, count: 1 });
 	assert.deepEqual(s.energy, { avg: null, count: 0 });
-	assert.deepEqual(s.emotions, [{ id: 'joy', count: 1, pleasant: true }], 'doppelt und unbekannt zählen nicht');
+	assert.deepEqual(s.emotions, [{ id: 'joy', count: 1, pleasant: true }], 'duplicates and unknown ones do not count');
 });
 
-test('Gefühle: Häufigkeit absteigend, bei Gleichstand in der Reihenfolge der Auswahl; angenehm/belastend', () => {
+test('feelings: by frequency, on a tie in the order of the choice; pleasant/unpleasant', () => {
 	const review = (date: string, emotions: string[], energy: number) =>
 		({ date, kinds: ['feelings'], content: { mood: null, energy, emotions } }) satisfies StatsDay;
 	const s = computeStats(
@@ -130,12 +130,12 @@ test('Gefühle: Häufigkeit absteigend, bei Gleichstand in der Reihenfolge der A
 	assert.ok(PLEASANT_EMOTIONS.length > 0 && PLEASANT_EMOTIONS.length < EMOTIONS.length);
 });
 
-test('Rückblicke: geschrieben pro Woche ab Montag bzw. pro Monat, möglich aus der Länge des Zeitraums', () => {
-	// 1.–14.10.2026: 14 Tage = 2 mögliche Wochen, 1 Monat
+test('reviews: written per week from Monday or per month, possible from the length of the period', () => {
+	// 1–14 Oct 2026: 14 days = 2 possible weeks, 1 month
 	const days = [
-		day('2026-09-30', null, { kinds: ['feelings'] }), // vor dem Zeitraum
+		day('2026-09-30', null, { kinds: ['feelings'] }), // before the period
 		day('2026-10-04', null, { kinds: ['daily', 'feelings'] }),
-		day('2026-10-03', null, { kinds: ['feelings'] }), // gleiche Woche
+		day('2026-10-03', null, { kinds: ['feelings'] }), // same week
 		day('2026-10-13', null, { kinds: ['growth'] })
 	];
 	const s = computeStats(days, '2026-10-01', '2026-10-14');
@@ -143,24 +143,24 @@ test('Rückblicke: geschrieben pro Woche ab Montag bzw. pro Monat, möglich aus 
 	assert.deepEqual(s.monthlyReviews, { done: 1, total: 1 });
 });
 
-test('Rückblicke: mögliche Anzahl für alle Zeiträume, an jedem Wochentag gleich', () => {
+test('reviews: possible number for all periods, the same on every weekday', () => {
 	const expected = { '30': [4, 1], '90': [13, 3], '365': [52, 12] } as const;
-	// eine ganze Woche lang jeden Tag als „heute“, auch über einen Monatsanfang und ein Schaltjahr
+	// a whole week, each day as „today“, also across the start of a month and a leap year
 	for (const today of ['2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15', '2026-10-16', '2026-10-17', '2026-10-18', '2028-03-01']) {
 		for (const [period, [weeks, months]] of Object.entries(expected)) {
 			const s = computeStats([], periodStart(period as '30' | '90' | '365', today, null), today);
-			assert.equal(s.weeklyReviews.total, weeks, `${period} Tage bis ${today}: Wochen`);
-			assert.equal(s.monthlyReviews.total, months, `${period} Tage bis ${today}: Monate`);
+			assert.equal(s.weeklyReviews.total, weeks, `${period} days up to ${today}: weeks`);
+			assert.equal(s.monthlyReviews.total, months, `${period} days up to ${today}: months`);
 		}
 	}
-	// „Alles“: ab dem ersten Eintrag, mindestens 1
+	// „all“: from the first entry, at least 1
 	assert.deepEqual(computeStats([], '2026-10-15', '2026-10-17').weeklyReviews, { done: 0, total: 1 });
 	assert.equal(computeStats([], '2024-10-18', '2026-10-17').weeklyReviews.total, 104);
 	assert.equal(computeStats([], '2024-10-18', '2026-10-17').monthlyReviews.total, 24);
 });
 
-test('Rückblicke: angebrochene Wochen am Rand zählen als geschrieben, aber nie mehr als möglich', () => {
-	// 12 Monate bis Samstag, 17.10.2026; jeden Sonntag ein Wochen-, jeden 1. ein Monatsrückblick
+test('reviews: partial weeks at the edge count as written, but never more than possible', () => {
+	// 12 months up to Saturday, 17 Oct 2026; a weekly review every Sunday, a monthly review on every 1st
 	const from = periodStart('365', '2026-10-17', null);
 	const days: StatsDay[] = [];
 	for (let d = '2025-10-01'; d <= '2026-10-17'; d = new Date(Date.parse(d) + 86400000).toISOString().slice(0, 10)) {
@@ -172,34 +172,34 @@ test('Rückblicke: angebrochene Wochen am Rand zählen als geschrieben, aber nie
 	const s = computeStats(days, from, '2026-10-17');
 	assert.deepEqual(s.weeklyReviews, { done: 52, total: 52 });
 	assert.deepEqual(s.monthlyReviews, { done: 12, total: 12 });
-	// zusätzlich am Mittwoch ein Rückblick in der laufenden Woche → 53 Wochen berührt, gezählt 52
+	// additionally a review on Wednesday in the current week → 53 weeks touched, 52 counted
 	const more = computeStats([...days, day('2026-10-14', null, { kinds: ['feelings'] })], from, '2026-10-17');
 	assert.deepEqual(more.weeklyReviews, { done: 52, total: 52 });
 });
 
-test('Gesperrte Einträge ohne PIN: zählen für Anzahl, Serien und Rückblicke, nicht für Stimmung', () => {
+test('locked entries without PIN: count for number, streaks and reviews, not for mood', () => {
 	const days = [day('2026-10-09', 4), locked('2026-10-10', ['feelings']), day('2026-10-11', 2)];
 	const s = computeStats(days, '2026-10-01', '2026-10-11');
 	assert.equal(s.written, 3);
 	assert.equal(s.hidden, 1);
 	assert.deepEqual(s.mood, { avg: 3, count: 2 });
 	assert.equal(s.weeklyReviews.done, 1);
-	assert.equal(computeStats([locked('2026-09-01')], '2026-10-01', '2026-10-11').hidden, 0, 'nur im Zeitraum');
+	assert.equal(computeStats([locked('2026-09-01')], '2026-10-01', '2026-10-11').hidden, 0, 'only within the period');
 });
 
-test('Aktuelle Serie: mit heutigem Eintrag, sonst bis gestern, über Monats- und Jahresgrenzen', () => {
+test('current streak: with an entry today, otherwise up to yesterday, across month and year boundaries', () => {
 	assert.equal(currentStreak(['2026-10-10', '2026-10-09', '2026-10-08', '2026-10-06'], '2026-10-10'), 3);
-	assert.equal(currentStreak(['2026-10-09', '2026-10-08'], '2026-10-10'), 2, 'heute noch offen');
+	assert.equal(currentStreak(['2026-10-09', '2026-10-08'], '2026-10-10'), 2, 'today still open');
 	assert.equal(currentStreak(['2026-10-08', '2026-10-07'], '2026-10-10'), 0, 'gestern ausgelassen');
 	assert.equal(currentStreak([], '2026-10-10'), 0);
 	assert.equal(currentStreak(['2026-01-02', '2026-01-01', '2025-12-31', '2025-12-30'], '2026-01-02'), 4);
 	assert.equal(currentStreak(['2026-03-01', '2026-02-28'], '2026-03-01'), 2);
 });
 
-test('Kennzahlen aus den Metadaten (Widget, Dashboard, Statistik)', () => {
+test('figures from the metadata (widget, dashboard, statistics)', () => {
 	assert.deepEqual(writingSummary([], '2026-10-10'), { entries: 0, lastEntry: null, writtenToday: false, streak: 0 });
 	const metas = [
-		{ date: '2026-10-09', updatedAt: '2026-10-10T07:00:00.000Z' }, // gestern, heute nachgetragen
+		{ date: '2026-10-09', updatedAt: '2026-10-10T07:00:00.000Z' }, // yesterday, filled in today
 		{ date: '2026-10-10', updatedAt: '2026-10-10T06:00:00.000Z' },
 		{ date: '2026-10-07', updatedAt: '2026-10-07T20:00:00.000Z' }
 	];
