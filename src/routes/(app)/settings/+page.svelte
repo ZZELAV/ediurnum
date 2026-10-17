@@ -316,7 +316,8 @@
 		gap: 0 1.2rem;
 		align-items: end;
 	}
-	.grid > div:last-child {
+	/* space to what follows the form (e.g. the next heading) – not at the end of a card, where its padding applies */
+	.grid:not(:last-child) > div:last-child {
 		margin-bottom: 1.4rem;
 	}
 	.check {
