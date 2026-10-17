@@ -9,27 +9,27 @@ const optional = (value: string | undefined) => (value?.trim() ? value.trim() : 
  */
 export const variables = defineEnvVars({
 	DATA_DIR: {
-		description: 'Ordner für die Datenbank (Standard ./data)',
+		description: 'Folder for the database (default ./data)',
 		schema: (value) => optional(value) ?? './data'
 	},
 	ORIGIN: {
-		description: 'Öffentliche Adresse, z. B. https://journal.example.com – für sichere Cookies und den Push-Absender',
+		description: 'Public address, e.g. https://journal.example.com – for secure cookies and the push sender',
 		schema: (value) => optional(value)?.replace(/\/+$/, '')
 	},
 	COOKIE_SECURE: {
-		description: 'true/false: Sitzungs-Cookie nur über HTTPS senden; Standard folgt ORIGIN (https:// → true)',
+		description: 'true/false: send the session cookie only over HTTPS; default follows ORIGIN (https:// → true)',
 		schema: optional
 	},
 	LOG_LEVEL: {
-		description: 'error, warn, info (Standard) oder debug (zusätzlich jede Anfrage)',
+		description: 'error, warn, info (default) or debug (additionally every request)',
 		schema: optional
 	},
 	VAPID_SUBJECT: {
-		description: 'Absender für Push-Dienste (mailto: oder https:), Standard: ORIGIN',
+		description: 'Sender for push services (mailto: or https:), default: ORIGIN',
 		schema: optional
 	},
 	WIDGET_TOKEN: {
-		description: 'Bearer-Token für /api/widget (mindestens 16 Zeichen), sonst ist der Endpunkt aus',
+		description: 'Bearer token for /api/widget (at least 16 characters), otherwise the endpoint is off',
 		schema: optional
 	}
 });

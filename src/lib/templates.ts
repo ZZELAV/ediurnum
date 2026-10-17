@@ -13,7 +13,7 @@ export interface FieldDef {
 
 export interface SectionDef {
 	kind: SectionKind;
-	/** Vorgeschlagener Rhythmus in Tagen (unverbindlich). */
+	/** Suggested rhythm (not binding). */
 	rhythm: 'daily' | 'weekly' | 'monthly';
 	fields: FieldDef[];
 }

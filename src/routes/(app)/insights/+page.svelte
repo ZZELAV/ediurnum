@@ -349,7 +349,7 @@
 							: t('insights.meta', { from: fmtDate(a.from, 'short'), to: fmtDate(a.to, 'short'), count: a.entryCount, agent: a.agentName, model: a.model })}
 					</span>
 				</summary>
-				{#if a.question}<p class="faint"><em>„{a.question}“</em></p>{/if}
+				{#if a.question}<p class="faint"><em>{t('insights.questionQuoted', { question: a.question })}</em></p>{/if}
 				{#if a.focusPoints.length}
 					<div class="focus card">
 						<p class="eyebrow">{t('insights.focusPoints')}</p>

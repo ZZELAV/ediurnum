@@ -35,7 +35,7 @@
 		const blob = new Blob([t('setup.keyFileText') + recoveryKey + '\n'], { type: 'text/plain' });
 		const a = document.createElement('a');
 		a.href = URL.createObjectURL(blob);
-		a.download = 'ediurnum-wiederherstellungsschluessel.txt';
+		a.download = t('setup.keyFileName');
 		a.click();
 		URL.revokeObjectURL(a.href);
 	}

@@ -36,7 +36,7 @@ export const VALUES = [
 export const JOURNALING = ['none', 'past', 'occasional', 'regular'] as const;
 export type Journaling = (typeof JOURNALING)[number];
 
-/** Freitextfelder in Anzeigereihenfolge. */
+/** Free text fields in display order. */
 export const PROFILE_TEXTS = ['life', 'strengths', 'challenges', 'goals', 'coping', 'hopes', 'sensitive'] as const;
 export type ProfileText = (typeof PROFILE_TEXTS)[number];
 

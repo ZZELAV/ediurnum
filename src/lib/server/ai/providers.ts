@@ -134,7 +134,7 @@ async function openaiComplete(agent: AiAgent, system: string, user: string): Pro
 	const choice = body?.choices?.[0];
 	if (choice?.finish_reason === 'content_filter') throw new AiError('refusal', 'content_filter');
 	const content = choice?.message?.content;
-	if (typeof content !== 'string') throw new AiError('provider', 'Leere Antwort');
+	if (typeof content !== 'string') throw new AiError('provider', 'empty response');
 	return content.trim();
 }
 
@@ -165,7 +165,7 @@ async function geminiComplete(agent: AiAgent, system: string, user: string): Pro
 	const cand = body?.candidates?.[0];
 	if (!cand && body?.promptFeedback?.blockReason) throw new AiError('refusal', body.promptFeedback.blockReason);
 	const text = (cand?.content?.parts ?? []).map((p: { text?: string }) => p.text ?? '').join('');
-	if (!text) throw new AiError(cand?.finishReason === 'SAFETY' ? 'refusal' : 'provider', 'Leere Antwort');
+	if (!text) throw new AiError(cand?.finishReason === 'SAFETY' ? 'refusal' : 'provider', 'empty response');
 	return text.trim();
 }
 
