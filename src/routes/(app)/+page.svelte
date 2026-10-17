@@ -7,7 +7,7 @@
 
 	let { data } = $props();
 
-	// „Heute nicht“ (not today) applies here as well (same as in the entry)
+	// "Not today" applies here as well (same as in the entry)
 	let dismissed = $state<Partial<Record<SectionKind, boolean>>>({});
 	onMount(() => {
 		for (const k of ['feelings', 'growth'] as const) if (isDismissed(data.today, k)) dismissed[k] = true;

@@ -53,7 +53,7 @@ describe('Setup, signing in, signing out', () => {
 		recoveryKey = r.recoveryKey;
 		assert.match(recoveryKey, KEY_FORMAT);
 		const session = r.client.lastSetCookie.find((c) => c.startsWith('ediurnum_session='))!;
-		assert.ok(session, 'Sitzungs-Cookie gesetzt');
+		assert.ok(session, 'session cookie set');
 		assert.match(session, /HttpOnly/i);
 		assert.match(session, /SameSite=Strict/i);
 		assert.doesNotMatch(session, /Secure/i, 'without Secure over http://, otherwise the browser would not send it');
@@ -174,7 +174,7 @@ describe('Setup, signing in, signing out', () => {
 		const typed = recoveryKey.toLowerCase().replaceAll('-', ' ');
 		const r = await c.action('/recover', { password: 'neues-Passwort-123', confirm: 'neues-Passwort-123', recoveryKey: typed });
 		assert.equal(r.location, '/');
-		assert.equal((await c.get('/')).status, 200, 'direkt angemeldet');
+		assert.equal((await c.get('/')).status, 200, 'logged in directly');
 		assert.equal((await other.get('/')).headers.get('location'), '/login', 'other session ended');
 
 		const login = new Client(server.url);

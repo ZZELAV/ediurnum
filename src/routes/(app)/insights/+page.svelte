@@ -66,7 +66,7 @@
 	let instructions = $state(untrack(() => data.instructions.custom || data.instructions.default));
 	const instructionsNotice = new Flash();
 
-	// „Letzte Woche“ (last week) = today and the 6 days before (7 days), likewise 30 and 90 days
+	// "Last week" = today and the 6 days before (7 days), likewise 30 and 90 days
 	const from = $derived(period === 'custom' ? customFrom : addDays(data.today, 1 - Number(period)));
 	const to = $derived(period === 'custom' ? customTo : data.today);
 

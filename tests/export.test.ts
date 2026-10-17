@@ -89,7 +89,7 @@ describe('PDF', () => {
 		const bytes = await exportPdf(many, 'de', 1, fonts);
 		assert.equal(Buffer.from(bytes.subarray(0, 5)).toString(), '%PDF-');
 		const pdf = await PDFDocument.load(bytes);
-		assert.ok(pdf.getPageCount() > 3, `${pdf.getPageCount()} Seiten`);
+		assert.ok(pdf.getPageCount() > 3, `${pdf.getPageCount()} pages`);
 		assert.equal(pdf.getTitle(), 'ediurnum – Tagebuch');
 		assert.ok(!Buffer.from(bytes).includes('Kaffee'), 'text only as glyphs of the embedded font');
 	});

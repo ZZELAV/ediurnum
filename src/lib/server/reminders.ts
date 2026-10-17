@@ -176,7 +176,7 @@ export function removeAllDevices() {
 }
 
 /**
- * Sender for the push services (VAPID „subject“). Apple rejects addresses such as „localhost“,
+ * Sender for the push services (VAPID "subject"). Apple rejects addresses such as "localhost",
  * hence the public address from ORIGIN – or explicitly VAPID_SUBJECT (mailto: or https:).
  */
 function vapidSubject(): string {
@@ -195,7 +195,7 @@ export async function sendToAll(payload: { title: string; body: string; url: str
 			await webpush.sendNotification({ endpoint: r.endpoint, keys: JSON.parse(r.keys) }, JSON.stringify(payload), {
 				vapidDetails: { subject: vapidSubject(), publicKey, privateKey },
 				TTL: 60 * 60 * 12,
-				// „high“: deliver immediately. With „normal“ Apple (iOS) may hold the message back until the device
+				// "high": deliver immediately. With "normal" Apple (iOS) may hold the message back until the device
 				// wakes up anyway – it then often only arrived when e.g. a VPN woke up the iPhone.
 				urgency: 'high'
 			});

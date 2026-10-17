@@ -1,11 +1,11 @@
 /**
- * Self-assessment („Über mich“, about me). Filled in first after setup, can be adapted in the
+ * Self-assessment ("About me"). Filled in first after setup, can be adapted in the
  * settings and serves the AI as background for every analysis.
  *
  * Structure based on proven methods:
  * - Big Five (five personality dimensions) as a short self-assessment on a 5-point scale
  * - life satisfaction as a baseline (cf. Cantril ladder)
- * - values, strengths, challenges and goals (cf. TELOS from the project „fabric“)
+ * - values, strengths, challenges and goals (cf. TELOS from the project "fabric")
  * - experience with journaling, expectations and topics the AI should treat with care
  *
  * Never rename field IDs (stored answers depend on them).

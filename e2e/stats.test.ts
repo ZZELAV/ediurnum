@@ -12,14 +12,14 @@ const strip = (html: string) => html.replace(/<!--[\s\S]*?-->|<[^>]+>/g, '').tri
 /** Value below a label on the dashboard (`<dt>` → `<dd>`). */
 function dashboardValue(html: string, label: string) {
 	const i = html.search(new RegExp(`<dt class="eyebrow[^"]*">${label}</dt>`));
-	assert.ok(i >= 0, `Dashboard: ${label} fehlt`);
+	assert.ok(i >= 0, `dashboard: ${label} missing`);
 	return strip(html.slice(i).match(/<dd[^>]*>([\s\S]*?)<\/dd>/)![1]);
 }
 
-/** Text of a tile in the statistics, e.g. „4.0“ below „Ø Stimmung“. */
+/** Text of a tile in the statistics, e.g. "4.0" below the average mood. */
 function tile(html: string, label: string) {
 	const i = html.search(new RegExp(`class="eyebrow[^"]*">${label}</span>`));
-	assert.ok(i >= 0, `Kachel ${label} fehlt`);
+	assert.ok(i >= 0, `tile ${label} missing`);
 	return strip(html.slice(i).match(/<strong[^>]*>([\s\S]*?)<\/strong>/)![1]);
 }
 
@@ -88,7 +88,7 @@ describe('Statistics', () => {
 		assert.match(html, /<h2[^>]*>Stimmungsverlauf<\/h2>/);
 		const labels = [...html.matchAll(/class="month-label[^"]*">([^<]+)</g)].map((m) => m[1]);
 		const fmt = (iso: string) => new Intl.DateTimeFormat('de-CH', { month: 'short', timeZone: 'UTC' }).format(new Date(iso.slice(0, 7) + '-01T00:00:00Z'));
-		assert.equal(labels[0], fmt(zurichToday()), 'laufender Monat links');
+		assert.equal(labels[0], fmt(zurichToday()), 'current month on the left');
 		assert.equal(labels.at(-1), fmt(zurichToday(-2)));
 		assert.doesNotMatch(await (await c.get('/insights')).text(), /Stimmungsverlauf/);
 	});

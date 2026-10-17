@@ -20,9 +20,9 @@ test('adding days and distances across month, year and daylight saving boundarie
 	assert.equal(addDays('2026-10-31', 1), '2026-11-01');
 	assert.equal(addDays('2026-01-01', -1), '2025-12-31');
 	assert.equal(addDays('2028-02-28', 1), '2028-02-29');
-	assert.equal(addDays('2026-03-28', 2), '2026-03-30', 'Sommerzeit-Beginn');
+	assert.equal(addDays('2026-03-28', 2), '2026-03-30', 'start of daylight saving time');
 	assert.equal(daysBetween('2026-03-28', '2026-03-30'), 2);
-	assert.equal(daysBetween('2026-10-24', '2026-10-26'), 2, 'Winterzeit-Beginn');
+	assert.equal(daysBetween('2026-10-24', '2026-10-26'), 2, 'end of daylight saving time');
 	assert.equal(daysBetween('2026-10-10', '2026-10-01'), -9);
 	assert.equal(daysBetween('2025-10-10', '2026-10-10'), 365);
 });

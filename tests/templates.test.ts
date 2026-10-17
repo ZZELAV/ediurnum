@@ -10,7 +10,7 @@ test('field IDs stay stable (old answers depend on them – never rename, only a
 		growth: ['learned', 'proud', 'growth', 'nextFocus']
 	};
 	for (const [kind, fields] of Object.entries(required)) {
-		for (const f of fields) assert.ok(ids[kind]?.includes(f), `${kind}.${f} fehlt`);
+		for (const f of fields) assert.ok(ids[kind]?.includes(f), `${kind}.${f} missing`);
 	}
 	for (const e of ['joy', 'gratitude', 'calm', 'tired', 'stressed', 'anxious', 'sad', 'overwhelmed']) {
 		assert.ok(EMOTIONS.includes(e), `feeling ${e} missing`);

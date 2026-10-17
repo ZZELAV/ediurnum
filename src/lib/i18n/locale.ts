@@ -7,7 +7,7 @@ export function locale(lang: Lang): string {
 
 /**
  * Format for dates and numbers: the first entry of `Accept-Language` with a region that matches the app language
- * (e.g. `de-DE` → „3,3“, `en-US` → „Oct 10“). Otherwise the default format of the language.
+ * (e.g. `de-DE` → "3,3", `en-US` → "Oct 10"). Otherwise the default format of the language.
  */
 export function pickLocale(acceptLanguage: string | null, lang: Lang): string {
 	for (const part of (acceptLanguage ?? '').slice(0, 200).split(',')) {

@@ -14,7 +14,7 @@ const PUBLIC_PATHS = ['/setup', '/login', '/recover'];
 /** Check a token themselves instead of the session (e.g. dashboard widget). */
 const TOKEN_PATHS = ['/api/widget'];
 
-/** Older devices ask for icon names of their own (e.g. „-precomposed“ or with a size). */
+/** Older devices ask for icon names of their own (e.g. "-precomposed" or with a size). */
 const TOUCH_ICON_ALIAS = /^\/apple-touch-icon(-\d+x\d+)?(-precomposed)?\.png$/;
 
 /** On server start: write details to the log and start the scheduler for reminders (push). */

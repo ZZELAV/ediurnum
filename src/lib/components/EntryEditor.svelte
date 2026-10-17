@@ -116,13 +116,13 @@
 	}
 
 	// ---- Suggested reviews ----
-	// due reviews appear as a card of their own; „Heute nicht“ (not today) is remembered per day in the browser
+	// due reviews appear as a card of their own; "Not today" is remembered per day in the browser
 	// (same as on the start page, see #lib/suggest).
 	let dismissed = $state<Partial<Record<SectionKind, boolean>>>({});
 
 	onMount(() => {
 		for (const s of optional) if (isDismissed(date, s.kind)) dismissed[s.kind] = true;
-		// „Jetzt schreiben“ (write now) on the start page opens the entry with ?add=<section>
+		// "Write it now" on the start page opens the entry with ?add=<section>
 		const add = page.url.searchParams.get('add');
 		const def = optional.find((s) => s.kind === add);
 		if (def && readable && content.sections[def.kind] === undefined) {

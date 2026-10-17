@@ -161,7 +161,7 @@ describe('Locking with PIN', () => {
 		assert.ok((await readable()).has(DAY), 'readable with an open PIN');
 	});
 
-	test('after „Wieder sperren“ (lock again) the entry can be neither read nor changed', async () => {
+	test('after "Lock again" the entry can be neither read nor changed', async () => {
 		assert.equal((await c.api('/api/pin', undefined, 'DELETE')).status, 200);
 		assert.ok(!(await readable()).has(DAY));
 		assert.equal((await c.api(`/api/entry/${DAY}`, { content: { mood: 1, sections: {}, free: 'x' } })).status, 423);

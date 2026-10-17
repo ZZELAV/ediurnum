@@ -9,8 +9,8 @@ import { SECTIONS } from '../src/lib/templates.ts';
 test('both languages have the same keys', () => {
 	const missingEn = Object.keys(de).filter((k) => !(k in en));
 	const missingDe = Object.keys(en).filter((k) => !(k in de));
-	assert.deepEqual(missingEn, [], `fehlt in en.ts: ${missingEn.join(', ')}`);
-	assert.deepEqual(missingDe, [], `fehlt in de.ts: ${missingDe.join(', ')}`);
+	assert.deepEqual(missingEn, [], `missing in en.ts: ${missingEn.join(', ')}`);
+	assert.deepEqual(missingDe, [], `missing in de.ts: ${missingDe.join(', ')}`);
 });
 
 test('all text keys used in the code exist', () => {
@@ -56,7 +56,7 @@ test('singular forms (.one) have a base form, no text is empty', () => {
 	assert.deepEqual(empty, []);
 });
 
-test('Swiss spelling: no „ß“ in the German texts', () => {
+test('Swiss spelling: no "ß" in the German texts', () => {
 	assert.deepEqual(Object.keys(de).filter((k) => de[k].includes('ß')), []);
 });
 

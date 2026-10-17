@@ -315,7 +315,7 @@ select,
 textarea {
 	width: 100%;
 	/* fields may shrink in flex rows and grids – otherwise iOS gives them a fixed minimum width
-	 * and they stick out on the right (e.g. next to the numbers of „Wofür bin ich dankbar?“) */
+	 * and they stick out on the right (e.g. next to the numbers of "What am I grateful for today?") */
 	min-width: 0;
 	/* text areas can only be resized in height – in width they would stick out of the column */
 	resize: vertical;

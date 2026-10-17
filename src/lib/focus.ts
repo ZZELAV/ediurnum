@@ -2,7 +2,7 @@
  * Focus mode while writing: after three characters in a row the navigation and the
  * side column slowly fade out (styles in app.css under "Focus mode",
  * controlled via data-focus on <html>). It deliberately ends only with Esc –
- * on touch devices without a keyboard also with the button "Fokus beenden".
+ * on touch devices without a keyboard also with the button "Exit focus".
  */
 const START_AFTER_CHARS = 3; // this many characters in a row until focus starts
 const PAUSE_RESETS_MS = 2000; // a longer pause starts counting again

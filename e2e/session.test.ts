@@ -1,5 +1,5 @@
 /**
- * Session: sign of life, leaving the app, setting „lock after leaving the app“.
+ * Session: sign of life, leaving the app, setting "lock after leaving the app".
  * The actual locking after the time runs out (at least 1 minute) was checked in the browser; here only what is quick.
  */
 import { after, before, describe, test } from 'node:test';

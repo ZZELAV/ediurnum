@@ -117,15 +117,15 @@ const listItems = (block: string) => [
 ].slice(0, 7);
 
 /**
- * Heading of the section with the focus points: as Markdown („## Fokuspunkte“, also with additions such as
- * „für die nächsten Wochen“) or as a plain line – that is how it arrives when the answer was selected
- * and copied in the chat instead of using the copy button.
+ * Heading of the section with the focus points: as Markdown ("## Focus points" or the German "## Fokuspunkte",
+ * also with additions such as "for the coming weeks") or as a plain line – that is how it arrives when the
+ * answer was selected and copied in the chat instead of using the copy button.
  */
 const FOCUS_HEADING = /^(?:#{1,4}[ \t]*)?\**[ \t]*(?:Fokuspunkte|Fokus-Punkte|Focus points)\b[^\n]{0,60}?\**[ \t]*:?[ \t]*$/gim;
 
 /**
  * Separates the focus points from the rest of the text: either a <focus> block (AI agent)
- * or the last section „## Fokuspunkte“ / „## Focus points“ (answer from an AI chat).
+ * or the last section "## Fokuspunkte" / "## Focus points" (answer from an AI chat).
  */
 export function parseResponse(text: string): { body: string; focusPoints: string[] } {
 	text = text.replace(/\r\n/g, '\n');

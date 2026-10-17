@@ -17,7 +17,7 @@ const entry = (date: string, content: EntryContent): Entry => ({
 
 const options = { tone: 'balanced' as const, persona: '', maxFocusPoints: 3, instructions: '' };
 
-test('answer with a section „## Fokuspunkte“ at the end', () => {
+test('answer with a section "## Fokuspunkte" at the end', () => {
 	const r = parseResponse('## Überblick\nGut.\n\n## Fokuspunkte\n- Mehr schlafen\n- **Sport** treiben\n3. Lesen\n');
 	assert.deepEqual(r.focusPoints, ['Mehr schlafen', 'Sport treiben', 'Lesen']);
 	assert.equal(r.body, '## Überblick\nGut.');

@@ -11,7 +11,7 @@ const day = (date: string, mood: number | null = null, extra: Partial<StatsDay> 
 });
 const locked = (date: string, kinds: StatsDay['kinds'] = ['daily']): StatsDay => ({ date, kinds, content: null });
 
-test('period: last 30/90/365 days including today, „all“ from the first entry', () => {
+test('period: last 30/90/365 days including today, "all" from the first entry', () => {
 	assert.equal(periodStart('30', '2026-10-11', '2025-01-01'), '2026-09-12');
 	assert.equal(periodStart('90', '2026-10-11', null), '2026-07-14');
 	assert.equal(periodStart('365', '2026-10-11', null), '2025-10-12');
@@ -145,7 +145,7 @@ test('reviews: written per week from Monday or per month, possible from the leng
 
 test('reviews: possible number for all periods, the same on every weekday', () => {
 	const expected = { '30': [4, 1], '90': [13, 3], '365': [52, 12] } as const;
-	// a whole week, each day as „today“, also across the start of a month and a leap year
+	// a whole week, each day as "today", also across the start of a month and a leap year
 	for (const today of ['2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15', '2026-10-16', '2026-10-17', '2026-10-18', '2028-03-01']) {
 		for (const [period, [weeks, months]] of Object.entries(expected)) {
 			const s = computeStats([], periodStart(period as '30' | '90' | '365', today, null), today);
@@ -153,7 +153,7 @@ test('reviews: possible number for all periods, the same on every weekday', () =
 			assert.equal(s.monthlyReviews.total, months, `${period} days up to ${today}: months`);
 		}
 	}
-	// „all“: from the first entry, at least 1
+	// "all": from the first entry, at least 1
 	assert.deepEqual(computeStats([], '2026-10-15', '2026-10-17').weeklyReviews, { done: 0, total: 1 });
 	assert.equal(computeStats([], '2024-10-18', '2026-10-17').weeklyReviews.total, 104);
 	assert.equal(computeStats([], '2024-10-18', '2026-10-17').monthlyReviews.total, 24);
@@ -190,7 +190,7 @@ test('locked entries without PIN: count for number, streaks and reviews, not for
 test('current streak: with an entry today, otherwise up to yesterday, across month and year boundaries', () => {
 	assert.equal(currentStreak(['2026-10-10', '2026-10-09', '2026-10-08', '2026-10-06'], '2026-10-10'), 3);
 	assert.equal(currentStreak(['2026-10-09', '2026-10-08'], '2026-10-10'), 2, 'today still open');
-	assert.equal(currentStreak(['2026-10-08', '2026-10-07'], '2026-10-10'), 0, 'gestern ausgelassen');
+	assert.equal(currentStreak(['2026-10-08', '2026-10-07'], '2026-10-10'), 0, 'yesterday skipped');
 	assert.equal(currentStreak([], '2026-10-10'), 0);
 	assert.equal(currentStreak(['2026-01-02', '2026-01-01', '2025-12-31', '2025-12-30'], '2026-01-02'), 4);
 	assert.equal(currentStreak(['2026-03-01', '2026-02-28'], '2026-03-01'), 2);

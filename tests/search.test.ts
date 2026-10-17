@@ -41,12 +41,12 @@ test('long texts are shortened around the match', () => {
 	assert.deepEqual(marked(hit), ['Treffer']);
 });
 
-test('Leere Suche findet nichts', () => {
+test('an empty search finds nothing', () => {
 	assert.deepEqual(searchTerms('   '), []);
 	assert.equal(matchEntry(entry, [], t), null);
 });
 
-test('„ss“ and „ß“ count as equal, the highlight hits the original', () => {
+test('"ss" and "ß" count as equal, the highlight hits the original', () => {
 	const c: EntryContent = { mood: null, sections: {}, free: 'Über die Straße gegangen.' };
 	assert.deepEqual(marked(matchEntry(c, searchTerms('strasse'), t)), ['Straße']);
 	assert.deepEqual(marked(matchEntry(c, searchTerms('STRAẞE'), t)), ['Straße']);

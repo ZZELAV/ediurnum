@@ -52,7 +52,7 @@ export interface TestServer {
  * `env` adds or overrides variables.
  */
 export async function startServer(env: Record<string, string | undefined> = {}, opts: { dataDir?: string } = {}): Promise<TestServer> {
-	if (!existsSync(new URL('build/index.js', ROOT))) throw new Error('Zuerst bauen: npm run build');
+	if (!existsSync(new URL('build/index.js', ROOT))) throw new Error('Build first: npm run build');
 	const port = await freePort();
 	const url = `http://127.0.0.1:${port}`;
 	const dataDir = opts.dataDir ?? mkdtempSync(join(tmpdir(), 'ediurnum-e2e-'));
@@ -85,7 +85,7 @@ export async function startServer(env: Record<string, string | undefined> = {}, 
 		child.stdout!.on('data', check);
 		child.on('exit', (code) => {
 			clearTimeout(timer);
-			reject(new Error(`Server beendet (${code}):\n${out}`));
+			reject(new Error(`Server exited (${code}):\n${out}`));
 		});
 	});
 	return {
@@ -115,7 +115,7 @@ export interface ActionResult {
 	location?: string;
 }
 
-/** A „browser“ with its own cookies. */
+/** A "browser" with its own cookies. */
 export class Client {
 	cookies = new Map<string, string>();
 	/** Raw Set-Cookie headers of the last response */
@@ -210,6 +210,6 @@ export class Client {
 export async function setupJournal(server: TestServer, name = 'Testperson') {
 	const client = new Client(server.url);
 	const r = await client.action('/setup?/create', { name, password: PASSWORD, confirm: PASSWORD });
-	if (r.type !== 'success') throw new Error('Einrichtung fehlgeschlagen: ' + JSON.stringify(r));
+	if (r.type !== 'success') throw new Error('setup failed: ' + JSON.stringify(r));
 	return { client, recoveryKey: String(r.data!.recoveryKey) };
 }

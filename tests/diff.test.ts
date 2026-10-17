@@ -67,7 +67,7 @@ test('random texts: before/after exact, no empty parts, no two parts of the same
 	}
 });
 
-test('Sehr lange Texte: ganzer Text als ersetzt statt langer Rechenzeit', () => {
+test('very long texts: the whole text as replaced instead of a long computation', () => {
 	const a = Array.from({ length: 3000 }, (_, i) => `wort${i}`).join(' ');
 	const b = Array.from({ length: 3000 }, (_, i) => `wort${i + 1}`).join(' ');
 	const started = Date.now();

@@ -43,7 +43,7 @@ export function watchIdle(idleMinutes: number, leaveMinutes = 0): () => void {
 		}
 	};
 
-	/** Sign of life; for the server it also means „back again“. */
+	/** Sign of life; for the server it also means "back again". */
 	const ping = () => {
 		lastPing = Date.now();
 		fetch('/api/session', { method: 'GET', cache: 'no-store' })
@@ -89,7 +89,7 @@ export function watchIdle(idleMinutes: number, leaveMinutes = 0): () => void {
 		if (closing) return;
 		last = Date.now();
 		ping();
-		// switching between two tabs: the other tab's „left“ message can arrive after this sign of life
+		// switching between two tabs: the other tab's "left" message can arrive after this sign of life
 		// – report once more shortly afterwards.
 		clearTimeout(recheck);
 		recheck = setTimeout(ping, 3_000);

@@ -202,7 +202,7 @@
 		text-decoration: line-through;
 		border-radius: 3px;
 	}
-	/* space between struck-through text and new text right after it – otherwise they stick together („sein.Nicht“) */
+	/* space between struck-through text and new text right after it – otherwise they stick together ("be.Not") */
 	del + ins {
 		margin-left: 0.25em;
 	}

@@ -132,7 +132,7 @@ describe('Key derivation', () => {
 	});
 });
 
-describe('Hilfsfunktionen', () => {
+describe('Helpers', () => {
 	test('fingerprint: short, stable, does not reveal the key', () => {
 		const key = generateKey();
 		const fp = keyFingerprint(key);

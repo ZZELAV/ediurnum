@@ -41,7 +41,7 @@ describe('Completely cleared entry', () => {
 		assert.equal(w.lastEntry, saved.updated_at, 'time of the latest save, not of the cleared entry');
 		assert.match(String(w.lastEntry), /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/);
 
-		// not in „Alle Einträge“, but the page of the day and the versions still exist
+		// not in "All entries", but the page of the day and the versions still exist
 		const archive = await (await c.get('/archive/__data.json')).text();
 		assert.ok(!archive.includes('2026-05-01'), 'not in the archive');
 		assert.equal((await c.get('/entry/2026-05-01')).status, 200);

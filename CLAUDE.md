@@ -3,8 +3,11 @@
 Privates, verschlüsseltes Tagebuch. SvelteKit 3 + Svelte 5 (Runes), TypeScript, `node:sqlite`, Node ≥ 24.7.
 Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ statt „ß“).
 **Der gesamte Code ist englisch:** Kommentare, Funktionen, Variablen, Typen, Testnamen, Log-Meldungen,
-gespeicherte Werte und Kommentare in Dockerfile/Workflows. Deutsch bleiben nur die App-Texte in `src/lib/i18n/de.ts`
-(neben `en.ts`) und die lokalen Notizen `docs/STAND.md`/`docs/KONZEPT.md`. Gespeicherte Werte (z. B. Abschnittsarten,
+gespeicherte Werte und Kommentare in Dockerfile/Workflows. Englisch ist die Standardsprache: Kommentare zitieren
+Oberflächenbegriffe so, wie sie in der englischen App heissen (aus `en.ts`, z. B. "Not today"), nie die deutsche Fassung
+(weitere Sprachen sind geplant). Anführungszeichen im Code `"…"`, nicht `„…“`. Deutsch bleiben nur die App-Texte in
+`src/lib/i18n/de.ts` (neben `en.ts`), deutsche Testdaten, der deutsche KI-Auftrag und die lokalen Notizen
+`docs/STAND.md`/`docs/KONZEPT.md`. Gespeicherte Werte (z. B. Abschnittsarten,
 Feld-IDs) nur mit Migration und Backup-Version ändern (siehe Sicherheitsregeln).
 
 ## Befehle

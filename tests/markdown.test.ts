@@ -44,7 +44,7 @@ test('lists, paragraphs with line breaks, horizontal rule, code, italic', () => 
 	);
 });
 
-test('Leerer Text', () => {
+test('empty text', () => {
 	assert.equal(renderMarkdown(''), '');
 	assert.equal(renderMarkdown('\n\n'), '');
 });

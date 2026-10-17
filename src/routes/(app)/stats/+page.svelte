@@ -11,7 +11,7 @@
 	// newest month on the left: the year below the first month and below every December (where the previous year starts)
 	const showYear = (month: string, i: number) => i === 0 || month.endsWith('-12');
 
-	/** Height or width of a bar in percent: scale 1–5 so differences show; „1“ stays visible as a line. */
+	/** Height or width of a bar in percent: scale 1–5 so differences show; "1" stays visible as a line. */
 	const pct = (a: Average) => (a.avg === null ? 0 : Math.max(3, ((a.avg - 1) / 4) * 100));
 	const value = (a: Average) => (a.avg === null ? t('stats.none') : fmtNumber(a.avg));
 

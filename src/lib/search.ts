@@ -4,7 +4,7 @@ import type { EntryContent } from './types.ts';
 /**
  * Full-text search across decrypted entries. Runs only in RAM on the server –
  * there is no search index because it would be stored in plain text on disk.
- * Case and accents don't matter („cafe“ finds „Café“, „strasse“ finds „Straße“).
+ * Case and accents don't matter ("cafe" finds "Café", "strasse" finds "Straße").
  */
 
 export interface SearchHit {

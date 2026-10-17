@@ -1,7 +1,7 @@
 import type { SectionKind } from './types.ts';
 
 /**
- * „Heute nicht“ (not today) for suggested reviews – remembered per day in the browser.
+ * "Not today" for suggested reviews – remembered per day in the browser.
  * Applies to the entry and the start page alike.
  */
 const PREFIX = 'ediurnum:suggest-later:';

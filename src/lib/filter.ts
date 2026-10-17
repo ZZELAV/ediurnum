@@ -1,7 +1,7 @@
 import type { SectionKind } from './types.ts';
 
 /**
- * Filter for „Alle Einträge“ (calendar and search results). Within a group one match is enough
+ * Filter for "All entries" (calendar and search results). Within a group one match is enough
  * (mood 1 or 2), between the groups everything has to match (mood and review). Empty groups don't filter.
  * Energy and feelings come from the weekly review, so they only match days that have one.
  */

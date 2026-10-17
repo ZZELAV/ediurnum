@@ -60,7 +60,7 @@ function commonSpace(a: string, b: string, pick: (s: string) => string): string 
 
 /**
  * Groups changes into blocks: a run of removals and additions, separated only by
- * whitespace, becomes „everything removed“ followed by „everything new“ (instead of alternating
+ * whitespace, becomes "everything removed" followed by "everything new" (instead of alternating
  * word by word). The whitespace in between belongs to both blocks, so the before and
  * after texts can be recovered exactly.
  */

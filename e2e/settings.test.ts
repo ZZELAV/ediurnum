@@ -30,7 +30,7 @@ const general = (fields: Record<string, string>) =>
 async function settings() {
 	const res = await c.get('/settings/__data.json');
 	const json = (await res.json()) as { nodes: ({ data: unknown[] } | null)[] };
-	// devalue: the last node object belongs to the page; „settings“ points to the settings object
+	// devalue: the last node object belongs to the page; "settings" points to the settings object
 	const data = json.nodes.at(-1)!.data;
 	const root = data[0] as Record<string, number>;
 	const s = data[root.settings] as Record<string, number>;
@@ -134,7 +134,7 @@ describe('Changing the PIN', () => {
 describe('Testing the recovery key', () => {
 	test('right, wrong, invalid', async () => {
 		assert.equal((await c.action('/settings?/recoveryTest', { recoveryKey })).data?.success, 'settings.recoveryTestOk');
-		assert.equal((await c.action('/settings?/recoveryTest', { recoveryKey: recoveryKey.toLowerCase().replace(/-/g, ' ') })).data?.success, 'settings.recoveryTestOk', 'Schreibweise egal');
+		assert.equal((await c.action('/settings?/recoveryTest', { recoveryKey: recoveryKey.toLowerCase().replace(/-/g, ' ') })).data?.success, 'settings.recoveryTestOk', 'spelling does not matter');
 		const otherServer = await startServer();
 		try {
 			const other = await setupJournal(otherServer);

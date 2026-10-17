@@ -86,7 +86,7 @@ export interface Stats {
 	hidden: number;
 }
 
-/** First day of the period; „all“ starts at the first entry. */
+/** First day of the period; "all" starts at the first entry. */
 export function periodStart(period: StatsPeriod, today: string, firstEntry: string | null): string {
 	if (period === 'all') return firstEntry && firstEntry < today ? firstEntry : today;
 	return addDays(today, 1 - Number(period));

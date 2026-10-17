@@ -73,7 +73,7 @@ export const AI_PRESETS: AiPreset[] = [
 	},
 	{
 		id: 'ollama',
-		label: 'Ollama (lokal)',
+		label: 'Ollama (local)',
 		provider: 'openai-compatible',
 		baseUrl: 'http://ollama:11434/v1',
 		defaultModel: '',
@@ -81,7 +81,7 @@ export const AI_PRESETS: AiPreset[] = [
 	},
 	{
 		id: 'custom',
-		label: 'OpenAI-kompatibel (eigener Endpunkt)',
+		label: 'OpenAI-compatible (own endpoint)',
 		provider: 'openai-compatible',
 		baseUrl: '',
 		defaultModel: '',

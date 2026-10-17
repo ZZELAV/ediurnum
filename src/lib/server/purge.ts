@@ -2,7 +2,7 @@ import { getDb, setMeta, transaction } from './db.ts';
 import { destroyAllSessions } from './vault.ts';
 
 /**
- * Final deletion („purge“). SQLite runs with secure_delete, deleted content is
+ * Final deletion ("purge"). SQLite runs with secure_delete, deleted content is
  * overwritten; afterwards the file is compacted so that no old pages remain.
  */
 

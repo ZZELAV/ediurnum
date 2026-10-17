@@ -1,7 +1,7 @@
 // Start script for production (Docker: `node server.js`).
 //
 // Since adapter-node 6 there is no ORIGIN variable any more: the address is derived from the request headers,
-// and without PROTOCOL_HEADER SvelteKit assumes „https“. A direct request via
+// and without PROTOCOL_HEADER SvelteKit assumes "https". A direct request via
 // http://… would then reject every form as foreign (403). If ORIGIN is set, this
 // script takes protocol and host from it – like adapter-node up to version 5. Without ORIGIN the behaviour
 // of adapter-node applies (Host header, PROTOCOL_HEADER/HOST_HEADER behind a proxy).

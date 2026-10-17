@@ -78,7 +78,7 @@
 		}, delay);
 	}
 
-	// PIN expired or „Wieder sperren“ (lock again): fetch the results again, so no excerpts of locked entries remain
+	// PIN expired or "Lock again": fetch the results again, so no excerpts of locked entries remain
 	let pinUntil: number | undefined;
 	$effect(() => {
 		const until = data.pinUnlockedUntil;

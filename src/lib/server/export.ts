@@ -16,7 +16,7 @@ export interface EntryField {
 
 export interface EntryDoc {
 	date: string;
-	/** Date written out, e.g. „Freitag, 16. Oktober 2026“ */
+	/** Date written out, e.g. "Friday, 16 October 2026" */
 	heading: string;
 	mood: number | null;
 	sections: { title: string; fields: EntryField[] }[];
@@ -63,7 +63,7 @@ export function entryDocs(entries: Entry[], lang: Lang): EntryDoc[] {
 }
 
 /**
- * Journal text for Markdown: lines starting with „#“ would otherwise become headings
+ * Journal text for Markdown: lines starting with "#" would otherwise become headings
  * and mess up the structure of the file (instructions, entries, days).
  */
 export const plain = (text: string) => text.trim().replace(/^(\s*)#/gm, '$1\\#');

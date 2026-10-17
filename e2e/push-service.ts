@@ -16,7 +16,7 @@ export interface PushMessage {
 	payload: { title: string; body: string; url: string; tag: string };
 }
 
-/** A „device“: keys as in the browser, address at the fake service. */
+/** A "device": keys as in the browser, address at the fake service. */
 export interface FakeDevice {
 	subscription: { endpoint: string; keys: { p256dh: string; auth: string } };
 	decrypt(body: Buffer): string;

@@ -42,14 +42,14 @@ export function fmtDate(iso: string, style: 'long' | 'medium' | 'short' | 'weekd
 	const fmt = new Intl.DateTimeFormat(currentLocale(), { ...opts, timeZone: 'UTC' });
 	const date = new Date(iso.length === 10 ? iso + 'T00:00:00Z' : iso);
 	if (style === 'weekday') {
-		// weekday always first – en-US would otherwise write „8 Thu“
+		// weekday always first – en-US would otherwise write "8 Thu"
 		const part = (type: string) => fmt.formatToParts(date).find((p) => p.type === type)?.value ?? '';
 		return currentLang() === 'de' ? `${part('weekday')}, ${part('day')}.` : `${part('weekday')} ${part('day')}`;
 	}
 	return fmt.format(date);
 }
 
-/** Month name for "YYYY-MM": short („Okt“) or long with the year („Oktober 2026“). */
+/** Month name for "YYYY-MM": short ("Oct") or long with the year ("October 2026"). */
 export function fmtMonth(month: string, style: 'short' | 'long' = 'long'): string {
 	const opts: Intl.DateTimeFormatOptions = style === 'long' ? { month: 'long', year: 'numeric' } : { month: 'short' };
 	return new Intl.DateTimeFormat(currentLocale(), { ...opts, timeZone: 'UTC' }).format(new Date(month + '-01T00:00:00Z'));

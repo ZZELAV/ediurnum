@@ -38,7 +38,7 @@ function deviceCount(): number {
 	return n;
 }
 
-/** Writes a custom reminder directly into the schedule (without the „already sent today“ marker). */
+/** Writes a custom reminder directly into the schedule (without the "already sent today" marker). */
 function writeCustom(reminder: Record<string, unknown>) {
 	const d = db();
 	const cfg = JSON.parse((d.prepare(`SELECT value FROM meta WHERE key = 'reminders'`).get() as { value: string }).value);
@@ -135,7 +135,7 @@ describe('Scheduler', () => {
 		assert.equal(r.type, 'success');
 		push.messages.length = 0;
 		await restart();
-		assert.equal((await push.waitFor(1, 8_000)).length, 0, 'erst wieder morgen');
+		assert.equal((await push.waitFor(1, 8_000)).length, 0, 'not again until tomorrow');
 	});
 
 	test('a new reminder with a past time does not send right away', async () => {
@@ -189,6 +189,6 @@ describe('Schedule of the reviews', () => {
 async function login() {
 	const client = new Client(server.url);
 	const r = await client.action('/login', { password: 'e2e-Passwort-lang-genug' });
-	if (r.type !== 'redirect' && r.type !== 'success') throw new Error('Anmeldung fehlgeschlagen: ' + JSON.stringify(r));
+	if (r.type !== 'redirect' && r.type !== 'success') throw new Error('login failed: ' + JSON.stringify(r));
 	return { client };
 }
