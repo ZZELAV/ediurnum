@@ -1,5 +1,5 @@
-import { decryptJson, encryptJson } from './crypto';
-import { getDb } from './db';
+import { decryptJson, encryptJson } from './crypto.ts';
+import { getDb } from './db.ts';
 import type { Analysis } from '#lib/types.ts';
 
 const aad = (id: string) => `analysis:${id}`;

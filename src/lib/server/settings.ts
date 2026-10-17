@@ -1,5 +1,5 @@
-import { decryptJson, encryptJson, SETTINGS_AAD as AAD } from './crypto';
-import { getMeta, setMeta } from './db';
+import { decryptJson, encryptJson, SETTINGS_AAD as AAD } from './crypto.ts';
+import { getMeta, setMeta } from './db.ts';
 import type { AiAgent, PublicAiAgent, Settings } from '#lib/types.ts';
 
 export function defaultSettings(): Settings {

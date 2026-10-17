@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
-import { decryptJson, encryptJson, entryAad as aad } from './crypto';
-import { getDb, nowIso, transaction } from './db';
+import { decryptJson, encryptJson, entryAad as aad } from './crypto.ts';
+import { getDb, nowIso, transaction } from './db.ts';
 import { todayIso } from '#lib/dates.ts';
-import type { Session } from './vault';
+import type { Session } from './vault.ts';
 import { filledKinds, isEmptyContent } from '#lib/templates.ts';
 import type { StatsDay } from '#lib/stats.ts';
 import type { Entry, EntryContent, EntryMeta, RevisionInfo } from '#lib/types.ts';

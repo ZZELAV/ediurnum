@@ -1,7 +1,7 @@
-import { getMeta } from './db';
-import { hasPin } from './vault';
-import { hasProfile } from './profile';
-import { listDevices } from './reminders';
+import { getMeta } from './db.ts';
+import { hasPin } from './vault.ts';
+import { hasProfile } from './profile.ts';
+import { listDevices } from './reminders.ts';
 import type { EntryMeta } from '#lib/types.ts';
 
 /**

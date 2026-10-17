@@ -11,10 +11,10 @@ import {
 	randomToken,
 	unlockWithPin,
 	type KdfParams
-} from './crypto';
-import { getMeta, nowIso, setMeta, transaction } from './db';
-import { log } from './log';
-import { MAX_PASSWORD, validatePin } from './validation';
+} from './crypto.ts';
+import { getMeta, nowIso, setMeta, transaction } from './db.ts';
+import { log } from './log.ts';
+import { MAX_PASSWORD, validatePin } from './validation.ts';
 
 /**
  * Tresor: verwaltet den Hauptschlüssel. Er existiert entschlüsselt nur im

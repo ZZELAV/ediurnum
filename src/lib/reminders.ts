@@ -1,5 +1,5 @@
 import { addDays, daysBetween, isIsoDate, weekdayOf } from './dates.ts';
-import type { EntryMeta, Lang, SectionKind } from './types';
+import type { EntryMeta, Lang, SectionKind } from './types.ts';
 
 /**
  * Erinnerungen für die wiederkehrenden Rückblicke und eigene Erinnerungen.

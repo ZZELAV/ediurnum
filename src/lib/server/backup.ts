@@ -1,7 +1,7 @@
 import { encodeBackup, jsonToRow, rowsToJson, type BackupData } from './backup-file.ts';
-import { getDb, getMeta, setMeta, transaction } from './db';
-import { listEntryMeta, getEntry } from './entries';
-import type { Session } from './vault';
+import { getDb, getMeta, setMeta, transaction } from './db.ts';
+import { listEntryMeta, getEntry } from './entries.ts';
+import type { Session } from './vault.ts';
 import type { Entry } from '#lib/types.ts';
 
 const META_KEYS = ['created_at', 'settings', 'profile', 'pin_kdf', 'pin_check', 'reminders'];

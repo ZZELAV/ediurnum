@@ -1,5 +1,5 @@
 import { SECTIONS } from './templates.ts';
-import type { EntryContent } from './types';
+import type { EntryContent } from './types.ts';
 
 /**
  * Volltextsuche über entschlüsselte Einträge. Läuft nur im RAM auf dem Server –

@@ -1,8 +1,8 @@
 import { error, type Cookies, type RequestEvent } from '@sveltejs/kit';
 import { dev } from '$app/env';
 import { COOKIE_SECURE, ORIGIN } from '$app/env/private';
-import { createSession, destroySession, type Session } from './vault';
-import { loadSettings } from './settings';
+import { createSession, destroySession, type Session } from './vault.ts';
+import { loadSettings } from './settings.ts';
 
 export const SESSION_COOKIE = 'ediurnum_session';
 

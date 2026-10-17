@@ -1,4 +1,4 @@
-import type { SectionKind } from './types';
+import type { SectionKind } from './types.ts';
 
 /**
  * „Heute nicht“ bei vorgeschlagenen Rückblicken – pro Tag im Browser gemerkt.

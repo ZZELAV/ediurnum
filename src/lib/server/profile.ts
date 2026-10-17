@@ -1,5 +1,5 @@
-import { decryptJson, encryptJson } from './crypto';
-import { getMeta, nowIso, setMeta } from './db';
+import { decryptJson, encryptJson } from './crypto.ts';
+import { getMeta, nowIso, setMeta } from './db.ts';
 import { emptyProfile, sanitizeProfile, type Profile } from '#lib/profile.ts';
 
 /** Selbsteinschätzung – wie alle Inhalte nur verschlüsselt gespeichert. */

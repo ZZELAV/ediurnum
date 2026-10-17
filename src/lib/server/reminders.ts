@@ -1,11 +1,11 @@
 import webpush from 'web-push';
 import { ORIGIN, VAPID_SUBJECT } from '$app/env/private';
-import { getDb, getMeta, nowIso, setMeta } from './db';
-import { listEntryMeta } from './entries';
+import { getDb, getMeta, nowIso, setMeta } from './db.ts';
+import { listEntryMeta } from './entries.ts';
 import { isLang, translate } from '#lib/i18n/index.ts';
 import { todayIso } from '#lib/dates.ts';
 import { randomUUID } from 'node:crypto';
-import { log } from './log';
+import { log } from './log.ts';
 import {
 	defaultReminders,
 	isGefuehlDue,

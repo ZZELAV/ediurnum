@@ -1,4 +1,4 @@
-import type { ProviderKind } from './types';
+import type { ProviderKind } from './types.ts';
 
 export interface AiPreset {
 	id: string;

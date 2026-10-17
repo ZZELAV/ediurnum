@@ -1,5 +1,5 @@
-import { getDb, setMeta, transaction } from './db';
-import { destroyAllSessions } from './vault';
+import { getDb, setMeta, transaction } from './db.ts';
+import { destroyAllSessions } from './vault.ts';
 
 /**
  * Endgültiges Löschen („Purge“). SQLite läuft mit secure_delete, gelöschte Inhalte werden

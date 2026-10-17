@@ -1,4 +1,4 @@
-import type { SectionKind } from './types';
+import type { SectionKind } from './types.ts';
 
 /**
  * Filter für „Alle Einträge“ (Kalender und Suchergebnisse). Innerhalb einer Gruppe genügt ein Treffer

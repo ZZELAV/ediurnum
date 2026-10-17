@@ -1,4 +1,4 @@
-import type { EntryContent, SectionKind } from './types';
+import type { EntryContent, SectionKind } from './types.ts';
 
 export type FieldType = 'text' | 'textarea' | 'lines' | 'scale' | 'chips';
 
