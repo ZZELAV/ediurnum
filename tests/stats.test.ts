@@ -89,7 +89,7 @@ test('Monate lückenlos, auch über den Jahreswechsel', () => {
 		['2026-02', '2026-01', '2025-12', '2025-11']
 	);
 	assert.equal(s.byMonth[2].mood.avg, null);
-	assert.equal(s.monthlyReviews.total, 4);
+	assert.equal(s.monthlyReviews.total, 3, '83 Tage ≈ 3 Monate');
 });
 
 test('Ungültige Werte zählen nicht', () => {
@@ -130,8 +130,8 @@ test('Gefühle: Häufigkeit absteigend, bei Gleichstand in der Reihenfolge der A
 	assert.ok(PLEASANT_EMOTIONS.length > 0 && PLEASANT_EMOTIONS.length < EMOTIONS.length);
 });
 
-test('Rückblicke: Wochen ab Montag, die den Zeitraum berühren, und Monate', () => {
-	// 1.10.2026 ist ein Donnerstag → Wochen ab 28.9., 5.10. und 12.10. (bis 14.10.)
+test('Rückblicke: geschrieben pro Woche ab Montag bzw. pro Monat, möglich aus der Länge des Zeitraums', () => {
+	// 1.–14.10.2026: 14 Tage = 2 mögliche Wochen, 1 Monat
 	const days = [
 		day('2026-09-30', null, { kinds: ['gefuehl'] }), // vor dem Zeitraum
 		day('2026-10-04', null, { kinds: ['erlebt', 'gefuehl'] }),
@@ -139,8 +139,42 @@ test('Rückblicke: Wochen ab Montag, die den Zeitraum berühren, und Monate', ()
 		day('2026-10-13', null, { kinds: ['wachstum'] })
 	];
 	const s = computeStats(days, '2026-10-01', '2026-10-14');
-	assert.deepEqual(s.weeklyReviews, { done: 1, total: 3 });
+	assert.deepEqual(s.weeklyReviews, { done: 1, total: 2 });
 	assert.deepEqual(s.monthlyReviews, { done: 1, total: 1 });
+});
+
+test('Rückblicke: mögliche Anzahl für alle Zeiträume, an jedem Wochentag gleich', () => {
+	const expected = { '30': [4, 1], '90': [13, 3], '365': [52, 12] } as const;
+	// eine ganze Woche lang jeden Tag als „heute“, auch über einen Monatsanfang und ein Schaltjahr
+	for (const today of ['2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15', '2026-10-16', '2026-10-17', '2026-10-18', '2028-03-01']) {
+		for (const [period, [weeks, months]] of Object.entries(expected)) {
+			const s = computeStats([], periodStart(period as '30' | '90' | '365', today, null), today);
+			assert.equal(s.weeklyReviews.total, weeks, `${period} Tage bis ${today}: Wochen`);
+			assert.equal(s.monthlyReviews.total, months, `${period} Tage bis ${today}: Monate`);
+		}
+	}
+	// „Alles“: ab dem ersten Eintrag, mindestens 1
+	assert.deepEqual(computeStats([], '2026-10-15', '2026-10-17').weeklyReviews, { done: 0, total: 1 });
+	assert.equal(computeStats([], '2024-10-18', '2026-10-17').weeklyReviews.total, 104);
+	assert.equal(computeStats([], '2024-10-18', '2026-10-17').monthlyReviews.total, 24);
+});
+
+test('Rückblicke: angebrochene Wochen am Rand zählen als geschrieben, aber nie mehr als möglich', () => {
+	// 12 Monate bis Samstag, 17.10.2026; jeden Sonntag ein Wochen-, jeden 1. ein Monatsrückblick
+	const from = periodStart('365', '2026-10-17', null);
+	const days: StatsDay[] = [];
+	for (let d = '2025-10-01'; d <= '2026-10-17'; d = new Date(Date.parse(d) + 86400000).toISOString().slice(0, 10)) {
+		const kinds: StatsDay['kinds'] = [];
+		if (new Date(d).getUTCDay() === 0) kinds.push('gefuehl');
+		if (d.endsWith('-01')) kinds.push('wachstum');
+		if (kinds.length) days.push(day(d, null, { kinds }));
+	}
+	const s = computeStats(days, from, '2026-10-17');
+	assert.deepEqual(s.weeklyReviews, { done: 52, total: 52 });
+	assert.deepEqual(s.monthlyReviews, { done: 12, total: 12 });
+	// zusätzlich am Mittwoch ein Rückblick in der laufenden Woche → 53 Wochen berührt, gezählt 52
+	const more = computeStats([...days, day('2026-10-14', null, { kinds: ['gefuehl'] })], from, '2026-10-17');
+	assert.deepEqual(more.weeklyReviews, { done: 52, total: 52 });
 });
 
 test('Gesperrte Einträge ohne PIN: zählen für Anzahl, Serien und Rückblicke, nicht für Stimmung', () => {

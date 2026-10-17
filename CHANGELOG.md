@@ -22,6 +22,8 @@ The topmost version without a date is still in development.
 
 - The three fields under “What am I grateful for today?” no longer grow past the right edge when the text gets
   long; the text scrolls inside the field instead.
+- Statistics: the number of possible weekly and monthly reviews now matches the period (e.g. 52 weeks and 12 months
+  for 12 months) instead of also counting the partial weeks and months at both ends (53 and 13).
 
 ## [0.1.0-beta.6] - 2026-10-11
 

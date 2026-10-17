@@ -1,6 +1,6 @@
 import { addDays, addMonths, daysBetween, monthKey, weekdayOf } from './dates.ts';
 import { EMOTIONS } from './templates.ts';
-import type { SectionKind } from './types';
+import type { SectionKind } from './types.ts';
 
 /** Gefühle, die als angenehm gelten (der Rest gilt als belastend); Reihenfolge wie in EMOTIONS. */
 export const PLEASANT_EMOTIONS = EMOTIONS.slice(0, EMOTIONS.indexOf('tired'));
@@ -79,7 +79,7 @@ export interface Stats {
 	byMonth: { month: string; written: number; mood: Average; energy: Average }[];
 	byWeekday: ({ weekday: number } & Average)[];
 	emotions: { id: string; count: number; pleasant: boolean }[];
-	/** Wochen (ab Montag) bzw. Monate im Zeitraum und wie viele davon einen Rückblick haben. */
+	/** Mögliche Wochen- bzw. Monatsrückblicke (aus der Länge des Zeitraums) und wie viele geschrieben sind. */
 	weeklyReviews: { done: number; total: number };
 	monthlyReviews: { done: number; total: number };
 	/** Gesperrte Einträge, deren Stimmung und Gefühle nicht mitzählen (PIN nicht offen). */
@@ -100,6 +100,9 @@ const isScale = (v: unknown): v is number => typeof v === 'number' && Number.isI
 
 /** Bis zu so vielen Tagen zeigt der Stimmungsverlauf einzelne Tage, darüber Wochen. */
 const TREND_DAILY_MAX_DAYS = 90;
+
+/** Durchschnittliche Monatslänge in Tagen */
+const DAYS_PER_MONTH = 365.25 / 12;
 
 /** Montag der Woche eines Datums. */
 const mondayOf = (iso: string) => addDays(iso, -((weekdayOf(iso) + 6) % 7));
@@ -155,17 +158,20 @@ export function computeStats(all: StatsDay[], from: string, to: string): Stats {
 		.map(([id, count]) => ({ id, count, pleasant: PLEASANT_EMOTIONS.includes(id) }))
 		.sort((a, b) => b.count - a.count || EMOTIONS.indexOf(a.id) - EMOTIONS.indexOf(b.id));
 
-	// Wochen, die ganz oder teilweise im Zeitraum liegen
-	const weeks = new Set<string>();
-	for (let w = mondayOf(from); w <= to; w = addDays(w, 7)) weeks.add(w);
-	const weeksDone = new Set(days.filter((d) => d.kinds.includes('gefuehl')).map((d) => mondayOf(d.date)));
-	const monthsDone = new Set(days.filter((d) => d.kinds.includes('wachstum')).map((d) => monthKey(d.date)));
+	// Mögliche Rückblicke aus der Länge des Zeitraums (12 Monate = 52 Wochen, 12 Monate), nicht aus den
+	// berührten Kalenderwochen/-monaten – sonst zählten die angebrochenen an beiden Enden mit (53 bzw. 13).
+	// Geschrieben: Wochen (ab Montag) bzw. Monate mit Rückblick, höchstens so viele wie möglich.
+	const length = daysBetween(from, to) + 1;
+	const reviews = (kind: SectionKind, period: (iso: string) => string, total: number) => {
+		const done = new Set(days.filter((d) => d.kinds.includes(kind)).map((d) => period(d.date))).size;
+		return { done: Math.min(done, total), total };
+	};
 
 	const moodDays = readable.flatMap((d) => {
 		const mood = moodOf(d);
 		return mood === null ? [] : [{ date: d.date, mood }];
 	});
-	const weekly = daysBetween(from, to) + 1 > TREND_DAILY_MAX_DAYS;
+	const weekly = length > TREND_DAILY_MAX_DAYS;
 	const byWeek = new Map<string, number[]>();
 	for (const p of weekly ? moodDays : []) {
 		const monday = mondayOf(p.date);
@@ -180,7 +186,7 @@ export function computeStats(all: StatsDay[], from: string, to: string): Stats {
 	return {
 		from,
 		to,
-		days: daysBetween(from, to) + 1,
+		days: length,
 		written: days.length,
 		longest: longestRun(days.map((d) => d.date)),
 		mood: average(readable.map(moodOf).filter((m) => m !== null)),
@@ -189,8 +195,8 @@ export function computeStats(all: StatsDay[], from: string, to: string): Stats {
 		byMonth,
 		byWeekday,
 		emotions,
-		weeklyReviews: { done: weeksDone.size, total: weeks.size },
-		monthlyReviews: { done: monthsDone.size, total: months.length },
+		weeklyReviews: reviews('gefuehl', mondayOf, Math.max(1, Math.round(length / 7))),
+		monthlyReviews: reviews('wachstum', monthKey, Math.max(1, Math.round(length / DAYS_PER_MONTH))),
 		hidden: days.length - readable.length
 	};
 }
