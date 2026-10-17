@@ -49,10 +49,10 @@ Step-by-step guide (proxy, push notifications, updates, backups):
 | Tag | Meaning |
 |---|---|
 | `latest` | newest release |
-| `0.1.0-beta.6`, … | a specific release – see the [changelog](https://github.com/ZZELAV/ediurnum/blob/main/CHANGELOG.md) |
+| `1.0.0`, … | a specific release – see the [changelog](https://github.com/ZZELAV/ediurnum/blob/main/CHANGELOG.md) |
 
 Images are built for `linux/amd64` and `linux/arm64` (e.g. Raspberry Pi 4/5). Pin a version in `.env` with
-`EDIURNUM_VERSION=0.1.0-beta.6`.
+`EDIURNUM_VERSION=1.0.0`.
 
 ## Configuration
 

@@ -3,7 +3,7 @@ import { translate } from '#lib/i18n/index.ts';
 import type { Entry, Lang } from '#lib/types.ts';
 
 /**
- * Lesbarer Export (Klartext!): eine Aufbereitung pro Eintrag (`entryDoc`), aus der Markdown und PDF entstehen.
+ * Lesbarer Export (Klartext!): eine Aufbereitung pro Eintrag (`entryDocs`), aus der Markdown und PDF entstehen.
  * Wird von der App (Einstellungen, KI-Datei) und vom Konverter-Skript genutzt – deshalb ohne Datenbank-Import.
  */
 

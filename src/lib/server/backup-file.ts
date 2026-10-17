@@ -108,7 +108,7 @@ export function unlockBackupPin(data: BackupData, dek: Buffer, pin: string): Pro
 }
 
 /**
- * Entschlüsselte Einträge aus einem Backup, ältester zuerst – wie `plainExport` in der App.
+ * Entschlüsselte Einträge aus einem Backup, ältester zuerst – wie `readableEntries` (backup.ts) in der App.
  * Gesperrte Einträge nur mit Sperr-Schlüssel, sonst zählen sie zu `skippedLocked`. Komplett geleerte fehlen.
  */
 export function backupEntries(data: BackupData, dek: Buffer, lockKey: Buffer | null) {
