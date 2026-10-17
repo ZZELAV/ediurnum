@@ -1,7 +1,7 @@
 /**
- * Sehr kleiner, sicherer Markdown-Renderer für KI-Antworten und das Changelog.
- * Sämtlicher Text wird zuerst HTML-escaped; danach werden nur wenige
- * Formatierungen (Überschriften, Listen, Tabellen, fett, kursiv, Code, Links zu http(s)) erzeugt.
+ * Very small, safe Markdown renderer for AI answers and the changelog.
+ * All text is HTML-escaped first; afterwards only a few
+ * formats (headings, lists, tables, bold, italic, code, links to http(s)) are created.
  */
 
 function escapeHtml(s: string): string {
@@ -21,11 +21,11 @@ function inline(s: string): string {
 		.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" rel="noopener noreferrer" target="_blank">$1</a>');
 }
 
-// ---- Tabellen (wie GitHub): Kopfzeile, Trennzeile mit --- (optional : für die Ausrichtung), Zeilen ----
+// ---- Tables (like GitHub): header row, separator row with --- (optional : for the alignment), rows ----
 
 type Align = 'left' | 'center' | 'right' | null;
 
-/** Zellen einer Tabellenzeile; Rand-Striche sind optional, `\|` steht für einen Strich im Text. */
+/** Cells of a table row; edge pipes are optional, `\|` stands for a pipe in the text. */
 function cells(line: string): string[] {
 	let s = line.trim();
 	if (s.startsWith('|')) s = s.slice(1);
@@ -35,7 +35,7 @@ function cells(line: string): string[] {
 
 const isTableRow = (line: string) => line.includes('|');
 
-/** Trennzeile wie `|---|:---:|--:|`; liefert die Ausrichtung pro Spalte oder null. */
+/** Separator row such as `|---|:---:|--:|`; returns the alignment per column or null. */
 function separator(line: string): Align[] | null {
 	if (!line.includes('-') || !/^\s*\|?(\s*:?-+:?\s*\|)*\s*:?-+:?\s*\|?\s*$/.test(line)) return null;
 	return cells(line).map((c) => (c.startsWith(':') && c.endsWith(':') ? 'center' : c.endsWith(':') ? 'right' : c.startsWith(':') ? 'left' : null));
@@ -44,7 +44,7 @@ function separator(line: string): Align[] | null {
 function table(head: string[], aligns: Align[], rows: string[][]): string {
 	const cell = (tag: 'th' | 'td', text: string, i: number) =>
 		`<${tag}${aligns[i] ? ` class="align-${aligns[i]}"` : ''}>${inline(text)}</${tag}>`;
-	// gleich viele Zellen wie die Kopfzeile: fehlende leer, überzählige weglassen
+	// as many cells as the header row: missing ones empty, surplus ones dropped
 	const fit = (row: string[]) => aligns.map((_, i) => row[i] ?? '');
 	return [
 		'<div class="table-wrap"><table>',
@@ -74,7 +74,7 @@ export function renderMarkdown(md: string): string {
 		const heading = line.match(/^(#{1,4})\s+(.*)$/);
 		const ul = line.match(/^\s*[-*•]\s+(.*)$/);
 		const ol = line.match(/^\s*\d+[.)]\s+(.*)$/);
-		// Tabelle nur, wenn Kopf- und Trennzeile gleich viele Spalten haben (sonst z. B. Text über einer Trennlinie)
+		// a table only if header and separator row have the same number of columns (otherwise e.g. text above a horizontal rule)
 		const head = isTableRow(line) ? cells(line) : null;
 		const aligns = head && n + 1 < lines.length ? separator(lines[n + 1]) : null;
 		if (head && aligns && aligns.length === head.length) {

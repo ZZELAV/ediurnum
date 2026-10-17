@@ -12,7 +12,7 @@
 	}
 	let { reminder, today, onclose, onsaved }: Props = $props();
 
-	// Formularzustand – Startwerte aus der bestehenden Erinnerung (nur beim Öffnen gelesen)
+	// form state – initial values from the existing reminder (read only when opening)
 	const initial = (() => ({ reminder, weekday: weekdayOf(today) }))();
 	let repeat = $state<CustomRepeat>(initial.reminder?.repeat ?? 'daily');
 	let weekdays = $state<number[]>(initial.reminder?.weekdays.length ? [...initial.reminder.weekdays] : [initial.weekday]);

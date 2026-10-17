@@ -4,7 +4,7 @@
 	import { diffWords, hasChanges, type DiffPart } from '#lib/diff.ts';
 	import type { EntryContent, FieldValue } from '#lib/types.ts';
 
-	/** Zeigt eine Version mit den Änderungen gegenüber der Version davor (`before`). */
+	/** Shows a version with the changes compared to the version before it (`before`). */
 	let { before, after }: { before: EntryContent; after: EntryContent } = $props();
 
 	type Field =
@@ -72,7 +72,7 @@
 	{#if from === to}{to}{:else}{#if from}<del>{from}</del>{/if}{#if from && to}<span class="arrow" aria-hidden="true"> → </span>{/if}{#if to}<ins>{to}</ins>{/if}{/if}
 {/snippet}
 
-<!-- Vergleichsansicht im Versionsverlauf: Hinzugefügtes markiert, Entferntes durchgestrichen -->
+<!-- Comparison view in the version history: additions highlighted, removals struck through -->
 <div class="entry-read">
 	{#if unchanged}<p class="faint">{t('history.noChanges')}</p>{/if}
 
@@ -147,7 +147,7 @@
 		display: grid;
 		gap: 0.15rem;
 	}
-	/* Unverändertes tritt zurück, damit die Änderungen auffallen */
+	/* unchanged text steps back so the changes stand out */
 	.same {
 		opacity: 0.5;
 	}
@@ -202,7 +202,7 @@
 		text-decoration: line-through;
 		border-radius: 3px;
 	}
-	/* Abstand zwischen Gestrichenem und direkt folgendem Neuem – sonst kleben sie zusammen („sein.Nicht“) */
+	/* space between struck-through text and new text right after it – otherwise they stick together („sein.Nicht“) */
 	del + ins {
 		margin-left: 0.25em;
 	}

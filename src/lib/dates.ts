@@ -1,4 +1,4 @@
-/** Datumshilfen. Ein Tag wird immer als "YYYY-MM-DD" (lokales Datum) dargestellt. */
+/** Date helpers. A day is always represented as "YYYY-MM-DD" (local date). */
 
 export function isIsoDate(v: string): boolean {
 	if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
@@ -6,7 +6,7 @@ export function isIsoDate(v: string): boolean {
 	return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v;
 }
 
-/** Heutiges Datum in der lokalen Zeitzone (Server: Umgebungsvariable TZ). */
+/** Today's date in the local time zone (server: environment variable TZ). */
 export function todayIso(now = new Date()): string {
 	const y = now.getFullYear();
 	const m = String(now.getMonth() + 1).padStart(2, '0');
@@ -28,7 +28,7 @@ export function monthKey(iso: string): string {
 	return iso.slice(0, 7);
 }
 
-/** Gleicher Kalendertag `years` Jahre früher oder später (29. Februar → 28. Februar). */
+/** Same calendar day `years` years earlier or later (29 February → 28 February). */
 export function addYears(iso: string, years: number): string {
 	const y = Number(iso.slice(0, 4)) + years;
 	const md = iso.slice(5);
@@ -36,12 +36,12 @@ export function addYears(iso: string, years: number): string {
 	return isIsoDate(candidate) ? candidate : `${String(y).padStart(4, '0')}-02-28`;
 }
 
-/** Wochentag eines Datums, 0 = Sonntag. */
+/** Weekday of a date, 0 = Sunday. */
 export function weekdayOf(iso: string): number {
 	return new Date(iso + 'T00:00:00Z').getUTCDay();
 }
 
-/** Monat ("YYYY-MM") verschoben um `months` Monate. */
+/** Month ("YYYY-MM") shifted by `months` months. */
 export function addMonths(month: string, months: number): string {
 	const [y, m] = month.split('-').map(Number);
 	const total = y * 12 + (m - 1) + months;

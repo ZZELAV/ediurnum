@@ -12,7 +12,7 @@
 	}
 	let { push }: Props = $props();
 
-	// ---- Push auf diesem Gerät ----
+	// ---- Push on this device ----
 	type PushState = 'loading' | 'unsupported' | 'ios-install' | 'denied' | 'off' | 'on';
 	let pushState = $state<PushState>('loading');
 	let endpoint = $state<string | null>(null);

@@ -1,16 +1,16 @@
 /**
- * Automatisches Sperren nach Inaktivität und nach Verlassen der App.
+ * Automatic locking after inactivity and after leaving the app.
  *
- * Der Server beendet eine Sitzung, wenn länger als die eingestellte Zeit keine Anfrage kam.
- * Damit das Tagebuch auch auf dem Bildschirm gesperrt wird (und nicht offen stehen bleibt,
- * bis jemand klickt), zählt der Browser Eingaben, Klicks und Scrollen als Aktivität:
- * - aktiv → höchstens einmal pro Minute ein kurzes Lebenszeichen an den Server
- * - inaktiv länger als die eingestellte Zeit → Tagebuch sperren und zur Anmeldung
- * Mehrere offene Tabs teilen sich die letzte Aktivität über localStorage.
+ * The server ends a session when no request arrived for longer than the set time.
+ * So that the journal is also locked on the screen (and doesn't stay open until
+ * someone clicks), the browser counts typing, clicks and scrolling as activity:
+ * - active → at most once a minute a short sign of life to the server
+ * - inactive for longer than the set time → lock the journal and go to the sign-in
+ * Several open tabs share the last activity via localStorage.
  *
- * Verlassen der App (schliessen, in den Hintergrund, Bildschirm sperren): Der Browser meldet das per
- * sendBeacon. Bleibt die App länger weg als eingestellt, sperrt der Server die Sitzung – auch wenn die
- * App inzwischen beendet wurde. Beim Zurückkommen meldet sich die Seite wieder (oder landet bei der Anmeldung).
+ * Leaving the app (closing it, sending it to the background, locking the screen): the browser reports this via
+ * sendBeacon. If the app stays away longer than set, the server locks the session – even if the
+ * app has been closed in the meantime. When coming back the page reports again (or ends up at the sign-in).
  */
 const STORAGE_KEY = 'ediurnum:last-activity';
 const PING_EVERY_MS = 60_000;
@@ -39,11 +39,11 @@ export function watchIdle(idleMinutes: number, leaveMinutes = 0): () => void {
 		try {
 			localStorage.setItem(STORAGE_KEY, String(now));
 		} catch {
-			// ohne Speicher zählt nur dieser Tab
+			// without storage only this tab counts
 		}
 	};
 
-	/** Lebenszeichen; gilt beim Server zugleich als „wieder da“. */
+	/** Sign of life; for the server it also means „back again“. */
 	const ping = () => {
 		lastPing = Date.now();
 		fetch('/api/session', { method: 'GET', cache: 'no-store' })
@@ -54,7 +54,7 @@ export function watchIdle(idleMinutes: number, leaveMinutes = 0): () => void {
 	};
 
 	const activity = () => {
-		// Ereignisse einer verborgenen Seite (z. B. Scrollen beim Wegwechseln) zählen nicht
+		// events of a hidden page (e.g. scrolling while switching away) don't count
 		if (hiddenAt) return;
 		const now = Date.now();
 		last = now;
@@ -83,20 +83,20 @@ export function watchIdle(idleMinutes: number, leaveMinutes = 0): () => void {
 	const onVisible = () => {
 		const away = hiddenAt;
 		hiddenAt = 0;
-		// Länger weg als erlaubt (und kein anderer Tab war inzwischen aktiv) → sofort sperren, ohne auf den Server zu warten
+		// away for longer than allowed (and no other tab was active in the meantime) → lock right away without waiting for the server
 		if (leaveMs && away && Date.now() - Math.max(away, readShared()) > leaveMs) return close();
 		check();
 		if (closing) return;
 		last = Date.now();
 		ping();
-		// Wechsel zwischen zwei Tabs: Die Meldung „verlassen“ des anderen Tabs kann nach diesem Lebenszeichen
-		// ankommen – kurz darauf noch einmal melden.
+		// switching between two tabs: the other tab's „left“ message can arrive after this sign of life
+		// – report once more shortly afterwards.
 		clearTimeout(recheck);
 		recheck = setTimeout(ping, 3_000);
 	};
 
 	const onVisibility = () => (document.visibilityState === 'hidden' ? onHidden() : onVisible());
-	// Zurück aus dem Verlauf-Cache (z. B. Safari): wie ein Zurückkommen behandeln
+	// back from the history cache (e.g. Safari): treat it like coming back
 	const onPageShow = (e: PageTransitionEvent) => e.persisted && onVisible();
 
 	for (const e of EVENTS) window.addEventListener(e, activity, { passive: true, capture: true });
@@ -104,7 +104,7 @@ export function watchIdle(idleMinutes: number, leaveMinutes = 0): () => void {
 	document.addEventListener('visibilitychange', onVisibility);
 	window.addEventListener('pagehide', onHidden);
 	window.addEventListener('pageshow', onPageShow);
-	// Beim Laden melden, dass die App (wieder) im Vordergrund ist
+	// on load, report that the app is in the foreground (again)
 	if (document.visibilityState === 'visible') ping();
 
 	return () => {

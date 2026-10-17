@@ -9,7 +9,7 @@ export function isLang(v: unknown): v is Lang {
 }
 
 export function translate(lang: Lang, key: string, params?: Record<string, string | number>): string {
-	// Einzahl: Schlüssel mit Endung ".one" wird verwendet, wenn count === 1
+	// singular: a key ending in ".one" is used when count === 1
 	const singular = params?.count === 1 ? `${key}.one` : null;
 	let text =
 		(singular && (dictionaries[lang]?.[singular] ?? dictionaries.de[singular])) ||

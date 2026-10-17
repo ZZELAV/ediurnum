@@ -3,10 +3,10 @@
 	import { fmtDate, fmtNumber, t } from '#lib/i18n/t.ts';
 
 	/**
-	 * Stimmungsverlauf (1–5) über einen Zeitraum: Linie mit Punkten, neuester Tag links,
-	 * Lücken an Tagen ohne Stimmung.
-	 * `weekly`: Punkte sind Wochendurchschnitte (Datum = Wochenbeginn). Der Gesamtdurchschnitt steht
-	 * in der Statistik als eigene Kachel und wird hier nicht wiederholt.
+	 * Mood over a period (1–5): line with points, newest day on the left,
+	 * gaps on days without a mood.
+	 * `weekly`: points are weekly averages (date = start of the week). The overall average is shown
+	 * as a tile of its own in the statistics and is not repeated here.
 	 */
 	let {
 		points,
@@ -15,23 +15,23 @@
 		weekly = false
 	}: { points: { date: string; mood: number }[]; from: string; to: string; weekly?: boolean } = $props();
 
-	// Breite erst nach dem Messen bekannt – vorher nichts zeichnen, sonst ragt die Grafik auf dem Handy kurz hinaus
+	// width is only known after measuring – draw nothing before, otherwise the chart briefly overflows on phones
 	let width = $state(0);
 	const height = 190;
 	const pad = { top: 12, right: 12, bottom: 26, left: 74 };
 
 	const span = $derived(Math.max(1, daysBetween(from, to)));
-	// Neuestes links (wie das Monatsdiagramm der Statistik), ältestes rechts
+	// newest on the left (like the monthly chart in the statistics), oldest on the right
 	const x = (date: string) => pad.left + (daysBetween(date, to) / span) * (width - pad.left - pad.right);
 	const y = (mood: number) => pad.top + ((5 - mood) / 4) * (height - pad.top - pad.bottom);
 
 	const sorted = $derived([...points].sort((a, b) => a.date.localeCompare(b.date)));
-	// Benachbarte Punkte verbinden; Lücken (mehr als 3 Tage bzw. eine ausgelassene Woche) gestrichelt
+	// connect neighbouring points; gaps (more than 3 days or a skipped week) are dashed
 	const maxStep = $derived(weekly ? 7 : 3);
 	const segments = $derived(
 		sorted.slice(1).map((p, i) => ({ a: sorted[i], b: p, gap: daysBetween(sorted[i].date, p.date) > maxStep }))
 	);
-	/** Wert als Text: Tageswert als Wort, Wochenschnitt als Zahl mit dem nächstliegenden Wort. */
+	/** Value as text: a daily value as a word, a weekly average as a number with the nearest word. */
 	const label = (mood: number) => (weekly ? `${fmtNumber(mood)} · ${t(`mood.${Math.round(mood)}`)}` : t(`mood.${mood}`));
 	const when = (date: string, style: 'dayMonth' | 'medium') => (weekly ? t('mood.week', { date: fmtDate(date, style) }) : fmtDate(date, style));
 	const ticks = $derived(from === to ? [to] : [to, from]);
@@ -40,7 +40,7 @@
 </script>
 
 <figure class="mood-chart" bind:clientWidth={width}>
-	<!-- sichtbarer Titel steht in der Karte drumherum -->
+	<!-- the visible title is in the surrounding card -->
 	<figcaption class="visually-hidden">{t('mood.chartTitle')}</figcaption>
 
 	{#if sorted.length === 0}
@@ -61,7 +61,7 @@
 				{/each}
 				{#each sorted as p (p.date)}
 					<circle class="dot" class:on={hover?.date === p.date} cx={x(p.date)} cy={y(p.mood)} r={hover?.date === p.date ? 5.5 : weekly ? 3 : 4} />
-					<!-- grössere, unsichtbare Trefferfläche für Maus und Finger -->
+					<!-- larger, invisible hit area for mouse and finger -->
 					<circle
 						class="hit"
 						cx={x(p.date)}
@@ -85,7 +85,7 @@
 			{/if}
 			{/if}
 		</div>
-		<!-- im div: eine Tabelle hielte sich nicht an die Breite von 1 px und liesse die Seite seitlich überlaufen -->
+		<!-- in a div: a table wouldn't respect the width of 1 px and would make the page overflow sideways -->
 		<div class="visually-hidden">
 			<table>
 				<caption>{t('mood.chartTitle')}</caption>
@@ -101,8 +101,8 @@
 	.mood-chart {
 		margin: 0;
 		min-width: 0;
-		/* Breite nur vom Platz drumherum, nicht vom gezeichneten SVG – sonst bliebe die Grafik nach dem
-		   Schmalerwerden (Handy drehen, Fenster verkleinern) so breit wie zuvor gemessen */
+		/* width only from the surrounding space, not from the drawn SVG – otherwise the chart would stay as wide
+		   as measured before after getting narrower (turning the phone, shrinking the window) */
 		contain: inline-size;
 	}
 	.plot {

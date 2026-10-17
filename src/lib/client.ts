@@ -1,4 +1,4 @@
-/** Kleine Hilfe für JSON-Aufrufe der eigenen API. */
+/** Small helper for JSON calls to the app's own API. */
 export async function api<T = unknown>(
 	url: string,
 	method: 'GET' | 'POST' | 'DELETE' = 'POST',

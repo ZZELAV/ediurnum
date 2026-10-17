@@ -19,7 +19,7 @@
 	const empty = $derived(!content.mood && sections.length === 0 && !content.free.trim());
 </script>
 
-<!-- Lese-Ansicht eines Eintrags (vergangene Tage, Versionsverlauf) -->
+<!-- Read-only view of an entry (past days, version history) -->
 <div class="entry-read">
 	{#if content.mood}
 		<p class="mood">

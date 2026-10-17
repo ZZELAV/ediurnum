@@ -13,7 +13,7 @@
 
 	const def = $derived(sectionDef(kind));
 
-	// Fehlende Felder mit passenden Startwerten belegen
+	// fill in missing fields with suitable initial values
 	$effect.pre(() => {
 		for (const f of def.fields) {
 			if (values[f.id] !== undefined) continue;

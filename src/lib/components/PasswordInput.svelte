@@ -2,7 +2,7 @@
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { t } from '#lib/i18n/t.ts';
 
-	/** Passwortfeld mit Auge zum Anzeigen/Verbergen. Alle übrigen Attribute gehen an das Eingabefeld. */
+	/** Password field with an eye to show/hide it. All other attributes go to the input. */
 	let {
 		value = $bindable(),
 		show = $bindable(false),

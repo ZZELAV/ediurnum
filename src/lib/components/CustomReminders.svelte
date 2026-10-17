@@ -10,7 +10,7 @@
 	interface Props {
 		items: CustomReminderView[];
 		today: string;
-		/** Formular für eine neue Erinnerung geöffnet (von aussen steuerbar). */
+		/** Form for a new reminder is open (can be controlled from outside). */
 		creating?: boolean;
 	}
 	let { items, today, creating = $bindable(false) }: Props = $props();

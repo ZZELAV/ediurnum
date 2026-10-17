@@ -4,7 +4,7 @@ export type SectionKind = 'daily' | 'feelings' | 'growth';
 
 export type FieldValue = string | number | string[] | null;
 
-/** Inhalt eines Tageseintrags (wird nur verschlüsselt gespeichert). */
+/** Content of a daily entry (stored only encrypted). */
 export interface EntryContent {
 	mood: number | null;
 	sections: Partial<Record<SectionKind, Record<string, FieldValue>>>;
@@ -23,7 +23,7 @@ export interface EntryMeta {
 }
 
 export interface Entry extends EntryMeta {
-	content: EntryContent | null; // null = gesperrt und PIN nicht eingegeben
+	content: EntryContent | null; // null = locked and PIN not entered
 }
 
 export interface RevisionInfo {
@@ -38,27 +38,27 @@ export interface AiAgent {
 	id: string;
 	name: string;
 	provider: ProviderKind;
-	preset: string; // z. B. "mistral", "ollama" – nur für die Oberfläche
+	preset: string; // e.g. "mistral", "ollama" – only for the interface
 	baseUrl: string;
 	model: string;
 	apiKey: string;
-	persona: string; // individuelle Rolle / Anweisungen
+	persona: string; // individual role / instructions
 	tone: 'gentle' | 'balanced' | 'direct';
 	maxFocusPoints: number;
 }
 
-/** Agent ohne geheimen Schlüssel – so geht er an den Browser. */
+/** Agent without the secret key – this is how it goes to the browser. */
 export type PublicAiAgent = Omit<AiAgent, 'apiKey'> & { hasApiKey: boolean };
 
 export interface Settings {
-	name: string; // Vorname für die Begrüssung (kein Login-Name)
+	name: string; // first name for the greeting (not a login name)
 	language: Lang;
 	theme: Theme;
 	sessionMinutes: number;
-	leaveMinutes: number; // nach Verlassen der App sperren (0 = nie), siehe #lib/idle
+	leaveMinutes: number; // lock after leaving the app (0 = never), see #lib/idle
 	focusMode: boolean;
-	welcomeHidden: boolean; // Willkommenskarte auf der Startseite ausgeblendet
-	aiInstructions: string; // eigener Auftrag an die KI (leer = Standard aus #lib/server/ai/analyze)
+	welcomeHidden: boolean; // welcome card on the start page hidden
+	aiInstructions: string; // own instructions to the AI (empty = default from #lib/server/ai/analyze)
 	agents: AiAgent[];
 	defaultAgentId: string | null;
 }
@@ -69,12 +69,12 @@ export interface Analysis {
 	from: string;
 	to: string;
 	agentName: string;
-	provider: ProviderKind | 'chat'; // 'chat' = Antwort aus einem KI-Chat eingefügt
+	provider: ProviderKind | 'chat'; // 'chat' = answer pasted from an AI chat
 	model: string;
 	entryCount: number;
 	question: string;
-	body: string; // Markdown ohne Fokus-Block
+	body: string; // Markdown without the focus block
 	focusPoints: string[];
-	pinned: boolean; // aktuelle Fokuspunkte auf dem Dashboard
-	moods?: { date: string; mood: number }[]; // nur in Auswertungen von 0.1.0-beta.2 bis beta.5; wird nicht mehr angezeigt
+	pinned: boolean; // current focus points on the dashboard
+	moods?: { date: string; mood: number }[]; // only in analyses from 0.1.0-beta.2 to beta.5; no longer shown
 }

@@ -5,9 +5,9 @@ export type FieldType = 'text' | 'textarea' | 'lines' | 'scale' | 'chips';
 export interface FieldDef {
 	id: string;
 	type: FieldType;
-	/** Anzahl Zeilen bei "lines" */
+	/** Number of lines for "lines" */
 	count?: number;
-	/** Auswahl bei "chips" */
+	/** Options for "chips" */
 	options?: string[];
 }
 
@@ -37,10 +37,10 @@ export const EMOTIONS = [
 ];
 
 /**
- * Die geführten Fragen. Texte stehen in den Sprachdateien unter
- * `section.<kind>.<fieldId>` (Label) und `section.<kind>.<fieldId>.hint` (Platzhalter).
- * Neue Felder dürfen ergänzt werden; bestehende IDs nie umbenennen,
- * sonst werden alte Antworten nicht mehr angezeigt.
+ * The guided questions. Texts are in the language files under
+ * `section.<kind>.<fieldId>` (label) and `section.<kind>.<fieldId>.hint` (placeholder).
+ * New fields may be added; never rename existing IDs,
+ * otherwise old answers are no longer shown.
  */
 export const SECTIONS: SectionDef[] = [
 	{
@@ -121,7 +121,7 @@ function hasValue(v: unknown): boolean {
 	return true;
 }
 
-/** Welche Abschnitte enthalten tatsächlich Inhalte? */
+/** Which sections actually contain something? */
 export function filledKinds(content: EntryContent): SectionKind[] {
 	return SECTIONS.map((s) => s.kind).filter((kind) => {
 		const sec = content.sections[kind];
@@ -133,7 +133,7 @@ export function isEmptyContent(content: EntryContent): boolean {
 	return content.mood === null && !content.free.trim() && filledKinds(content).length === 0;
 }
 
-/** Bereinigt Eingaben aus dem Browser, damit nur bekannte Felder gespeichert werden. */
+/** Sanitizes input from the browser so only known fields are stored. */
 export function sanitizeContent(input: unknown): EntryContent {
 	const raw = (input ?? {}) as Partial<EntryContent>;
 	const out = emptyContent();

@@ -1,8 +1,8 @@
 /**
- * Bestätigung in der App statt `window.confirm()`.
- * Browser-Dialoge werden in eingebetteten Browsern und manchen installierten Web-Apps
- * unterdrückt (gelten dann als „Abbrechen“) – damit liessen sich Dinge nicht mehr löschen.
- * Angezeigt wird die Frage von <ConfirmDialog /> im Wurzel-Layout.
+ * Confirmation inside the app instead of `window.confirm()`.
+ * Browser dialogs are suppressed in embedded browsers and some installed web apps
+ * (they then count as „cancel“) – things could no longer be deleted.
+ * The question is shown by <ConfirmDialog /> in the root layout.
  */
 export interface ConfirmRequest {
 	message: string;

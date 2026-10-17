@@ -30,7 +30,7 @@
 
 	let { date, today, entry, suggestions, focus, hasPin, pinOpen, prev, next }: Props = $props();
 
-	// Der Editor wird pro Tag neu erzeugt ({#key} in der Seite) – Startwerte genügen.
+	// the editor is created anew for each day ({#key} in the page) – initial values are enough.
 	const initial = untrack(() => entry);
 	const readable = initial === null || initial.content !== null;
 	let content = $state(sanitizeContent(initial?.content ?? emptyContent()));
@@ -41,7 +41,7 @@
 	let pinDialog = $state(false);
 	let afterPin: (() => void) | null = null;
 
-	// Nach refreshAll (z. B. Sperren) die Metadaten übernehmen
+	// take over the metadata after refreshAll (e.g. locking)
 	$effect(() => {
 		if (entry) meta = { ...entry };
 	});
@@ -58,7 +58,7 @@
 		return () => clearTimeout(timer);
 	});
 
-	// Speichervorgänge laufen nacheinander – sonst könnte eine ältere Fassung nach einer neueren ankommen
+	// saves run one after the other – otherwise an older text could arrive after a newer one
 	let queue: Promise<void> = Promise.resolve();
 	function save(): Promise<void> {
 		queue = queue.then(saveNow);
@@ -106,7 +106,7 @@
 		};
 	});
 
-	// Vergangene Tage öffnen sich zum Lesen; bearbeitet wird erst nach Klick auf den Stift.
+	// past days open for reading; editing starts after clicking the pencil.
 	let editing = $state(untrack(() => date === today));
 
 	async function finishEditing() {
@@ -115,14 +115,14 @@
 		editing = false;
 	}
 
-	// ---- Vorschläge für Rückblicke ----
-	// Fällige Rückblicke erscheinen als eigene Karte; „Heute nicht“ wird pro Tag im Browser gemerkt
-	// (gleich wie auf der Startseite, siehe #lib/suggest).
+	// ---- Suggested reviews ----
+	// due reviews appear as a card of their own; „Heute nicht“ (not today) is remembered per day in the browser
+	// (same as on the start page, see #lib/suggest).
 	let dismissed = $state<Partial<Record<SectionKind, boolean>>>({});
 
 	onMount(() => {
 		for (const s of optional) if (isDismissed(date, s.kind)) dismissed[s.kind] = true;
-		// „Jetzt schreiben“ auf der Startseite öffnet den Eintrag mit ?add=<Abschnitt>
+		// „Jetzt schreiben“ (write now) on the start page opens the entry with ?add=<section>
 		const add = page.url.searchParams.get('add');
 		const def = optional.find((s) => s.kind === add);
 		if (def && readable && content.sections[def.kind] === undefined) {
@@ -198,7 +198,7 @@
 				message = res.error;
 			}
 		};
-		// Gesperrte Einträge lassen sich nur mit PIN löschen
+		// locked entries can only be deleted with the PIN
 		if (meta?.locked) withPin(run);
 		else run();
 	}
@@ -272,7 +272,7 @@
 					<button class="btn" onclick={() => (pinDialog = true)}>{t('pin.title')}</button>
 				</div>
 			{:else if !editing}
-				<!-- Vergangener Tag: nur lesen, bearbeiten über den Stift -->
+				<!-- past day: read only, edit via the pencil -->
 				{#if meta}
 					<section class="card read">
 						{#if meta.locked}<span class="chip gold">🔒 {t('entry.lockedBadge')}</span>{/if}

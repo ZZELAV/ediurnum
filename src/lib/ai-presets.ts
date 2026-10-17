@@ -10,9 +10,9 @@ export interface AiPreset {
 }
 
 /**
- * Vorlagen für die grossen KI-Anbieter. Alle Anbieter mit OpenAI-kompatibler
- * Schnittstelle laufen über denselben Adapter; nur Basis-URL und Modell unterscheiden sich.
- * Modellnamen ändern sich häufig – über "Modelle laden" holt die App die aktuelle Liste.
+ * Presets for the big AI providers. All providers with an OpenAI-compatible
+ * interface use the same adapter; only base URL and model differ.
+ * Model names change often – "Load models" fetches the current list.
  */
 export const AI_PRESETS: AiPreset[] = [
 	{

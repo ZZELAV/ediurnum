@@ -2,13 +2,13 @@ import { addDays, daysBetween, isIsoDate, weekdayOf } from './dates.ts';
 import type { EntryMeta, Lang, SectionKind } from './types.ts';
 
 /**
- * Erinnerungen für die wiederkehrenden Rückblicke und eigene Erinnerungen.
- * Der Zeitplan enthält keine Tagebuchinhalte und wird deshalb unverschlüsselt
- * gespeichert – nur so kann der Server Push-Nachrichten schicken, während das
- * Tagebuch gesperrt ist.
+ * Reminders for the recurring reviews and custom reminders.
+ * The schedule contains no journal content and is therefore stored
+ * unencrypted – only this way can the server send push messages while the
+ * journal is locked.
  */
 export interface ReminderConfig {
-	feelings: { enabled: boolean; weekday: number; time: string }; // 0 = Sonntag
+	feelings: { enabled: boolean; weekday: number; time: string }; // 0 = Sunday
 	growth: { enabled: boolean; day: number | 'last'; time: string };
 	custom: CustomReminder[];
 	lang: Lang;
@@ -18,18 +18,18 @@ export type CustomRepeat = 'once' | 'daily' | 'weekly' | 'monthly';
 export const CUSTOM_REPEATS: CustomRepeat[] = ['once', 'daily', 'weekly', 'monthly'];
 export const MAX_CUSTOM_REMINDERS = 50;
 
-/** Zeitplan einer Erinnerung. Je nach `repeat` zählt `date`, `weekdays` oder `day`. */
+/** Schedule of a reminder. Depending on `repeat`, `date`, `weekdays` or `day` counts. */
 export interface ReminderSchedule {
 	repeat: CustomRepeat;
-	date: string; // einmalig: YYYY-MM-DD
-	weekdays: number[]; // wöchentlich: 0 = Sonntag
-	day: number | 'last'; // monatlich
+	date: string; // once: YYYY-MM-DD
+	weekdays: number[]; // weekly: 0 = Sunday
+	day: number | 'last'; // monthly
 	time: string; // HH:MM
 }
 
 /**
- * Eigene Erinnerung. Titel und Text liegen wie der übrige Zeitplan unverschlüsselt vor,
- * damit der Server sie auch bei geschlossenem Tagebuch verschicken kann.
+ * Custom reminder. Like the rest of the schedule, title and text are stored unencrypted,
+ * so the server can send them while the journal is closed.
  */
 export interface CustomReminder extends ReminderSchedule {
 	id: string;
@@ -57,7 +57,7 @@ export type CustomReminderError =
 	| 'reminders.errorWeekdays'
 	| 'reminders.errorLimit';
 
-/** Prüft eine eigene Erinnerung. Gibt die bereinigte Erinnerung oder einen Fehlerschlüssel zurück. */
+/** Checks a custom reminder. Returns the sanitized reminder or an error key. */
 export function sanitizeCustomReminder(input: unknown): CustomReminder | CustomReminderError {
 	const raw = (input ?? {}) as Partial<CustomReminder>;
 	const title = typeof raw.title === 'string' ? raw.title.trim().slice(0, 100) : '';
@@ -110,7 +110,7 @@ export function sanitizeReminders(input: unknown, lang: Lang): ReminderConfig {
 	};
 }
 
-/** Letzter Tag mit dem gewünschten Wochentag am oder vor `date`. */
+/** Last day with the given weekday on or before `date`. */
 export function lastWeekdayOnOrBefore(date: string, weekday: number): string {
 	return addDays(date, -((weekdayOf(date) - weekday + 7) % 7));
 }
@@ -121,7 +121,7 @@ function monthDue(year: number, month: number, day: number | 'last'): string {
 	return new Date(Date.UTC(year, month, d)).toISOString().slice(0, 10);
 }
 
-/** Letzter Fälligkeitstag des Monatsrückblicks am oder vor `date`. */
+/** Last due day of the monthly review on or before `date`. */
 export function lastMonthlyDueOnOrBefore(date: string, day: number | 'last'): string {
 	const d = new Date(date + 'T00:00:00Z');
 	const thisMonth = monthDue(d.getUTCFullYear(), d.getUTCMonth(), day);
@@ -133,7 +133,7 @@ export function minutesOf(hhmm: string): number {
 	return h * 60 + m;
 }
 
-/** Fällt die Erinnerung auf diesen Tag? */
+/** Does the reminder fall on this day? */
 export function occursOn(s: ReminderSchedule, date: string): boolean {
 	switch (s.repeat) {
 		case 'once':
@@ -147,7 +147,7 @@ export function occursOn(s: ReminderSchedule, date: string): boolean {
 	}
 }
 
-/** Nächster Tag, an dem die Erinnerung ansteht (heute nur, wenn die Uhrzeit noch nicht vorbei ist). */
+/** Next day the reminder is due (today only if the time hasn't passed yet). */
 export function nextOccurrence(s: ReminderSchedule, today: string, nowMinutes: number): string | null {
 	if (s.repeat === 'once') return s.date > today || (s.date === today && minutesOf(s.time) > nowMinutes) ? s.date : null;
 	for (let i = 0; i <= 62; i++) {
@@ -158,18 +158,18 @@ export function nextOccurrence(s: ReminderSchedule, today: string, nowMinutes: n
 }
 
 /**
- * Mindestabstand in Tagen zum letzten Rückblick derselben Art (ohne Rückblick: zum ersten Eintrag).
- * Ein Wochenrückblick wird also erst angeboten, wenn rund eine Woche keiner geschrieben wurde,
- * ein Monatsrückblick erst nach rund einem Monat. Etwas Spielraum, damit ein leicht verspäteter
- * Rückblick den nächsten nicht um eine ganze Woche bzw. einen ganzen Monat verschiebt.
+ * Minimum gap in days to the last review of the same kind (without a review: to the first entry).
+ * So a weekly review is only offered once none has been written for about a week,
+ * a monthly review only after about a month. Some leeway, so a slightly late
+ * review doesn't push the next one back by a whole week or month.
  */
-/** Für die Fälligkeit zählen nur Datum und Abschnittsarten eines Eintrags. */
+/** For the due date only the date and the section kinds of an entry count. */
 type ReviewMeta = Pick<EntryMeta, 'date' | 'kinds'>;
 
 const WEEKLY_GAP_DAYS = 6;
 const MONTHLY_GAP_DAYS = 25;
 
-/** Letzter Tag (am oder vor `date`) mit diesem Abschnitt – ohne Rückblick der erste Eintrag überhaupt. */
+/** Last day (on or before `date`) with this section – without a review, the very first entry. */
 function lastReviewOrStart(metas: ReviewMeta[], kind: SectionKind, date: string): string | null {
 	let last: string | null = null;
 	let first: string | null = null;
@@ -182,8 +182,8 @@ function lastReviewOrStart(metas: ReviewMeta[], kind: SectionKind, date: string)
 }
 
 /**
- * Fällig ab dem eingestellten Erinnerungstag, wenn seit dem letzten Rückblick mindestens `gap` Tage
- * vergangen sind. Ein Rückblick am Erinnerungstag oder danach gilt als erledigt.
+ * Due from the set reminder day if at least `gap` days have passed since the last review.
+ * A review on the reminder day or later counts as done.
  */
 function isReviewDue(date: string, metas: ReviewMeta[], kind: SectionKind, scheduled: string, gap: number): boolean {
 	const since = lastReviewOrStart(metas, kind, date);
@@ -202,8 +202,8 @@ export function isGrowthDue(date: string, metas: ReviewMeta[], cfg: ReminderConf
 }
 
 /**
- * Nächster Tag, an dem tatsächlich an den Rückblick erinnert wird – also mit Mindestabstand,
- * nicht nur nach Wochentag bzw. Monatstag. Ohne Einträge zählt heute als erster Eintrag.
+ * Next day on which the review is actually suggested – i.e. with the minimum gap,
+ * not just by weekday or day of the month. Without entries, today counts as the first entry.
  */
 export function nextReview(
 	kind: 'feelings' | 'growth',
@@ -232,8 +232,8 @@ export interface Suggestions {
 }
 
 /**
- * Hinweise in der App (Dashboard und Eintrag). Ein heute bereits geschriebener
- * Rückblick zählt als erledigt; `daysSince` bezieht sich auf frühere Tage.
+ * Hints in the app (dashboard and entry). A review already written today
+ * counts as done; `daysSince` refers to earlier days.
  */
 export function suggestionsFor(date: string, metas: EntryMeta[], cfg: ReminderConfig): Suggestions {
 	const past = metas.filter((m) => m.date <= date);
@@ -247,7 +247,7 @@ export function suggestionsFor(date: string, metas: EntryMeta[], cfg: ReminderCo
 	};
 }
 
-/** Eigene Erinnerung mit nächster Fälligkeit für die Anzeige. */
+/** Custom reminder with its next due date for display. */
 export interface CustomReminderView extends CustomReminder {
 	next: string | null;
 	today: boolean;

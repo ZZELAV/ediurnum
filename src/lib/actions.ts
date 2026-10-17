@@ -1,4 +1,4 @@
-/** Passt die Höhe eines Textfelds an den Inhalt an (Fallback für Browser ohne field-sizing). */
+/** Fits the height of a text field to its content (fallback for browsers without field-sizing). */
 export function autosize(node: HTMLTextAreaElement) {
 	if (CSS.supports('field-sizing', 'content')) return;
 	const resize = () => {

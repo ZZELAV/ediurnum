@@ -1,14 +1,14 @@
 /**
- * Selbsteinschätzung („Über mich“). Wird nach der Einrichtung als erstes ausgefüllt, kann in den
- * Einstellungen angepasst werden und dient der KI als Hintergrund für jede Auswertung.
+ * Self-assessment („Über mich“, about me). Filled in first after setup, can be adapted in the
+ * settings and serves the AI as background for every analysis.
  *
- * Aufbau angelehnt an bewährte Methoden:
- * - Big Five (fünf Persönlichkeitsdimensionen) als kurze Selbsteinschätzung auf einer 5er-Skala
- * - Lebenszufriedenheit als Ausgangswert (vgl. Cantril-Leiter)
- * - Werte, Stärken, Herausforderungen und Ziele (vgl. TELOS aus dem Projekt „fabric“)
- * - Erfahrung mit Tagebuch, Erwartungen und Themen, die die KI behutsam behandeln soll
+ * Structure based on proven methods:
+ * - Big Five (five personality dimensions) as a short self-assessment on a 5-point scale
+ * - life satisfaction as a baseline (cf. Cantril ladder)
+ * - values, strengths, challenges and goals (cf. TELOS from the project „fabric“)
+ * - experience with journaling, expectations and topics the AI should treat with care
  *
- * Feld-IDs nie umbenennen (gespeicherte Antworten hängen daran).
+ * Never rename field IDs (stored answers depend on them).
  */
 
 export const TRAITS = ['extraversion', 'agreeableness', 'conscientiousness', 'stability', 'openness'] as const;
@@ -43,7 +43,7 @@ export type ProfileText = (typeof PROFILE_TEXTS)[number];
 export interface Profile {
 	journaling: Journaling | '';
 	satisfaction: number | null; // 1–5
-	traits: Partial<Record<Trait, number | null>>; // 1–5 zwischen zwei Polen
+	traits: Partial<Record<Trait, number | null>>; // 1–5 between two poles
 	values: string[];
 	texts: Partial<Record<ProfileText, string>>;
 	updatedAt: string;
@@ -55,7 +55,7 @@ export function emptyProfile(): Profile {
 
 const scale = (v: unknown) => (typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 5 ? v : null);
 
-/** Bereinigt eine Eingabe aus dem Browser. */
+/** Sanitizes input from the browser. */
 export function sanitizeProfile(input: unknown): Profile {
 	const raw = (input ?? {}) as Partial<Profile>;
 	const traits: Profile['traits'] = {};
@@ -86,8 +86,8 @@ export function isEmptyProfile(p: Profile): boolean {
 }
 
 /**
- * Selbsteinschätzung als Markdown für die KI-Datei. `tr` übersetzt Textschlüssel,
- * damit die Funktion im Browser und auf dem Server gleich funktioniert.
+ * Self-assessment as Markdown for the AI file. `tr` translates text keys,
+ * so the function works the same in the browser and on the server.
  */
 export function profileMarkdown(p: Profile, name: string, tr: (key: string) => string): string {
 	const lines: string[] = [];

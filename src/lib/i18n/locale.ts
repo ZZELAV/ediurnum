@@ -1,13 +1,13 @@
 import type { Lang } from '#lib/types.ts';
 
-/** Standard-Format pro Sprache, wenn der Browser nichts Passendes angibt. */
+/** Default format per language if the browser doesn't give a matching one. */
 export function locale(lang: Lang): string {
 	return lang === 'de' ? 'de-CH' : 'en-GB';
 }
 
 /**
- * Format für Datum und Zahlen: die erste Angabe aus `Accept-Language` mit Region, die zur App-Sprache passt
- * (z. B. `de-DE` → „3,3“, `en-US` → „Oct 10“). Sonst das Standard-Format der Sprache.
+ * Format for dates and numbers: the first entry of `Accept-Language` with a region that matches the app language
+ * (e.g. `de-DE` → „3,3“, `en-US` → „Oct 10“). Otherwise the default format of the language.
  */
 export function pickLocale(acceptLanguage: string | null, lang: Lang): string {
 	for (const part of (acceptLanguage ?? '').slice(0, 200).split(',')) {
@@ -16,7 +16,7 @@ export function pickLocale(acceptLanguage: string | null, lang: Lang): string {
 		try {
 			return Intl.getCanonicalLocales(tag)[0];
 		} catch {
-			// ungültige Angabe überspringen
+			// skip an invalid entry
 		}
 	}
 	return locale(lang);

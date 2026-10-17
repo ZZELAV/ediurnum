@@ -1,4 +1,4 @@
-/** Deutsch (Schweizer Rechtschreibung: "ss" statt "ß"). */
+/** German (Swiss spelling: "ss" instead of "ß"). */
 export const de: Record<string, string> = {
 	'app.tagline': 'Dein digitales Tagebuch',
 
@@ -12,7 +12,7 @@ export const de: Record<string, string> = {
 	'nav.lock': 'Tagebuch sperren',
 	'nav.skip': 'Zum Inhalt springen',
 
-	// Allgemein
+	// General
 	'common.save': 'Speichern',
 	'common.cancel': 'Abbrechen',
 	'common.delete': 'Löschen',
@@ -26,7 +26,7 @@ export const de: Record<string, string> = {
 	'common.optional': 'optional',
 	'common.version': 'Version',
 
-	// Einrichtung
+	// Setup
 	'setup.title': 'Ein neues Tagebuch',
 	'setup.intro': 'Willkommen bei ediurnum. Sag uns, wie du heisst, und lege ein Passwort fest. Daraus und aus einem zufälligen Hauptschlüssel wird dein Tagebuch verschlüsselt.',
 	'setup.tabNew': 'Neu beginnen',
@@ -55,7 +55,7 @@ export const de: Record<string, string> = {
 	'setup.restore': 'Wiederherstellen',
 	'setup.restoring': 'Wird wiederhergestellt …',
 
-	// Anmeldung
+	// Sign-in
 	'login.title': 'Willkommen zurück',
 	'login.intro': 'Gib dein Passwort ein, um dein Tagebuch zu öffnen.',
 	'login.submit': 'Öffnen',
@@ -69,7 +69,7 @@ export const de: Record<string, string> = {
 	'recover.submit': 'Neues Passwort setzen',
 	'recover.backToLogin': 'Zurück zur Anmeldung',
 
-	// Fehler
+	// Errors
 	'error.passwordTooShort': 'Das Passwort muss mindestens 10 Zeichen lang sein.',
 	'error.passwordTooLong': 'Das Passwort darf höchstens 1024 Zeichen lang sein.',
 	'error.passwordMismatch': 'Die Passwörter stimmen nicht überein.',
@@ -94,7 +94,7 @@ export const de: Record<string, string> = {
 	'backup.wrongKey': 'Das Backup lässt sich mit diesem Schlüssel nicht öffnen.',
 	'backup.missingFile': 'Bitte wähle eine Backup-Datei aus.',
 
-	// Begrüssung / Dashboard
+	// Greeting / dashboard
 	'greeting.morning': 'Guten Morgen',
 	'greeting.day': 'Guten Tag',
 	'greeting.evening': 'Guten Abend',
@@ -119,7 +119,7 @@ export const de: Record<string, string> = {
 	'dashboard.yearAgo': 'Heute vor einem Jahr',
 	'dashboard.yearsAgo': 'Heute vor {years} Jahren',
 
-	// Eintrag
+	// Entry
 	'entry.title': 'Eintrag',
 	'entry.mood': 'Stimmung',
 	'entry.moodQuestion': 'Wie geht es dir heute?',
@@ -164,7 +164,7 @@ export const de: Record<string, string> = {
 	'history.noChanges': 'Keine inhaltlichen Änderungen gegenüber der Version davor.',
 	'history.backToEntry': 'Zurück zum Eintrag',
 
-	// Stimmung
+	// Mood
 	'mood.1': 'schwer',
 	'mood.2': 'gedrückt',
 	'mood.3': 'neutral',
@@ -176,7 +176,7 @@ export const de: Record<string, string> = {
 	'energy.4': 'wach',
 	'energy.5': 'voller Energie',
 
-	// Abschnitte
+	// Sections
 	'section.daily.title': 'Erlebt',
 	'section.daily.intro': 'Was dein Tag dir geschenkt hat.',
 	'section.daily.gratitude': 'Wofür bin ich heute dankbar?',
@@ -210,7 +210,7 @@ export const de: Record<string, string> = {
 	'section.growth.nextFocus': 'Was ist mein Fokus für den nächsten Monat?',
 	'section.growth.nextFocus.hint': 'Ein bis drei Dinge …',
 
-	// Gefühle
+	// Feelings
 	'emotion.joy': 'Freude',
 	'emotion.gratitude': 'Dankbarkeit',
 	'emotion.calm': 'Ruhe',
@@ -235,7 +235,7 @@ export const de: Record<string, string> = {
 	'pin.unlockedUntil': 'Gesperrte Einträge sind bis {time} lesbar.',
 	'pin.relock': 'Wieder sperren',
 
-	// Inhalt / Archiv
+	// Content / archive
 	'archive.title': 'Alle Einträge',
 	'archive.intro': 'Nach Monaten geordnet',
 	'archive.empty': 'Noch keine Einträge. Dein erster wartet auf dich.',
@@ -258,7 +258,7 @@ export const de: Record<string, string> = {
 	'search.lockedSkipped.one': '1 gesperrter Eintrag wurde nicht durchsucht.',
 	'search.clear': 'Suche zurücksetzen',
 
-	// Einsichten
+	// Insights
 	'insights.title': 'Einsichten',
 	'insights.intro': 'Erstelle aus deinen Einträgen eine Markdown-Datei und gib sie einem KI-Chat deiner Wahl (z. B. ChatGPT, Claude oder Gemini). Du erhältst Rückmeldungen und Fokuspunkte für die nächsten Wochen.',
 	'insights.new': 'Neue Auswertung',
@@ -330,7 +330,7 @@ export const de: Record<string, string> = {
 	'insights.error.config': 'Der KI-Agent ist unvollständig eingerichtet (Modell oder Adresse fehlt).',
 	'insights.error.provider': 'Der Anbieter hat einen Fehler gemeldet.',
 
-	// Einstellungen
+	// Settings
 	'settings.title': 'Einstellungen',
 	'settings.general': 'Allgemein',
 	'settings.language': 'Sprache',
@@ -355,7 +355,7 @@ export const de: Record<string, string> = {
 	'settings.remindLastDay': 'Letzter Tag des Monats',
 	'settings.remindTime': 'Uhrzeit',
 
-	// Erinnerungen (Tab)
+	// Reminders (tab)
 	'reminders.title': 'Erinnerungen',
 	'reminders.intro': 'Deine eigenen Erinnerungen und die Rückblicke auf einen Blick. Zur eingestellten Zeit erscheint auf angemeldeten Geräten eine Benachrichtigung.',
 	'reminders.noDevices': 'Benachrichtigungen sind noch auf keinem Gerät eingeschaltet – deine Erinnerungen siehst du trotzdem hier.',
@@ -494,7 +494,7 @@ export const de: Record<string, string> = {
 	'settings.exportJson': 'Als JSON',
 	'settings.exportPdf': 'Als PDF',
 
-	// Lesbarer Export (Markdown, PDF) – auch im Konverter-Skript
+	// Readable export (Markdown, PDF) – also used by the converter script
 	'export.title': 'Tagebuch',
 	'export.subtitle': 'Exportiert am {date} · {count} Einträge',
 	'export.skippedLocked': '{count} gesperrte Einträge sind nicht enthalten (PIN nicht eingegeben).',
@@ -513,7 +513,7 @@ export const de: Record<string, string> = {
 
 	'footer.version': 'ediurnum v{version}',
 
-	// Einzahl-Formen (werden bei count = 1 verwendet)
+	// Singular forms (used when count = 1)
 	'archive.entries.one': '1 Eintrag',
 	'archive.filterCount.one': '1 Eintrag passt zum Filter.',
 	'archive.filterHidden.one': '1 gesperrter Eintrag lässt sich ohne PIN nur nach Rückblicken filtern.',
@@ -530,7 +530,7 @@ export const de: Record<string, string> = {
 	'insights.savedWithFocus.one': 'Gespeichert. 1 Fokuspunkt ist jetzt auf deinem Dashboard.',
 	'settings.pinActive.one': 'Eine PIN ist festgelegt. 1 Eintrag ist gesperrt.',
 
-	// Über mich (Selbsteinschätzung)
+	// About me (self-assessment)
 	'profile.title': 'Über mich',
 	'profile.intro': 'Deine Selbsteinschätzung. Sie hilft dir später zu sehen, wie du dich verändert hast, und gibt der KI bei Auswertungen den nötigen Hintergrund. Alles ist freiwillig.',
 	'profile.welcomeEyebrow': 'Dein erster Schritt',
@@ -605,12 +605,12 @@ export const de: Record<string, string> = {
 	'profile.ai.name': 'Name',
 	'profile.ai.traits': 'Selbsteinschätzung der Persönlichkeit (Skala 1–5)',
 
-	// Stimmungsverlauf
+	// Mood chart
 	'mood.chartTitle': 'Stimmungsverlauf',
 	'mood.week': 'Woche ab {date}',
 	'mood.chartEmpty': 'In diesem Zeitraum hast du keine Stimmung angegeben.',
 
-	// Willkommenskarte
+	// Welcome card
 	'welcome.title': 'Deine ersten Schritte',
 	'welcome.progress': '{done} von {total} erledigt',
 	'welcome.hide': 'Ausblenden',

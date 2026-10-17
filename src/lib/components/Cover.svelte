@@ -19,8 +19,8 @@
 </main>
 
 <style>
-	/* Zentriert in der Fensterhöhe; Abstand als Innenabstand, damit nichts überläuft.
-	   Unten etwas mehr Platz für das heraushängende Lesebändchen. */
+	/* Centred in the window height; spacing as padding so nothing overflows.
+	   A little more room at the bottom for the hanging bookmark ribbon. */
 	.cover-wrap {
 		box-sizing: border-box;
 		min-height: 100dvh;

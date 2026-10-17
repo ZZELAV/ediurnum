@@ -1,10 +1,10 @@
-/** Öffentliches Projekt auf GitHub (Quellcode, Fehler melden) */
+/** Public project on GitHub (source code, reporting bugs) */
 export const REPO_URL = 'https://github.com/ZZELAV/ediurnum';
 export const CHANGELOG_URL = `${REPO_URL}/blob/main/CHANGELOG.md`;
 
 /**
- * Abschnitt einer Version aus dem Changelog (ohne Linkverweise am Ende).
- * Ohne passende Version wird der oberste Versionsabschnitt geliefert.
+ * Section of a version from the changelog (without the link references at the end).
+ * Without a matching version the topmost version section is returned.
  */
 export function changelogSection(md: string, version: string): { version: string; date: string; body: string } | null {
 	const sections = md

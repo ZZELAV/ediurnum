@@ -1,9 +1,9 @@
-/** So lange bleiben Erfolgsmeldungen sichtbar; Fehler bleiben stehen, bis die nächste Aktion sie ersetzt. */
+/** How long success messages stay visible; errors stay until the next action replaces them. */
 const FLASH_MS = 5000;
 
 export type FlashMessage = { kind: 'ok' | 'error'; text: string };
 
-/** Meldung, die nach FLASH_MS von selbst verschwindet (ausser Fehlern). */
+/** Message that disappears by itself after FLASH_MS (except errors). */
 export class Flash {
 	current = $state<FlashMessage | null>(null);
 	#timer: ReturnType<typeof setTimeout> | undefined;
@@ -21,12 +21,12 @@ export class Flash {
 }
 
 /**
- * Für Formular-Ergebnisse (`form`): Das Ergebnis gilt nach FLASH_MS als abgelaufen, ausser `keep` trifft zu
- * (Fehler). Jede Übermittlung liefert ein neues Objekt, deshalb erscheint dieselbe Meldung beim nächsten Mal wieder.
- * Muss beim Initialisieren einer Komponente aufgerufen werden.
+ * For form results (`form`): the result counts as expired after FLASH_MS unless `keep` applies
+ * (errors). Every submission returns a new object, so the same message appears again the next time.
+ * Must be called while initialising a component.
  */
 export function expiring<T extends object>(get: () => T | null | undefined, keep: (value: T) => boolean = () => false) {
-	// raw: ein Proxy wäre nicht mehr identisch mit dem Formular-Ergebnis
+	// raw: a proxy would no longer be identical to the form result
 	let expired = $state.raw<T | null>(null);
 	$effect(() => {
 		const value = get();

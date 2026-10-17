@@ -2,26 +2,26 @@ import { SECTIONS } from './templates.ts';
 import type { EntryContent } from './types.ts';
 
 /**
- * Volltextsuche über entschlüsselte Einträge. Läuft nur im RAM auf dem Server –
- * es gibt keinen Suchindex, weil der im Klartext auf der Platte läge.
- * Gross-/Kleinschreibung und Akzente spielen keine Rolle („cafe“ findet „Café“, „strasse“ findet „Straße“).
+ * Full-text search across decrypted entries. Runs only in RAM on the server –
+ * there is no search index because it would be stored in plain text on disk.
+ * Case and accents don't matter („cafe“ finds „Café“, „strasse“ finds „Straße“).
  */
 
 export interface SearchHit {
-	/** Textschlüssel des Feldes, in dem der Auszug steht (z. B. `section.daily.highlight`). */
+	/** Text key of the field the excerpt is from (e.g. `section.daily.highlight`). */
 	field: string;
-	/** Auszug als Abschnitte; `hit` markiert gefundene Stellen. */
+	/** Excerpt as parts; `hit` marks the matches. */
 	parts: { text: string; hit: boolean }[];
 }
 
 const MAX_TERMS = 8;
-const CONTEXT = 70; // Zeichen vor und nach der ersten Fundstelle
+const CONTEXT = 70; // characters before and after the first match
 
 export function searchTerms(query: string): string[] {
 	return [...new Set(fold(query).split(/\s+/).filter(Boolean))].slice(0, MAX_TERMS);
 }
 
-/** Kleinbuchstaben ohne Akzente; `map[i]` zeigt auf das Zeichen im Originaltext. */
+/** Lower case without accents; `map[i]` points to the character in the original text. */
 function foldWithMap(text: string): { folded: string; map: number[] } {
 	let folded = '';
 	const map: number[] = [];
@@ -40,7 +40,7 @@ function fold(text: string): string {
 	return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/ß/g, 'ss');
 }
 
-/** Alle durchsuchbaren Texte eines Eintrags mit dem Textschlüssel ihres Feldes. */
+/** All searchable texts of an entry with the text key of their field. */
 function fieldsOf(c: EntryContent, t: (key: string) => string): { field: string; text: string }[] {
 	const out: { field: string; text: string }[] = [];
 	for (const def of SECTIONS) {
@@ -62,15 +62,15 @@ function fieldsOf(c: EntryContent, t: (key: string) => string): { field: string;
 }
 
 /**
- * Prüft, ob ein Eintrag alle Suchbegriffe enthält (in beliebigen Feldern),
- * und liefert einen Auszug rund um die erste Fundstelle.
+ * Checks whether an entry contains all search terms (in any fields)
+ * and returns an excerpt around the first match.
  */
 export function matchEntry(c: EntryContent, terms: string[], t: (key: string) => string): SearchHit | null {
 	if (!terms.length) return null;
 	const fields = fieldsOf(c, t).map((f) => ({ ...f, ...foldWithMap(f.text.replace(/\s+/g, ' ')) }));
 	if (!terms.every((term) => fields.some((f) => f.folded.includes(term)))) return null;
 
-	// Auszug aus dem ersten Feld, das einen Begriff enthält
+	// excerpt from the first field that contains a term
 	const f = fields.find((x) => terms.some((term) => x.folded.includes(term)))!;
 	const text = f.text.replace(/\s+/g, ' ');
 	const ranges: [number, number][] = [];

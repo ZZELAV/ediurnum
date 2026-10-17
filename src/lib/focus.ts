@@ -1,15 +1,15 @@
 /**
- * Fokusmodus beim Schreiben: Nach drei Zeichen hintereinander blenden
- * Navigation und Seitenspalte langsam aus (Gestaltung in app.css unter "Fokusmodus",
- * gesteuert über data-focus am <html>). Beendet wird er bewusst nur mit Esc –
- * auf Touch-Geräten ohne Tastatur zusätzlich über den Knopf "Fokus beenden".
+ * Focus mode while writing: after three characters in a row the navigation and the
+ * side column slowly fade out (styles in app.css under "Fokusmodus",
+ * controlled via data-focus on <html>). It deliberately ends only with Esc –
+ * on touch devices without a keyboard also with the button "Fokus beenden".
  */
-const START_AFTER_CHARS = 3; // so viele Zeichen hintereinander, bis der Fokus beginnt
-const PAUSE_RESETS_MS = 2000; // längere Pause beginnt die Zählung neu
+const START_AFTER_CHARS = 3; // this many characters in a row until focus starts
+const PAUSE_RESETS_MS = 2000; // a longer pause starts counting again
 
 let exitCurrent: (() => void) | null = null;
 
-/** Beendet den Fokusmodus (Knopf auf Touch-Geräten, Ende der Bearbeitung). */
+/** Ends focus mode (button on touch devices, end of editing). */
 export function exitFocus() {
 	exitCurrent?.();
 }

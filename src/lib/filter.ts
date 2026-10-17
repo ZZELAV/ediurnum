@@ -1,8 +1,8 @@
 import type { SectionKind } from './types.ts';
 
 /**
- * Filter für „Alle Einträge“ (Kalender und Suchergebnisse). Innerhalb einer Gruppe genügt ein Treffer
- * (Stimmung 1 oder 2), zwischen den Gruppen muss alles passen (Stimmung und Rückblick). Leere Gruppen filtern nicht.
+ * Filter for „Alle Einträge“ (calendar and search results). Within a group one match is enough
+ * (mood 1 or 2), between the groups everything has to match (mood and review). Empty groups don't filter.
  */
 export interface DayFilter {
 	moods: number[];

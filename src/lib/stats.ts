@@ -2,15 +2,15 @@ import { addDays, addMonths, daysBetween, monthKey, weekdayOf } from './dates.ts
 import { EMOTIONS } from './templates.ts';
 import type { SectionKind } from './types.ts';
 
-/** Gefühle, die als angenehm gelten (der Rest gilt als belastend); Reihenfolge wie in EMOTIONS. */
+/** Feelings that count as pleasant (the rest count as unpleasant); order as in EMOTIONS. */
 export const PLEASANT_EMOTIONS = EMOTIONS.slice(0, EMOTIONS.indexOf('tired'));
 
 export const STATS_PERIODS = ['30', '90', '365', 'all'] as const;
 export type StatsPeriod = (typeof STATS_PERIODS)[number];
 
 /**
- * Aktuelle Schreibserie: Tage am Stück mit Eintrag bis heute. Ist heute noch nichts geschrieben,
- * zählt die Serie bis gestern – sie bricht erst ab, wenn ein ganzer Tag ohne Eintrag vorbei ist.
+ * Current writing streak: consecutive days with an entry up to today. If nothing has been written today yet,
+ * the streak counts up to yesterday – it only breaks once a whole day without an entry has passed.
  */
 export function currentStreak(dates: Iterable<string>, today: string): number {
 	const days = new Set(dates);
@@ -25,15 +25,15 @@ export function currentStreak(dates: Iterable<string>, today: string): number {
 
 export interface WritingSummary {
 	entries: number;
-	/** Zeitpunkt (ISO, UTC) der letzten Speicherung irgendeines Eintrags – nicht nur das Datum. */
+	/** Time (ISO, UTC) of the latest save of any entry – not just the date. */
 	lastEntry: string | null;
 	writtenToday: boolean;
 	streak: number;
 }
 
 /**
- * Kennzahlen aus den Klartext-Metadaten (ohne Inhalte) – die eine Quelle für Widget-API, Dashboard und Statistik.
- * `metas` sind alle geschriebenen Einträge (ohne geleerte), z. B. aus `listEntryMeta()`.
+ * Figures from the plain-text metadata (no content) – the one source for the widget API, dashboard and statistics.
+ * `metas` are all written entries (without cleared ones), e.g. from `listEntryMeta()`.
  */
 export function writingSummary(metas: { date: string; updatedAt: string }[], today: string): WritingSummary {
 	return {
@@ -48,8 +48,8 @@ export function writingSummary(metas: { date: string; updatedAt: string }[], tod
 }
 
 /**
- * Ein geschriebener Tag. Datum und Abschnittsarten sind Klartext-Metadaten und zählen immer;
- * `content` fehlt bei gesperrten Einträgen ohne offene PIN.
+ * A written day. Date and section kinds are plain-text metadata and always count;
+ * `content` is missing for locked entries without an open PIN.
  */
 export interface StatsDay {
 	date: string;
@@ -71,22 +71,22 @@ export interface Stats {
 	mood: Average;
 	energy: Average;
 	/**
-	 * Stimmungsverlauf, älteste zuerst: pro Tag oder – bei mehr als TREND_DAILY_MAX_DAYS Tagen – als
-	 * Wochendurchschnitt (Datum = Montag der Woche, frühestens `from`).
+	 * Mood over time, oldest first: per day or – for more than TREND_DAILY_MAX_DAYS days – as a
+	 * weekly average (date = Monday of the week, at the earliest `from`).
 	 */
 	moodTrend: { weekly: boolean; points: { date: string; mood: number }[] };
-	/** Stimmung und Energie pro Monat, neuester Monat zuerst. */
+	/** Mood and energy per month, newest month first. */
 	byMonth: { month: string; written: number; mood: Average; energy: Average }[];
 	byWeekday: ({ weekday: number } & Average)[];
 	emotions: { id: string; count: number; pleasant: boolean }[];
-	/** Mögliche Wochen- bzw. Monatsrückblicke (aus der Länge des Zeitraums) und wie viele geschrieben sind. */
+	/** Possible weekly or monthly reviews (from the length of the period) and how many are written. */
 	weeklyReviews: { done: number; total: number };
 	monthlyReviews: { done: number; total: number };
-	/** Gesperrte Einträge, deren Stimmung und Gefühle nicht mitzählen (PIN nicht offen). */
+	/** Locked entries whose mood and feelings don't count (PIN not open). */
 	hidden: number;
 }
 
-/** Erster Tag des Zeitraums; „all“ beginnt beim ersten Eintrag. */
+/** First day of the period; „all“ starts at the first entry. */
 export function periodStart(period: StatsPeriod, today: string, firstEntry: string | null): string {
 	if (period === 'all') return firstEntry && firstEntry < today ? firstEntry : today;
 	return addDays(today, 1 - Number(period));
@@ -98,16 +98,16 @@ function average(values: number[]): Average {
 
 const isScale = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 5;
 
-/** Bis zu so vielen Tagen zeigt der Stimmungsverlauf einzelne Tage, darüber Wochen. */
+/** Up to this many days the mood chart shows single days, above it weeks. */
 const TREND_DAILY_MAX_DAYS = 90;
 
-/** Durchschnittliche Monatslänge in Tagen */
+/** Average length of a month in days */
 const DAYS_PER_MONTH = 365.25 / 12;
 
-/** Montag der Woche eines Datums. */
+/** Monday of the week of a date. */
 const mondayOf = (iso: string) => addDays(iso, -((weekdayOf(iso) + 6) % 7));
 
-/** Längste Folge aufeinanderfolgender Tage in einer aufsteigend sortierten Liste. */
+/** Longest run of consecutive days in an ascending list. */
 function longestRun(dates: string[]): Stats['longest'] {
 	let best: Stats['longest'] = null;
 	let start = 0;
@@ -120,15 +120,15 @@ function longestRun(dates: string[]): Stats['longest'] {
 }
 
 /**
- * Statistik für den Zeitraum `from`–`to` (beide eingeschlossen). `all` sind geschriebene Tage, auch
- * ausserhalb des Zeitraums. Die aktuelle Serie steht in `writingSummary`.
+ * Statistics for the period `from`–`to` (both included). `all` are written days, also
+ * outside the period. The current streak is in `writingSummary`.
  */
 export function computeStats(all: StatsDay[], from: string, to: string): Stats {
 	const days = all.filter((d) => d.date >= from && d.date <= to).sort((a, b) => a.date.localeCompare(b.date));
 	const readable = days.filter((d) => d.content);
 	const moodOf = (d: StatsDay) => (isScale(d.content?.mood) ? d.content.mood : null);
 
-	// Monate lückenlos von `to` zurück bis `from`, neuester zuerst
+	// months without gaps from `to` back to `from`, newest first
 	const months: string[] = [];
 	for (let m = monthKey(to); m >= monthKey(from); m = addMonths(m, -1)) months.push(m);
 	const byMonth = months.map((month) => {
@@ -142,7 +142,7 @@ export function computeStats(all: StatsDay[], from: string, to: string): Stats {
 		};
 	});
 
-	// Montag zuerst
+	// Monday first
 	const byWeekday = [1, 2, 3, 4, 5, 6, 0].map((weekday) => ({
 		weekday,
 		...average(readable.filter((d) => weekdayOf(d.date) === weekday).map(moodOf).filter((m) => m !== null))
@@ -158,9 +158,9 @@ export function computeStats(all: StatsDay[], from: string, to: string): Stats {
 		.map(([id, count]) => ({ id, count, pleasant: PLEASANT_EMOTIONS.includes(id) }))
 		.sort((a, b) => b.count - a.count || EMOTIONS.indexOf(a.id) - EMOTIONS.indexOf(b.id));
 
-	// Mögliche Rückblicke aus der Länge des Zeitraums (12 Monate = 52 Wochen, 12 Monate), nicht aus den
-	// berührten Kalenderwochen/-monaten – sonst zählten die angebrochenen an beiden Enden mit (53 bzw. 13).
-	// Geschrieben: Wochen (ab Montag) bzw. Monate mit Rückblick, höchstens so viele wie möglich.
+	// possible reviews from the length of the period (12 months = 52 weeks, 12 months), not from the
+	// calendar weeks/months it touches – otherwise the partial ones at both ends would count too (53 and 13).
+	// written: weeks (from Monday) or months with a review, at most as many as possible.
 	const length = daysBetween(from, to) + 1;
 	const reviews = (kind: SectionKind, period: (iso: string) => string, total: number) => {
 		const done = new Set(days.filter((d) => d.kinds.includes(kind)).map((d) => period(d.date))).size;
