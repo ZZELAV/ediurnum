@@ -311,7 +311,9 @@
 	</div>
 
 <style>
+	/* positioned: the filter dropdown takes the width of the whole row (search + button) */
 	.tools {
+		position: relative;
 		display: flex;
 		gap: 0.5rem;
 		max-width: 38rem;
@@ -333,18 +335,17 @@
 	}
 	/* flex, so the button stretches to the height of the search field */
 	.filter-menu {
-		position: relative;
 		display: flex;
 	}
-	/* dropdown right-aligned below the button; on phones at most as wide as the screen */
+	/* dropdown below search and button, exactly as wide as both together */
 	.filter {
 		position: absolute;
 		top: calc(100% + 0.4rem);
+		left: 0;
 		right: 0;
 		z-index: 20;
-		width: min(28rem, calc(100vw - 2rem));
-		/* scrolls when there is little height; room for the header, search and (phone) the navigation bar at the bottom */
-		max-height: min(34rem, calc(100dvh - 17rem));
+		/* scrolls only when the window is too low; room for the header, search and (phone) the navigation bar at the bottom */
+		max-height: calc(100dvh - 17rem);
 		overflow-y: auto;
 		display: grid;
 		gap: 1rem;

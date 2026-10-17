@@ -13,6 +13,8 @@ The topmost version without a date is still in development.
 
 ### Changed
 
+- The filter in “All entries” opens as wide as the search field and the filter button together and only scrolls
+  when the window is too low.
 - Past days and the version history show the energy of the weekly review like the mood: one line with its
   colour („● Energy awake“).
 - The three sections are stored under English names (daily, feelings, growth). Existing journals are updated
