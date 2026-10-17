@@ -42,6 +42,7 @@ describe('General', () => {
 		const r = await general({ name: '  Vale  ', language: 'en', theme: 'dark', sessionMinutes: '45', focusMode: 'on', welcome: '', leaveMinutes: '5' });
 		assert.equal(r.type, 'success');
 		assert.match(c.lastSetCookie.join(';'), /lang=en/);
+		assert.match(c.lastSetCookie.join(';'), /theme=dark/);
 		const s = await settings();
 		assert.equal(s.name, 'Vale');
 		assert.equal(s.language, 'en');
@@ -65,6 +66,18 @@ describe('General', () => {
 		assert.equal(s.sessionMinutes, 720);
 		await general({ theme: 'system' });
 		assert.equal((await settings()).name, 'Testperson');
+	});
+
+	test('the login page uses the theme of the settings', async () => {
+		await general({ theme: 'dark' });
+		const { client } = await login();
+		assert.equal(client.cookies.get('theme'), 'dark');
+		await client.action('/logout', {});
+		assert.match(await (await client.get('/login')).text(), /<html lang="de" data-theme="dark"/);
+		client.cookies.set('theme', 'pink');
+		assert.match(await (await client.get('/login')).text(), /data-theme="system"/, 'an unknown theme follows the system');
+		assert.match(await (await new Client(server.url).get('/login')).text(), /data-theme="system"/, 'without a cookie the system decides');
+		await general({ theme: 'system' });
 	});
 
 	test('settings are stored only encrypted in the database', () => {

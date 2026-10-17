@@ -3,6 +3,7 @@ import { dev } from '$app/env';
 import { COOKIE_SECURE, ORIGIN } from '$app/env/private';
 import { createSession, destroySession, type Session } from './vault.ts';
 import { loadSettings } from './settings.ts';
+import type { Settings } from '#lib/types.ts';
 
 export const SESSION_COOKIE = 'ediurnum_session';
 
@@ -20,7 +21,7 @@ export function startSession(cookies: Cookies, dek: Buffer): Session {
 		sameSite: 'strict',
 		secure: secureCookies()
 	});
-	cookies.set('lang', settings.language, { path: '/', httpOnly: false, sameSite: 'strict', secure: secureCookies(), maxAge: 60 * 60 * 24 * 365 });
+	setDisplayCookies(cookies, settings);
 	return session;
 }
 
@@ -30,8 +31,11 @@ export function endSession(cookies: Cookies) {
 	cookies.delete(SESSION_COOKIE, { path: '/' });
 }
 
-export function setLangCookie(cookies: Cookies, lang: string) {
-	cookies.set('lang', lang, { path: '/', httpOnly: false, sameSite: 'strict', secure: secureCookies(), maxAge: 60 * 60 * 24 * 365 });
+/** Language and theme as cookies, so that pages without a session (login, recover) look like the app. */
+export function setDisplayCookies(cookies: Cookies, settings: Settings) {
+	const options = { path: '/', httpOnly: false, sameSite: 'strict', secure: secureCookies(), maxAge: 60 * 60 * 24 * 365 } as const;
+	cookies.set('lang', settings.language, options);
+	cookies.set('theme', settings.theme, options);
 }
 
 /** For API routes: returns the session or aborts with 401. */

@@ -22,6 +22,11 @@ The topmost version without a date is still in development.
 - Backups use format version 3. Older backups can still be restored; backups from 1.1.0 can't be restored in 1.0.0
   or older, so update all installations before moving a backup between them.
 
+### Fixed
+
+- The login page now uses the appearance chosen in the settings instead of always following the device. The choice
+  is remembered in a cookie on each device after logging in or saving the settings.
+
 ## [1.0.0] - 2026-10-17
 
 ### Added

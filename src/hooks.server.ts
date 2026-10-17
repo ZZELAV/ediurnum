@@ -4,7 +4,7 @@ import { dev } from '$app/env';
 import { ORIGIN } from '$app/env/private';
 import { startReminderScheduler } from '#lib/server/reminders.ts';
 import { getSession, isInitialized } from '#lib/server/vault.ts';
-import { loadSettings } from '#lib/server/settings.ts';
+import { isTheme, loadSettings } from '#lib/server/settings.ts';
 import { dataDir } from '#lib/server/db.ts';
 import { log } from '#lib/server/log.ts';
 import { isLang, pickLang, pickLocale } from '#lib/i18n/index.ts';
@@ -45,6 +45,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.lang =
 		event.locals.settings?.language ?? (isLang(cookieLang) ? cookieLang : pickLang(event.request.headers.get('accept-language')));
 	event.locals.locale = pickLocale(event.request.headers.get('accept-language'), event.locals.lang);
+	const cookieTheme = event.cookies.get('theme');
+	event.locals.theme = event.locals.settings?.theme ?? (isTheme(cookieTheme) ? cookieTheme : 'system');
 
 	const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(p + '/'));
 	const isApi = path.startsWith('/api/');
@@ -63,9 +65,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 		redirect(303, '/');
 	}
 
-	const theme = event.locals.settings?.theme ?? 'system';
 	const response = await resolve(event, {
-		transformPageChunk: ({ html }) => html.replace('%lang%', event.locals.lang).replace('%theme%', theme)
+		transformPageChunk: ({ html }) => html.replace('%lang%', event.locals.lang).replace('%theme%', event.locals.theme)
 	});
 
 	response.headers.set('X-Content-Type-Options', 'nosniff');

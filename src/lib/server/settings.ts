@@ -1,6 +1,10 @@
 import { decryptJson, encryptJson, SETTINGS_AAD as AAD } from './crypto.ts';
 import { getMeta, setMeta } from './db.ts';
-import type { AiAgent, PublicAiAgent, Settings } from '#lib/types.ts';
+import type { AiAgent, PublicAiAgent, Settings, Theme } from '#lib/types.ts';
+
+export function isTheme(value: unknown): value is Theme {
+	return value === 'system' || value === 'light' || value === 'dark';
+}
 
 export function defaultSettings(): Settings {
 	return {
@@ -22,7 +26,7 @@ export function loadSettings(dek: Buffer): Settings {
 	if (!raw) return defaultSettings();
 	const settings = { ...defaultSettings(), ...decryptJson<Partial<Settings>>(dek, Buffer.from(raw, 'base64'), AAD) };
 	// unknown themes (e.g. a removed one) follow the system again
-	if (settings.theme !== 'light' && settings.theme !== 'dark') settings.theme = 'system';
+	if (!isTheme(settings.theme)) settings.theme = 'system';
 	return settings;
 }
 

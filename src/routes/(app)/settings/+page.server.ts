@@ -9,12 +9,12 @@ import { isEmptyProfile } from '#lib/profile.ts';
 import { loadProfile } from '#lib/server/profile.ts';
 import { log } from '#lib/server/log.ts';
 import { presetById } from '#lib/ai-presets.ts';
-import { SESSION_COOKIE, setLangCookie } from '#lib/server/auth.ts';
+import { SESSION_COOKIE, setDisplayCookies } from '#lib/server/auth.ts';
 import { purgeContent, resetAll } from '#lib/server/purge.ts';
 import { countLocked, rekeyLocked } from '#lib/server/entries.ts';
 import { transaction } from '#lib/server/db.ts';
 import { parseRecoveryKey } from '#lib/server/crypto.ts';
-import { loadSettings, publicAgent, saveSettings } from '#lib/server/settings.ts';
+import { isTheme, loadSettings, publicAgent, saveSettings } from '#lib/server/settings.ts';
 import { validateNewPassword, validatePin } from '#lib/server/validation.ts';
 import {
 	closePinInOtherSessions,
@@ -30,7 +30,7 @@ import {
 	verifyPin
 } from '#lib/server/vault.ts';
 import { setReminderLang } from '#lib/server/reminders.ts';
-import type { AiAgent, Theme } from '#lib/types.ts';
+import type { AiAgent } from '#lib/types.ts';
 
 export const load: PageServerLoad = ({ locals }) => {
 	const settings = loadSettings(locals.session!.dek);
@@ -44,7 +44,6 @@ export const load: PageServerLoad = ({ locals }) => {
 	};
 };
 
-const THEMES: Theme[] = ['system', 'light', 'dark'];
 const LEAVE_MINUTES = [1, 5, 15, 0];
 
 export const actions: Actions = {
@@ -53,12 +52,12 @@ export const actions: Actions = {
 		const form = await request.formData();
 		const settings = loadSettings(session.dek);
 		const language = form.get('language');
-		const theme = form.get('theme') as Theme;
+		const theme = form.get('theme');
 		const minutes = Number(form.get('sessionMinutes'));
 		const leave = Number(form.get('leaveMinutes'));
 		settings.name = String(form.get('name') ?? '').trim().slice(0, 60);
 		if (isLang(language)) settings.language = language;
-		if (THEMES.includes(theme)) settings.theme = theme;
+		if (isTheme(theme)) settings.theme = theme;
 		settings.focusMode = form.get('focusMode') === 'on';
 		settings.welcomeHidden = form.get('welcome') !== 'on';
 		if (Number.isFinite(minutes)) settings.sessionMinutes = Math.min(720, Math.max(5, Math.round(minutes)));
@@ -66,7 +65,7 @@ export const actions: Actions = {
 		saveSettings(session.dek, settings);
 		session.idleMs = settings.sessionMinutes * 60 * 1000;
 		session.awayMs = settings.leaveMinutes * 60 * 1000;
-		setLangCookie(cookies, settings.language);
+		setDisplayCookies(cookies, settings);
 		setReminderLang(settings.language);
 		return { section: 'general', success: 'settings.saved' };
 	},
