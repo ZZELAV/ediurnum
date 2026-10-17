@@ -1,7 +1,7 @@
 /**
- * Schein-Push-Dienst für Ende-zu-Ende-Tests: ein lokaler HTTPS-Server (selbstsigniertes Zertifikat per
- * openssl) nimmt Web-Push-Nachrichten an und entschlüsselt sie wie ein Browser (RFC 8291, aes128gcm).
- * Der ediurnum-Server muss dafür mit NODE_TLS_REJECT_UNAUTHORIZED=0 laufen.
+ * Fake push service for end-to-end tests: a local HTTPS server (self-signed certificate via
+ * openssl) accepts web push messages and decrypts them like a browser (RFC 8291, aes128gcm).
+ * The ediurnum server has to run with NODE_TLS_REJECT_UNAUTHORIZED=0 for it.
  */
 import { execFileSync } from 'node:child_process';
 import { createDecipheriv, createECDH, createHmac, randomBytes } from 'node:crypto';
@@ -16,7 +16,7 @@ export interface PushMessage {
 	payload: { title: string; body: string; url: string; tag: string };
 }
 
-/** Ein „Gerät“: Schlüssel wie im Browser, Adresse beim Schein-Dienst. */
+/** A „device“: keys as in the browser, address at the fake service. */
 export interface FakeDevice {
 	subscription: { endpoint: string; keys: { p256dh: string; auth: string } };
 	decrypt(body: Buffer): string;
@@ -45,7 +45,7 @@ function device(endpoint: string): FakeDevice {
 			const decipher = createDecipheriv('aes-128-gcm', cek, nonce);
 			decipher.setAuthTag(data.subarray(data.length - 16));
 			const plain = Buffer.concat([decipher.update(data.subarray(0, data.length - 16)), decipher.final()]);
-			// letzter Datensatz: Inhalt, dann Trennzeichen 0x02 und Füllnullen
+			// last record: content, then delimiter 0x02 and padding zeros
 			let end = plain.length;
 			while (end > 0 && plain[end - 1] === 0) end--;
 			return plain.subarray(0, end - 1).toString('utf8');
@@ -56,10 +56,10 @@ function device(endpoint: string): FakeDevice {
 export interface FakePushService {
 	url: string;
 	messages: PushMessage[];
-	/** Antwortstatus pro Pfad (Standard 201) */
+	/** Response status per path (default 201) */
 	status: Map<string, number>;
 	device(path: string): FakeDevice;
-	/** Wartet, bis mindestens `count` Nachrichten da sind (oder die Zeit abläuft). */
+	/** Waits until at least `count` messages have arrived (or the time runs out). */
 	waitFor(count: number, ms?: number): Promise<PushMessage[]>;
 	close(): Promise<void>;
 }

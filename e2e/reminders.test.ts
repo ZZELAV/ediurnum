@@ -1,5 +1,5 @@
 /**
- * Bereich 5: Erinnerungen und Push – Geräte, Versand (über einen Schein-Push-Dienst), Planer, Zeitplan.
+ * Area 5: reminders and push – devices, sending (via a fake push service), scheduler, schedule.
  */
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -13,7 +13,7 @@ let server: TestServer;
 let c: Client;
 const env = { NODE_TLS_REJECT_UNAUTHORIZED: '0' };
 
-/** Jetzt in Zürich: Datum und Uhrzeit (HH:MM) – wie der Planer rechnet (TZ=Europe/Zurich). */
+/** Now in Zurich: date and time (HH:MM) – as the scheduler computes it (TZ=Europe/Zurich). */
 function zurichNow() {
 	const parts = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Zurich', dateStyle: 'short', timeStyle: 'short' }).format(new Date());
 	const [date, time] = parts.split(' ');
@@ -38,7 +38,7 @@ function deviceCount(): number {
 	return n;
 }
 
-/** Eigene Erinnerung direkt in den Zeitplan schreiben (ohne „heute schon gesendet“-Markierung). */
+/** Writes a custom reminder directly into the schedule (without the „already sent today“ marker). */
 function writeCustom(reminder: Record<string, unknown>) {
 	const d = db();
 	const cfg = JSON.parse((d.prepare(`SELECT value FROM meta WHERE key = 'reminders'`).get() as { value: string }).value);
@@ -48,7 +48,7 @@ function writeCustom(reminder: Record<string, unknown>) {
 	d.close();
 }
 
-/** Server neu starten (gleiche Daten): Der Planer prüft 5 Sekunden nach dem Start. */
+/** Restarts the server (same data): the scheduler checks 5 seconds after the start. */
 async function restart() {
 	await server.stop({ keepData: true });
 	server = await startServer(env, { dataDir: server.dataDir });
@@ -64,8 +64,8 @@ after(async () => {
 	await push.close();
 });
 
-describe('Geräte', () => {
-	test('anmelden; ungültige Adressen und ohne Anmeldung abgelehnt', async () => {
+describe('Devices', () => {
+	test('register; invalid addresses and requests without signing in rejected', async () => {
 		const dev = push.device('/push/phone');
 		assert.equal((await c.api('/api/push', { subscription: dev.subscription, label: 'iPhone' })).status, 200);
 		assert.equal(deviceCount(), 1);
@@ -75,12 +75,12 @@ describe('Geräte', () => {
 		assert.equal((await c.api('/api/push', { subscription: { endpoint: 'https://x' } })).status, 400);
 		assert.equal((await new Client(server.url).api('/api/push', { subscription: dev.subscription })).status, 401);
 		assert.equal(deviceCount(), 1);
-		// gleiche Adresse nochmals: kein zweites Gerät
+		// the same address again: no second device
 		await c.api('/api/push', { subscription: dev.subscription, label: 'iPhone' });
 		assert.equal(deviceCount(), 1);
 	});
 
-	test('Testbenachrichtigung: verschlüsselt, dringend, ohne Tagebuchinhalt', async () => {
+	test('test notification: encrypted, urgent, without journal content', async () => {
 		push.messages.length = 0;
 		const r = await c.api('/api/push/test', {});
 		assert.equal(r.json.sent, 1);
@@ -92,7 +92,7 @@ describe('Geräte', () => {
 		assert.match(String(m.headers['authorization']), /^vapid t=.+, k=.+/);
 	});
 
-	test('abgelaufenes Gerät wird entfernt, Fehler beim Dienst nur protokolliert', async () => {
+	test('an expired device is removed, errors of the service are only logged', async () => {
 		const gone = push.device('/push/gone');
 		const broken = push.device('/push/broken');
 		push.status.set('/push/gone', 410);
@@ -102,7 +102,7 @@ describe('Geräte', () => {
 		assert.equal(deviceCount(), 3);
 		const r = await c.api('/api/push/test', {});
 		assert.equal(r.json.sent, 1);
-		assert.equal(deviceCount(), 2, 'abgelaufenes entfernt, fehlerhaftes bleibt');
+		assert.equal(deviceCount(), 2, 'expired one removed, failing one stays');
 		assert.match(await server.waitForOutput(/push device expired and removed/), /push device expired and removed/);
 		assert.match(await server.waitForOutput(/push failed status=500/), /push failed status=500/);
 		await c.api('/api/push', { endpoint: broken.subscription.endpoint }, 'DELETE');
@@ -110,25 +110,25 @@ describe('Geräte', () => {
 	});
 });
 
-describe('Planer', () => {
-	test('eigene Erinnerung wird zur eingestellten Zeit genau einmal gesendet', async () => {
+describe('Scheduler', () => {
+	test('a custom reminder is sent exactly once at the set time', async () => {
 		const { date, time } = zurichNow();
 		writeCustom({ time });
 		push.messages.length = 0;
 		await restart();
 		const [m] = await push.waitFor(1);
-		assert.ok(m, 'Erinnerung gesendet');
+		assert.ok(m, 'reminder sent');
 		assert.deepEqual(m.payload, { title: 'Wasser trinken', body: 'Ein Glas', url: '/reminders', tag: 'custom-r1' });
 		assert.equal(JSON.parse(readMeta('reminder_sent_custom')!).r1, date);
-		// Die Log-Zeile kommt erst nach der Antwort des Push-Dienstes
+		// the log line only comes after the response of the push service
 		assert.match(await server.waitForOutput(/push sent tag=custom devices=1 of=1/), /push sent tag=custom devices=1 of=1/);
-		// Neustart am selben Tag: nicht nochmals
+		// restart on the same day: not again
 		push.messages.length = 0;
 		await restart();
 		assert.equal((await push.waitFor(1, 8_000)).length, 0);
 	});
 
-	test('Einschalten nach der Uhrzeit sendet nicht sofort', async () => {
+	test('switching on after the time does not send right away', async () => {
 		writeCustom({ time: '00:00', enabled: false });
 		({ client: c } = await login());
 		const r = await c.action('/reminders?/toggle', { id: 'r1', enabled: 'true' });
@@ -138,7 +138,7 @@ describe('Planer', () => {
 		assert.equal((await push.waitFor(1, 8_000)).length, 0, 'erst wieder morgen');
 	});
 
-	test('neue Erinnerung mit vergangener Uhrzeit sendet nicht sofort', async () => {
+	test('a new reminder with a past time does not send right away', async () => {
 		({ client: c } = await login());
 		const r = await c.action('/reminders?/save', { title: 'Neu', body: '', repeat: 'daily', time: '00:00' });
 		assert.equal(r.type, 'success');
@@ -147,7 +147,7 @@ describe('Planer', () => {
 		assert.equal((await push.waitFor(1, 8_000)).length, 0);
 	});
 
-	test('ohne Geräte wird nichts gesendet', async () => {
+	test('without devices nothing is sent', async () => {
 		({ client: c } = await login());
 		await c.api('/api/push', { all: true }, 'DELETE');
 		assert.equal(deviceCount(), 0);
@@ -156,12 +156,12 @@ describe('Planer', () => {
 		await restart();
 		await new Promise((r) => setTimeout(r, 7_000));
 		assert.doesNotMatch(server.output(), /push sent/);
-		assert.equal(readMeta('reminder_sent_custom'), null, 'bleibt offen, bis ein Gerät da ist');
+		assert.equal(readMeta('reminder_sent_custom'), null, 'stays open until there is a device');
 	});
 });
 
-describe('Zeitplan der Rückblicke', () => {
-	test('speichern, ungültige Werte auf Standard, Rückblick für heute nach der Uhrzeit gilt als gesendet', async () => {
+describe('Schedule of the reviews', () => {
+	test('save, invalid values to default, a review for today after its time counts as sent', async () => {
 		({ client: c } = await login());
 		const weekday = new Date(zurichNow().date + 'T00:00:00Z').getUTCDay();
 		const r = await c.action('/reminders?/reviews', {
@@ -179,7 +179,7 @@ describe('Zeitplan der Rückblicke', () => {
 		assert.equal(readMeta('reminder_sent_feelings'), zurichNow().date);
 	});
 
-	test('Seite zeigt die Erinnerungen', async () => {
+	test('the page shows the reminders', async () => {
 		const html = await (await c.get('/reminders')).text();
 		assert.match(html, /Wasser trinken/);
 		assert.equal((await new Client(server.url).get('/reminders')).status, 303);

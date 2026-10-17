@@ -1,5 +1,5 @@
 /**
- * Komplett geleerte Einträge, Datenbank-Migration und Backup-Versionen.
+ * Completely cleared entries, database migration and backup versions.
  */
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,7 +12,7 @@ import { Client, PASSWORD, setupJournal, startServer, type TestServer } from './
 const filled = (text: string) => ({ mood: 3, sections: { daily: { gratitude: ['', '', ''], experienced: text, highlight: '', takeaway: '' } }, free: '' });
 const cleared = { mood: null, sections: { daily: { gratitude: ['', '', ''], experienced: '', highlight: '', takeaway: '' } }, free: '' };
 
-describe('Komplett geleerter Eintrag', () => {
+describe('Completely cleared entry', () => {
 	let server: TestServer;
 	let c: Client;
 	before(async () => {
@@ -26,7 +26,7 @@ describe('Komplett geleerter Eintrag', () => {
 		return (await r.json()) as { entries: number; lastEntry: string | null };
 	};
 
-	test('zählt nicht als geschrieben, bleibt aber mit Versionen erhalten', async () => {
+	test('does not count as written, but is kept with its versions', async () => {
 		await c.api('/api/entry/2026-05-01', { content: filled('Erster Text') });
 		await c.api('/api/entry/2026-05-02', { content: filled('Bleibt') });
 		assert.equal((await widgetAuth()).entries, 2);
@@ -34,34 +34,34 @@ describe('Komplett geleerter Eintrag', () => {
 		const r = await c.api('/api/entry/2026-05-01', { content: cleared });
 		assert.equal(r.status, 200);
 		const w = await widgetAuth();
-		assert.equal(w.entries, 1, 'geleerter Eintrag zählt nicht');
+		assert.equal(w.entries, 1, 'cleared entry does not count');
 		const db = new DatabaseSync(join(server.dataDir, 'ediurnum.db'));
 		const saved = db.prepare(`SELECT updated_at FROM entries WHERE date = '2026-05-02'`).get() as { updated_at: string };
 		db.close();
-		assert.equal(w.lastEntry, saved.updated_at, 'Zeitpunkt der letzten Speicherung, nicht des geleerten Eintrags');
+		assert.equal(w.lastEntry, saved.updated_at, 'time of the latest save, not of the cleared entry');
 		assert.match(String(w.lastEntry), /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/);
 
-		// nicht in „Alle Einträge“, aber die Seite des Tages und die Versionen gibt es weiterhin
+		// not in „Alle Einträge“, but the page of the day and the versions still exist
 		const archive = await (await c.get('/archive/__data.json')).text();
-		assert.ok(!archive.includes('2026-05-01'), 'nicht im Archiv');
+		assert.ok(!archive.includes('2026-05-01'), 'not in the archive');
 		assert.equal((await c.get('/entry/2026-05-01')).status, 200);
 		assert.equal((await c.get('/entry/2026-05-01/history')).status, 200);
 	});
 
-	test('wieder befüllt zählt er wieder', async () => {
+	test('filled again it counts again', async () => {
 		await c.api('/api/entry/2026-05-01', { content: filled('Wieder da') });
 		assert.equal((await widgetAuth()).entries, 2);
 	});
 });
 
-describe('Migration einer bestehenden Datenbank (Schema 2 → 4)', () => {
-	test('fügt das Kennzeichen hinzu, bestehende Einträge zählen weiter', async () => {
+describe('Migration of an existing database (schema 2 → 4)', () => {
+	test('adds the flag, existing entries still count', async () => {
 		const first = await startServer();
 		const { client } = await setupJournal(first);
 		await client.api('/api/entry/2026-04-01', { content: filled('Vor dem Update') });
 		await first.stop({ keepData: true });
 
-		// Zustand wie vor diesem Update herstellen
+		// recreate the state from before this update
 		const file = join(first.dataDir, 'ediurnum.db');
 		let db = new DatabaseSync(file);
 		db.exec(`ALTER TABLE entries DROP COLUMN empty; UPDATE meta SET value = '2' WHERE key = 'schema';`);
@@ -83,7 +83,7 @@ describe('Migration einer bestehenden Datenbank (Schema 2 → 4)', () => {
 	});
 });
 
-describe('Backup-Versionen', () => {
+describe('Backup versions', () => {
 	let source: TestServer;
 	let backup: { format: string; version: number; data: string; keyFingerprint: string };
 	let recoveryKey: string;
@@ -98,7 +98,7 @@ describe('Backup-Versionen', () => {
 	});
 	after(() => source.stop());
 
-	/** Backup mit veränderten Daten neu verpacken (wie es eine andere Version schreiben würde) */
+	/** Repacks a backup with changed data (as another version would write it) */
 	function repack(version: number, change: (data: { entries: Record<string, unknown>[] }) => void) {
 		const dek = parseRecoveryKey(recoveryKey);
 		const data = JSON.parse(gunzipSync(decrypt(dek, Buffer.from(backup.data, 'base64'), 'ediurnum/backup/v1')).toString('utf8'));
@@ -118,7 +118,7 @@ describe('Backup-Versionen', () => {
 		return { target, c, r };
 	}
 
-	test('Aktuelle Backups haben Version 3 und behalten geleerte Einträge als geleert', async () => {
+	test('current backups have version 3 and keep cleared entries cleared', async () => {
 		assert.equal(backup.version, 3);
 		const { target, c, r } = await restore(JSON.stringify(backup));
 		try {
@@ -136,7 +136,7 @@ describe('Backup-Versionen', () => {
 		}
 	});
 
-	test('Backups der Version 1 (ohne Kennzeichen) lassen sich weiterhin einspielen', async () => {
+	test('backups of version 1 (without the flag) can still be restored', async () => {
 		const v1 = repack(1, (data) => {
 			for (const e of data.entries) delete e.empty;
 		});
@@ -148,7 +148,7 @@ describe('Backup-Versionen', () => {
 		}
 	});
 
-	test('Unbekannte Spalten im Backup werden ignoriert (landen nicht im SQL)', async () => {
+	test('unknown columns in the backup are ignored (do not end up in the SQL)', async () => {
 		const odd = repack(2, (data) => {
 			data.entries[0]['x) VALUES (1); DROP TABLE entries; --'] = 1;
 			data.entries[0].unknown_column = 'egal';
@@ -164,7 +164,7 @@ describe('Backup-Versionen', () => {
 		}
 	});
 
-	test('Backups einer neueren Version werden mit Hinweis abgelehnt', async () => {
+	test('backups of a newer version are rejected with a hint', async () => {
 		const { target, r } = await restore(repack(4, () => {}));
 		try {
 			assert.equal(r.data?.error, 'backup.tooNew');

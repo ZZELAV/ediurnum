@@ -1,7 +1,7 @@
 /**
- * Hilfen für Ende-zu-Ende-Tests: startet den gebauten Server (`node server.js`) mit einem leeren
- * Datenordner und spricht ihn über HTTP an – wie ein Browser, inklusive Cookies und Herkunft.
- * Voraussetzung: `npm run build`.
+ * Helpers for end-to-end tests: starts the built server (`node server.js`) with an empty
+ * data folder and talks to it over HTTP – like a browser, including cookies and origin.
+ * Requires `npm run build`.
  */
 import { spawn, type ChildProcess } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync } from 'node:fs';
@@ -15,7 +15,7 @@ const ROOT = new URL('..', import.meta.url);
 export const PASSWORD = 'e2e-Passwort-lang-genug';
 export const PIN = '482913';
 
-/** Heutiges Datum (plus `offset` Tage) in der Zeitzone des Testservers (TZ=Europe/Zurich). */
+/** Today's date (plus `offset` days) in the time zone of the test server (TZ=Europe/Zurich). */
 export function zurichToday(offset = 0) {
 	const d = new Date(new Date().toLocaleString('sv', { timeZone: 'Europe/Zurich' }).slice(0, 10) + 'T00:00:00Z');
 	d.setUTCDate(d.getUTCDate() + offset);
@@ -36,20 +36,20 @@ function freePort(): Promise<number> {
 export interface TestServer {
 	url: string;
 	dataDir: string;
-	/** Bisherige Ausgabe des Servers (für Prüfungen am Log) */
+	/** Output of the server so far (for checks on the log) */
 	output(): string;
 	/**
-	 * Wartet, bis das Log die Zeile enthält (höchstens `ms`), und gibt das Log zurück. Nötig, weil die Ausgabe
-	 * des Servers über eine Pipe kommt und eine HTTP-Antwort sie überholen kann.
+	 * Waits until the log contains the line (at most `ms`) and returns the log. Needed because the output
+	 * of the server arrives through a pipe and an HTTP response can overtake it.
 	 */
 	waitForOutput(re: RegExp, ms?: number): Promise<string>;
-	/** Beendet den Server; der Datenordner wird gelöscht, ausser mit keepData. */
+	/** Stops the server; the data folder is deleted unless keepData is set. */
 	stop(opts?: { keepData?: boolean }): Promise<void>;
 }
 
 /**
- * Startet eine eigene Instanz – mit leerem Datenordner oder einem bestehenden (`dataDir`).
- * `env` ergänzt oder überschreibt Variablen.
+ * Starts an instance of its own – with an empty data folder or an existing one (`dataDir`).
+ * `env` adds or overrides variables.
  */
 export async function startServer(env: Record<string, string | undefined> = {}, opts: { dataDir?: string } = {}): Promise<TestServer> {
 	if (!existsSync(new URL('build/index.js', ROOT))) throw new Error('Zuerst bauen: npm run build');
@@ -75,7 +75,7 @@ export async function startServer(env: Record<string, string | undefined> = {}, 
 	child.stdout!.on('data', (d) => (out += d));
 	child.stderr!.on('data', (d) => (out += d));
 	await new Promise<void>((resolve, reject) => {
-		const timer = setTimeout(() => reject(new Error('Server startet nicht:\n' + out)), 15000);
+		const timer = setTimeout(() => reject(new Error('Server does not start:\n' + out)), 15000);
 		const check = () => {
 			if (out.includes('Listening on')) {
 				clearTimeout(timer);
@@ -115,10 +115,10 @@ export interface ActionResult {
 	location?: string;
 }
 
-/** Ein „Browser“ mit eigenen Cookies. */
+/** A „browser“ with its own cookies. */
 export class Client {
 	cookies = new Map<string, string>();
-	/** Rohe Set-Cookie-Kopfzeilen der letzten Antwort */
+	/** Raw Set-Cookie headers of the last response */
 	lastSetCookie: string[] = [];
 
 	base: string;
@@ -159,7 +159,7 @@ export class Client {
 		return this.request(path, { headers });
 	}
 
-	/** Formular-Aktion wie mit use:enhance (Antwort als JSON). Dateien als Blob übergeben. */
+	/** Form action like with use:enhance (response as JSON). Pass files as a Blob. */
 	async action(path: string, fields: Record<string, string | Blob>, headers: Record<string, string> = {}): Promise<ActionResult> {
 		const hasFile = Object.values(fields).some((v) => typeof v !== 'string');
 		let body: BodyInit;
@@ -188,7 +188,7 @@ export class Client {
 		};
 	}
 
-	/** JSON-API */
+	/** JSON API */
 	async api(path: string, body?: unknown, method = body === undefined ? 'GET' : 'POST') {
 		const res = await this.request(path, {
 			method,
@@ -206,7 +206,7 @@ export class Client {
 	}
 }
 
-/** Richtet ein neues Tagebuch ein und gibt den angemeldeten Client samt Wiederherstellungsschlüssel zurück. */
+/** Sets up a new journal and returns the signed-in client together with the recovery key. */
 export async function setupJournal(server: TestServer, name = 'Testperson') {
 	const client = new Client(server.url);
 	const r = await client.action('/setup?/create', { name, password: PASSWORD, confirm: PASSWORD });

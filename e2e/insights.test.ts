@@ -1,5 +1,5 @@
 /**
- * Bereich 4: Einsichten – KI-Datei erstellen, Antwort einfügen, Fokuspunkte, eigener Auftrag.
+ * Area 4: insights – creating the AI file, pasting the answer, focus points, own instructions.
  */
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -36,8 +36,8 @@ before(async () => {
 });
 after(() => server.stop());
 
-describe('Vorschau', () => {
-	test('zählt freigegebene, gesperrte und ausgeschlossene Einträge', async () => {
+describe('Preview', () => {
+	test('counts shared, locked and excluded entries', async () => {
 		const r = await c.api(`/api/ai/preview?from=${FROM}&to=${TO}`);
 		assert.deepEqual(r.json, { send: 1, locked: 1, pinOpen: false, excluded: 1 });
 		assert.equal((await c.api('/api/ai/preview?from=x&to=y')).status, 400);
@@ -45,24 +45,24 @@ describe('Vorschau', () => {
 	});
 });
 
-describe('KI-Datei', () => {
-	test('enthält nur freigegebene, lesbare Einträge im Zeitraum', async () => {
+describe('AI file', () => {
+	test('contains only shared, readable entries in the period', async () => {
 		const r = await prompt({ question: 'Wie geht es mir?' });
 		assert.equal(r.type, 'success');
 		const md = String(r.data!.markdown);
 		assert.equal(r.data!.count, 1);
 		assert.equal(r.data!.filename, `ediurnum-${FROM}_${TO}.md`);
 		assert.match(md, /Normaler Tag/);
-		assert.match(md, /\\# Überschrift im Eintrag/, 'Überschrift im Eintrag entschärft');
+		assert.match(md, /\\# Überschrift im Eintrag/, 'heading in the entry escaped');
 		assert.match(md, /Wie geht es mir\?/);
 		assert.match(md, /genau 3 kurze/);
 		for (const absent of ['Vor dem Zeitraum', 'Nicht für die KI', 'Geheim', 'Geleert']) assert.doesNotMatch(md, new RegExp(absent));
-		// Der Stimmungsverlauf steht in der Statistik, nicht hier
+		// the mood chart is in the statistics, not here
 		assert.equal(r.data!.moods, undefined);
 		assert.doesNotMatch(md, /2026-03-05|5. März/);
 	});
 
-	test('gesperrte freigegebene Einträge nur mit offener PIN', async () => {
+	test('locked shared entries only with an open PIN', async () => {
 		await c.api('/api/pin', { pin: PIN });
 		const r = await prompt();
 		await c.api('/api/pin', undefined, 'DELETE');
@@ -70,7 +70,7 @@ describe('KI-Datei', () => {
 		assert.match(String(r.data!.markdown), /Geheim, aber freigegeben/);
 	});
 
-	test('Selbsteinschätzung nur, wenn gewünscht', async () => {
+	test('self-assessment only if wanted', async () => {
 		const without = String((await prompt()).data!.markdown);
 		const withProfile = String((await prompt({ profile: 'on' })).data!.markdown);
 		assert.doesNotMatch(without, /Über mich/);
@@ -78,55 +78,55 @@ describe('KI-Datei', () => {
 		assert.match(withProfile, /Testperson/);
 	});
 
-	test('ungültiger oder leerer Zeitraum', async () => {
+	test('invalid or empty period', async () => {
 		assert.equal((await prompt({ from: '2026-03-31', to: '2026-03-01' })).data?.error, 'common.error');
 		assert.equal((await prompt({ from: 'gestern' })).status, 400);
 		assert.equal((await prompt({ from: '2025-01-01', to: '2025-01-31' })).data?.error, 'insights.noEntries');
 	});
 
-	test('Inhalte landen nicht im Log', async () => {
+	test('contents do not end up in the log', async () => {
 		assert.match(await server.waitForOutput(/AI file created/), /AI file created/);
 		assert.doesNotMatch(server.output(), /Normaler Tag|Wie geht es mir/);
 	});
 });
 
-describe('Eigener Auftrag', () => {
-	test('wird gespeichert, in der Datei verwendet und lässt sich zurücksetzen', async () => {
+describe('Own instructions', () => {
+	test('is saved, used in the file and can be reset', async () => {
 		const saved = await c.action('/insights?/instructions', { instructions: 'Fasse dich kurz.' });
 		assert.equal(saved.data?.instructionsSaved, 'custom');
 		const md = String((await prompt()).data!.markdown);
 		assert.match(md, /Fasse dich kurz\./);
 		assert.doesNotMatch(md, /reflektierender Begleiter/);
-		assert.match(md, /## Fokuspunkte/, 'Fokus-Abschnitt wird immer ergänzt');
+		assert.match(md, /## Fokuspunkte/, 'the focus section is always added');
 		const reset = await c.action('/insights?/instructions', { instructions: 'egal', reset: 'reset' });
 		assert.equal(reset.data?.instructionsSaved, 'default');
 		assert.match(String((await prompt()).data!.markdown), /reflektierender Begleiter/);
 	});
 
-	test('der unveränderte Standard gilt nicht als eigener Auftrag', async () => {
+	test('the unchanged default does not count as own instructions', async () => {
 		const md = String((await prompt()).data!.markdown);
 		const standard = md.split('## Dein Auftrag\n\n')[1].split('\n\nSei wertschätzend')[0].replace(/^- `## (.+)`$/gm, '## $1');
 		assert.equal((await c.action('/insights?/instructions', { instructions: standard })).data?.instructionsSaved, 'default');
 	});
 });
 
-describe('Antwort der KI', () => {
+describe('Answer of the AI', () => {
 	const answer = '## Überblick\nDu schläfst gut.\n\n## Fokuspunkte\n- Früher ins Bett\n- Spazieren\n- Spazieren';
 
-	test('wird verschlüsselt gespeichert; Fokuspunkte erscheinen auf dem Dashboard', async () => {
+	test('is stored encrypted; focus points appear on the dashboard', async () => {
 		const r = await c.action('/insights?/import', { from: FROM, to: TO, count: '1', question: 'Schlaf?', answer });
 		assert.equal(r.type, 'success');
-		assert.equal(r.data!.focusCount, 2, 'doppelter Punkt entfällt');
+		assert.equal(r.data!.focusCount, 2, 'a duplicate point is dropped');
 		const home = await (await c.get('/')).text();
 		assert.match(home, /Früher ins Bett/);
 		const page = await (await c.get('/insights')).text();
 		assert.match(page, /Du schläfst gut\./);
 		assert.match(page, /Aktueller Fokus/);
 		const wal = readFileSync(join(server.dataDir, 'ediurnum.db-wal'));
-		assert.ok(!wal.includes(Buffer.from('Früher ins Bett')), 'kein Klartext in der Datenbank');
+		assert.ok(!wal.includes(Buffer.from('Früher ins Bett')), 'no plain text in the database');
 	});
 
-	test('HTML in der Antwort wird nicht ausgeführt', async () => {
+	test('HTML in the answer is not executed', async () => {
 		await c.action('/insights?/import', { from: FROM, to: TO, count: '1', answer: 'Hallo <img src=x onerror=alert(1)> [x](javascript:alert(1))' });
 		const page = await (await c.get('/insights')).text();
 		assert.match(page, /&lt;img src=x onerror=alert\(1\)&gt;/);
@@ -134,18 +134,18 @@ describe('Antwort der KI', () => {
 		assert.doesNotMatch(page, /href="javascript:/);
 	});
 
-	test('Antwort ohne Fokuspunkte lässt den bisherigen Fokus stehen', async () => {
+	test('an answer without focus points keeps the previous focus', async () => {
 		const home = await (await c.get('/')).text();
 		assert.match(home, /Früher ins Bett/);
 	});
 
-	test('leere Antwort und ungültiger Zeitraum werden abgelehnt', async () => {
+	test('an empty answer and an invalid period are rejected', async () => {
 		assert.equal((await c.action('/insights?/import', { from: FROM, to: TO, answer: '   ' })).data?.error, 'insights.answerEmpty');
 		assert.equal((await c.action('/insights?/import', { from: 'x', to: TO, answer: 'a' })).data?.error, 'common.error');
 	});
 
-	test('Fokus lösen, wieder festlegen, Auswertung löschen', async () => {
-		// IDs stehen als Anker im HTML der Einsichten, neueste zuerst
+	test('unpin the focus, pin it again, delete the analysis', async () => {
+		// IDs appear as anchors in the HTML of the insights, newest first
 		const ids = () => [...pageHtml.matchAll(/id="a-([0-9a-f-]{36})"/g)].map((m) => m[1]);
 		let pageHtml = await (await c.get('/insights')).text();
 		const [newest, first] = ids();
@@ -155,7 +155,7 @@ describe('Antwort der KI', () => {
 		await c.action('/insights?/pin', { id: first });
 		assert.match(await (await c.get('/')).text(), /Früher ins Bett/);
 		await c.action('/insights?/delete', { id: first });
-		assert.doesNotMatch(await (await c.get('/')).text(), /Früher ins Bett/, 'gelöschte Auswertung ist kein Fokus mehr');
+		assert.doesNotMatch(await (await c.get('/')).text(), /Früher ins Bett/, 'a deleted analysis is no longer the focus');
 		pageHtml = await (await c.get('/insights')).text();
 		assert.deepEqual(ids(), [newest]);
 	});

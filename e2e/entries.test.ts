@@ -1,5 +1,5 @@
 /**
- * Bereich 2: Eintrag schreiben, Versionen, Sperren und PIN, KI-Freigabe, Löschen.
+ * Area 2: writing an entry, versions, locking and PIN, sharing with the AI, deleting.
  */
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -33,20 +33,20 @@ const row = (date: string) =>
 		| { id: string; revision: number; locked: number; ai_allowed: number; kinds: string }
 		| undefined;
 
-/** Lesbarer Export: alle Einträge, die gerade entschlüsselt werden können. */
+/** Readable export: all entries that can currently be decrypted. */
 async function readable(): Promise<Map<string, { mood: number | null; free: string; sections: Record<string, Record<string, unknown>> }>> {
 	const r = await c.api('/api/export/plain?format=json');
 	const list = r.json.entries as { date: string; content: { mood: number | null; free: string; sections: Record<string, Record<string, unknown>> } }[];
 	return new Map(list.map((e) => [e.date, e.content]));
 }
 
-/** Simuliert, dass die aktuelle Fassung an einem früheren Tag begonnen wurde. */
+/** Simulates that the current text was started on an earlier day. */
 function ageCurrentRevision(date: string) {
 	db.prepare(`UPDATE entries SET rev_started_at = '2020-01-01T12:00:00.000Z' WHERE date = ?`).run(date);
 }
 
-describe('Schreiben', () => {
-	test('Neuer Eintrag wird verschlüsselt gespeichert', async () => {
+describe('Writing', () => {
+	test('a new entry is stored encrypted', async () => {
 		const r = await c.api(`/api/entry/${DAY}`, { content: { mood: 4, sections: { daily: daily('Ein Tag am See') }, free: 'Gedanken' } });
 		assert.equal(r.status, 200);
 		const meta = r.json.meta as { date: string; revision: number; kinds: string[]; locked: boolean; aiAllowed: boolean };
@@ -56,11 +56,11 @@ describe('Schreiben', () => {
 		assert.equal(meta.locked, false);
 		assert.equal(meta.aiAllowed, true);
 		const file = readFileSync(join(server.dataDir, 'ediurnum.db-wal'));
-		assert.ok(!file.includes(Buffer.from('Ein Tag am See')), 'kein Klartext in der Datenbank');
+		assert.ok(!file.includes(Buffer.from('Ein Tag am See')), 'no plain text in the database');
 		assert.equal((await readable()).get(DAY)?.sections.daily.experienced, 'Ein Tag am See');
 	});
 
-	test('Leerer neuer Eintrag wird nicht angelegt', async () => {
+	test('an empty new entry is not created', async () => {
 		const empty = { gratitude: ['', '', ''], experienced: '', highlight: '', takeaway: '' };
 		const r = await c.api('/api/entry/2026-03-01', { content: { mood: null, sections: { daily: empty }, free: '  ' } });
 		assert.equal(r.status, 200);
@@ -68,7 +68,7 @@ describe('Schreiben', () => {
 		assert.equal(row('2026-03-01'), undefined);
 	});
 
-	test('Unbekannte Felder und ungültige Werte werden verworfen', async () => {
+	test('unknown fields and invalid values are discarded', async () => {
 		await c.api('/api/entry/2026-02-01', {
 			content: {
 				mood: 9,
@@ -92,7 +92,7 @@ describe('Schreiben', () => {
 		assert.equal(row('2026-02-01')!.kinds, 'daily,feelings');
 	});
 
-	test('Zukunft, ungültiges Datum und fehlerhafte Anfragen werden abgewiesen', async () => {
+	test('future, invalid dates and broken requests are rejected', async () => {
 		assert.equal((await c.api('/api/entry/2999-01-01', { content: {} })).json.error, 'error.futureDate');
 		assert.equal((await c.api('/api/entry/2026-02-30', { content: {} })).status, 404);
 		assert.equal((await c.api('/api/entry/heute', { content: {} })).status, 404);
@@ -100,14 +100,14 @@ describe('Schreiben', () => {
 			const res = await c.request(`/api/entry/${DAY}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body });
 			assert.equal(res.status, 400, body);
 		}
-		assert.doesNotMatch(server.output(), /ERROR/, 'kein Serverfehler im Log');
+		assert.doesNotMatch(server.output(), /ERROR/, 'no server error in the log');
 		const anonymous = new Client(server.url);
 		assert.equal((await anonymous.api(`/api/entry/${DAY}`, { content: {} })).status, 401);
 	});
 });
 
-describe('Versionen', () => {
-	test('Am selben Tag bleibt es eine Version, unverändertes Speichern ändert nichts', async () => {
+describe('Versions', () => {
+	test('on the same day it stays one version, saving unchanged content changes nothing', async () => {
 		const before = row(DAY)!;
 		await c.api(`/api/entry/${DAY}`, { content: { mood: 3, sections: { daily: daily('Ein Tag am See, korrigiert') }, free: 'Gedanken' } });
 		assert.equal(row(DAY)!.revision, before.revision);
@@ -116,7 +116,7 @@ describe('Versionen', () => {
 		assert.equal((db.prepare('SELECT updated_at FROM entries WHERE date = ?').get(DAY) as { updated_at: string }).updated_at, saved.updated_at);
 	});
 
-	test('Erste Bearbeitung an einem neuen Tag archiviert die bisherige Fassung', async () => {
+	test('the first edit on a new day archives the previous text', async () => {
 		ageCurrentRevision(DAY);
 		await c.api(`/api/entry/${DAY}`, { content: { mood: 2, sections: { daily: daily('Am nächsten Tag ergänzt') }, free: 'Gedanken' } });
 		assert.equal(row(DAY)!.revision, 2);
@@ -124,7 +124,7 @@ describe('Versionen', () => {
 		assert.deepEqual(revs.map((r) => r.revision), [1]);
 	});
 
-	test('Frühere Version wiederherstellen ergibt eine neue Version mit dem alten Inhalt', async () => {
+	test('restoring an earlier version creates a new version with the old content', async () => {
 		const r = await c.api(`/api/entry/${DAY}/restore`, { revision: 1 });
 		assert.equal(r.status, 200);
 		assert.equal(row(DAY)!.revision, 3);
@@ -132,7 +132,7 @@ describe('Versionen', () => {
 		assert.equal((await c.api(`/api/entry/${DAY}/restore`, { revision: 99 })).status, 404);
 	});
 
-	test('Versionsseite zeigt alle Fassungen', async () => {
+	test('the version page shows all texts', async () => {
 		const res = await c.get(`/entry/${DAY}/history`);
 		assert.equal(res.status, 200);
 		const html = await res.text();
@@ -141,27 +141,27 @@ describe('Versionen', () => {
 	});
 });
 
-describe('Sperren mit PIN', () => {
-	test('Ohne PIN lässt sich nichts sperren', async () => {
+describe('Locking with PIN', () => {
+	test('without a PIN nothing can be locked', async () => {
 		assert.equal((await c.api(`/api/entry/${DAY}/lock`, { locked: true })).json.error, 'error.noPin');
 		assert.equal((await c.api('/api/pin', { pin: '1234' })).json.error, 'error.noPin');
 	});
 
-	test('PIN festlegen, Eintrag samt Versionen sperren', async () => {
+	test('set a PIN, lock an entry including its versions', async () => {
 		const r = await c.action('/settings?/pin', { pin: PIN, confirm: PIN });
 		assert.equal(r.type, 'success');
 		assert.match(await server.waitForOutput(/PIN set/), /PIN set/);
-		// nach dem Festlegen ist die PIN in dieser Sitzung 10 Minuten offen
+		// after setting it, the PIN is open in this session for 10 minutes
 		assert.equal((await c.api(`/api/entry/${DAY}/lock`, { locked: true })).status, 200);
 		const locked = row(DAY)!;
 		assert.equal(locked.locked, 1);
-		assert.equal(locked.ai_allowed, 0, 'Sperren schliesst von der KI aus');
+		assert.equal(locked.ai_allowed, 0, 'locking excludes from the AI');
 		const revLocked = db.prepare('SELECT locked FROM entry_revisions WHERE entry_id = ?').all(locked.id) as { locked: number }[];
-		assert.ok(revLocked.every((r) => r.locked === 1), 'auch alle früheren Versionen gesperrt');
-		assert.ok((await readable()).has(DAY), 'mit offener PIN lesbar');
+		assert.ok(revLocked.every((r) => r.locked === 1), 'all earlier versions locked as well');
+		assert.ok((await readable()).has(DAY), 'readable with an open PIN');
 	});
 
-	test('Nach „Wieder sperren“ ist der Eintrag unlesbar und unveränderbar', async () => {
+	test('after „Wieder sperren“ (lock again) the entry can be neither read nor changed', async () => {
 		assert.equal((await c.api('/api/pin', undefined, 'DELETE')).status, 200);
 		assert.ok(!(await readable()).has(DAY));
 		assert.equal((await c.api(`/api/entry/${DAY}`, { content: { mood: 1, sections: {}, free: 'x' } })).status, 423);
@@ -170,36 +170,36 @@ describe('Sperren mit PIN', () => {
 		assert.equal((await c.api(`/api/entry/${DAY}/lock`, { locked: false })).status, 423);
 		const history = await (await c.get(`/entry/${DAY}/history`)).text();
 		assert.doesNotMatch(history, /Ein Tag am See/);
-		// Andere Sitzungen kommen ohne PIN ebenfalls nicht an den Inhalt
+		// other sessions don't get to the content without the PIN either
 		const other = new Client(server.url);
 		await other.action('/login', { password: 'e2e-Passwort-lang-genug' });
 		assert.ok(!(await readableFor(other)).has(DAY));
 	});
 
-	test('Falsche PIN und unsinnige Eingaben werden abgelehnt', async () => {
+	test('a wrong PIN and nonsense input are rejected', async () => {
 		for (const pin of ['000000', 'abc', '1'.repeat(5000), '']) {
 			const r = await c.api('/api/pin', { pin });
 			assert.equal(r.status, 403, pin.slice(0, 10));
 			assert.equal(r.json.error, 'error.wrongPin');
 		}
-		// richtige PIN (noch unter der Sperrgrenze von fünf Fehlversuchen)
+		// correct PIN (still below the limit of five failed attempts)
 		const ok = await c.api('/api/pin', { pin: PIN });
 		assert.equal(ok.status, 200);
 		assert.ok(Number(ok.json.until) > Date.now());
 		assert.ok((await readable()).has(DAY));
 	});
 
-	test('Entsperren lässt die KI-Freigabe aus', async () => {
+	test('unlocking leaves sharing with the AI off', async () => {
 		assert.equal((await c.api(`/api/entry/${DAY}/lock`, { locked: false })).status, 200);
 		assert.equal(row(DAY)!.locked, 0);
-		assert.equal(row(DAY)!.ai_allowed, 0, 'erst eine ausdrückliche Freigabe erlaubt die KI wieder');
+		assert.equal(row(DAY)!.ai_allowed, 0, 'only an explicit share allows the AI again');
 		await c.api(`/api/entry/${DAY}/ai`, { allowed: true });
 		assert.equal(row(DAY)!.ai_allowed, 1);
 		await c.api(`/api/entry/${DAY}/ai`, { allowed: false });
 		assert.equal(row(DAY)!.ai_allowed, 0);
 	});
 
-	test('PIN wechseln verschlüsselt gesperrte Einträge neu', async () => {
+	test('changing the PIN re-encrypts locked entries', async () => {
 		await c.api(`/api/entry/${DAY}/lock`, { locked: true });
 		const wrong = await c.action('/settings?/pin', { current: '999999', pin: '135790', confirm: '135790' });
 		assert.equal(wrong.data?.error, 'error.wrongPin');
@@ -207,14 +207,14 @@ describe('Sperren mit PIN', () => {
 		assert.equal(r.type, 'success');
 		assert.match(await server.waitForOutput(/PIN changed/), /PIN changed/);
 		await c.api('/api/pin', undefined, 'DELETE');
-		assert.equal((await c.api('/api/pin', { pin: PIN })).status, 403, 'alte PIN gilt nicht mehr');
+		assert.equal((await c.api('/api/pin', { pin: PIN })).status, 403, 'the old PIN is no longer valid');
 		assert.equal((await c.api('/api/pin', { pin: '135790' })).status, 200);
 		assert.equal((await readable()).get(DAY)?.sections.daily.experienced, 'Ein Tag am See, korrigiert');
 	});
 });
 
-describe('Löschen', () => {
-	test('Gesperrter Eintrag nur mit PIN, Versionen werden mitgelöscht', async () => {
+describe('Deleting', () => {
+	test('a locked entry only with the PIN, versions are deleted too', async () => {
 		const id = row(DAY)!.id;
 		await c.api('/api/pin', undefined, 'DELETE');
 		assert.equal((await c.api(`/api/entry/${DAY}`, undefined, 'DELETE')).status, 423);
@@ -224,7 +224,7 @@ describe('Löschen', () => {
 		assert.equal((db.prepare('SELECT COUNT(*) AS n FROM entry_revisions WHERE entry_id = ?').get(id) as { n: number }).n, 0);
 	});
 
-	test('Nicht vorhandenen Eintrag löschen ist kein Fehler', async () => {
+	test('deleting a missing entry is not an error', async () => {
 		assert.equal((await c.api('/api/entry/2026-01-01', undefined, 'DELETE')).status, 200);
 	});
 });

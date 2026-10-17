@@ -1,29 +1,29 @@
 /**
- * Statistik: Seite, Zeitraum und gesperrte Einträge (Berechnung im Detail: tests/stats.test.ts).
+ * Statistics: page, period and locked entries (the calculation in detail: tests/stats.test.ts).
  */
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Client, PIN, setupJournal, startServer, zurichToday, type TestServer } from './helpers.ts';
 
 const TOKEN = 'w'.repeat(40);
-/** Text ohne Kommentare und Tags. */
+/** Text without comments and tags. */
 const strip = (html: string) => html.replace(/<!--[\s\S]*?-->|<[^>]+>/g, '').trim();
 
-/** Wert unter einer Beschriftung auf dem Dashboard (`<dt>` → `<dd>`). */
+/** Value below a label on the dashboard (`<dt>` → `<dd>`). */
 function dashboardValue(html: string, label: string) {
 	const i = html.search(new RegExp(`<dt class="eyebrow[^"]*">${label}</dt>`));
 	assert.ok(i >= 0, `Dashboard: ${label} fehlt`);
 	return strip(html.slice(i).match(/<dd[^>]*>([\s\S]*?)<\/dd>/)![1]);
 }
 
-/** Text einer Kachel in der Statistik, z. B. „4.0“ unter „Ø Stimmung“. */
+/** Text of a tile in the statistics, e.g. „4.0“ below „Ø Stimmung“. */
 function tile(html: string, label: string) {
 	const i = html.search(new RegExp(`class="eyebrow[^"]*">${label}</span>`));
 	assert.ok(i >= 0, `Kachel ${label} fehlt`);
 	return strip(html.slice(i).match(/<strong[^>]*>([\s\S]*?)<\/strong>/)![1]);
 }
 
-describe('Statistik', () => {
+describe('Statistics', () => {
 	let server: TestServer;
 	let c: Client;
 	before(async () => {
@@ -32,19 +32,19 @@ describe('Statistik', () => {
 	});
 	after(() => server.stop());
 
-	test('leeres Tagebuch', async () => {
+	test('empty journal', async () => {
 		const res = await c.get('/stats');
 		assert.equal(res.status, 200);
 		assert.match(await res.text(), /Noch keine Einträge/);
 	});
 
-	test('in der Navigation, Einstellungen weiterhin erreichbar', async () => {
+	test('in the navigation, settings still reachable', async () => {
 		const html = await (await c.get('/')).text();
 		assert.match(html, /href="\/stats"/);
 		assert.match(html, /href="\/settings"/);
 	});
 
-	test('Kennzahlen; gesperrte Einträge zählen ohne PIN nur bei Anzahl, Serien und Rückblicken', async () => {
+	test('figures; without PIN locked entries only count for number, streaks and reviews', async () => {
 		const save = (date: string, content: unknown) => c.api(`/api/entry/${date}`, { content });
 		await save(zurichToday(-2), { mood: 2, sections: { feelings: { energy: 3, emotions: ['joy', 'stressed'] } }, free: '' });
 		await save(zurichToday(-1), { mood: 4, sections: {}, free: 'gestern' });
@@ -58,7 +58,7 @@ describe('Statistik', () => {
 		assert.match(tile(html, 'Ø Stimmung'), /^4[.,]0/);
 		assert.equal(tile(html, 'Ø Energie'), '–');
 		assert.match(html, /1 gesperrter Eintrag zählt nur bei Serien und Anzahl mit/);
-		assert.doesNotMatch(html, /Freude/, 'Gefühle des gesperrten Eintrags bleiben verborgen');
+		assert.doesNotMatch(html, /Freude/, 'feelings of the locked entry stay hidden');
 
 		await c.api('/api/pin', { pin: PIN });
 		html = await (await c.get('/stats')).text();
@@ -70,20 +70,20 @@ describe('Statistik', () => {
 		await c.api('/api/pin', undefined, 'DELETE');
 	});
 
-	test('Serie und Anzahl: Widget-API, Dashboard und Statistik zeigen dieselben Werte', async () => {
+	test('streak and count: widget API, dashboard and statistics show the same values', async () => {
 		const widget = await (await new Client(server.url).request('/api/widget', { headers: { authorization: `Bearer ${TOKEN}` } })).json();
 		assert.deepEqual([widget.entries, widget.streak], [2, 2]);
 		const dashboard = await (await c.get('/')).text();
 		assert.equal(dashboardValue(dashboard, 'Aktuelle Serie'), '2 Tage');
 		assert.equal(dashboardValue(dashboard, 'Einträge'), '2');
-		assert.match(dashboardValue(dashboard, 'Ø Stimmung 30 Tage'), /^4[.,]0/, 'gesperrter Tag ohne PIN nicht in der Stimmung');
+		assert.match(dashboardValue(dashboard, 'Ø Stimmung 30 Tage'), /^4[.,]0/, 'a locked day without PIN is not in the mood');
 		assert.match(dashboard, /href="\/stats"/);
-		assert.doesNotMatch(dashboard, /Stimmungsverlauf/, 'Verlauf nur noch in der Statistik');
+		assert.doesNotMatch(dashboard, /Stimmungsverlauf/, 'mood chart only in the statistics');
 		const stats = await (await c.get('/stats')).text();
 		assert.equal(tile(stats, 'Aktuelle Serie'), '2 Tage');
 	});
 
-	test('Stimmungsverlauf in der Statistik, nicht mehr bei den Einsichten; Monate neuester zuerst', async () => {
+	test('mood chart in the statistics, no longer in the insights; months newest first', async () => {
 		const html = await (await c.get('/stats?period=all')).text();
 		assert.match(html, /<h2[^>]*>Stimmungsverlauf<\/h2>/);
 		const labels = [...html.matchAll(/class="month-label[^"]*">([^<]+)</g)].map((m) => m[1]);
@@ -93,12 +93,12 @@ describe('Statistik', () => {
 		assert.doesNotMatch(await (await c.get('/insights')).text(), /Stimmungsverlauf/);
 	});
 
-	test('Zeitraum aus der Adresse, unbekannte Werte → 12 Monate', async () => {
+	test('period from the address, unknown values → 12 months', async () => {
 		assert.match(await (await c.get('/stats?period=30')).text(), /aria-current="page"[^>]*>\s*30 Tage/);
 		assert.match(await (await c.get('/stats?period=x')).text(), /aria-current="page"[^>]*>\s*12 Monate/);
 	});
 
-	test('ohne Anmeldung zur Anmeldung umgeleitet', async () => {
+	test('redirected to the sign-in without signing in', async () => {
 		const res = await new Client(server.url).get('/stats');
 		assert.equal(res.status, 303);
 		assert.equal(res.headers.get('location'), '/login');

@@ -1,5 +1,5 @@
 /**
- * Bereich 3: Alle Einträge (Kalender) und Suche.
+ * Area 3: all entries (calendar) and search.
  */
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -26,7 +26,7 @@ before(async () => {
 	await save('2026-03-05', { mood: null, sections: {}, free: 'Geheimnis am See' });
 	await save('2026-03-09', { mood: 3, sections: {}, free: 'Später geleert, See' });
 	await save('2026-03-09', { mood: null, sections: {}, free: '' });
-	// 5. März sperren
+	// lock 5 March
 	await c.action('/settings?/pin', { pin: PIN, confirm: PIN });
 	await c.api('/api/entry/2026-03-05/lock', { locked: true });
 	await c.api('/api/pin', undefined, 'DELETE');
@@ -35,20 +35,20 @@ after(async () => {
 	await server.stop();
 });
 
-describe('Alle Einträge', () => {
-	test('Monate und Tage mit Stimmung, geleerte Einträge fehlen', async () => {
+describe('All entries', () => {
+	test('months and days with mood, cleared entries are missing', async () => {
 		const res = await c.get('/archive');
 		assert.equal(res.status, 200);
 		const html = await res.text();
 		assert.match(html, /href="\/entry\/2026-02-27" class="day has m5 svelte-\w+"/);
 		assert.match(html, /href="\/entry\/2026-03-02" class="day has m2 svelte-\w+"/);
 		assert.match(html, /href="\/entry\/2026-03-05" class="day has m0 svelte-\w+"/);
-		assert.match(html, /href="\/entry\/2026-03-09" class="day svelte-\w+">9</, 'geleerter Tag erscheint wie ein leerer');
-		assert.match(html, /2 Einträge/, 'März zählt nur zwei Einträge');
-		assert.match(html, /Spaziergang an der Straße zum See/, 'Auszug im Titel');
+		assert.match(html, /href="\/entry\/2026-03-09" class="day svelte-\w+">9</, 'a cleared day looks like an empty one');
+		assert.match(html, /2 Einträge/, 'March counts only two entries');
+		assert.match(html, /Spaziergang an der Straße zum See/, 'excerpt in the title');
 	});
 
-	test('Alle Monate vom laufenden bis zum ersten Eintrag, auch ohne Eintrag', async () => {
+	test('all months from the current one to the first entry, also without an entry', async () => {
 		const html = await (await c.get('/archive')).text();
 		const titles = [...html.matchAll(/<h2 class="svelte-\w+">([^<]+)<\/h2>/g)].map((m) => m[1]);
 		const fmt = new Intl.DateTimeFormat('de-CH', { month: 'long', year: 'numeric', timeZone: 'UTC' });
@@ -62,7 +62,7 @@ describe('Alle Einträge', () => {
 		assert.match(html, /0 Einträge/);
 	});
 
-	test('Gesperrter Eintrag ohne PIN: kein Auszug, keine Stimmung', async () => {
+	test('locked entry without PIN: no excerpt, no mood', async () => {
 		const html = await (await c.get('/archive')).text();
 		assert.doesNotMatch(html, /Geheimnis/);
 		await c.api('/api/pin', { pin: PIN });
@@ -70,7 +70,7 @@ describe('Alle Einträge', () => {
 		await c.api('/api/pin', undefined, 'DELETE');
 	});
 
-	test('Daten für den Filter: Gefühle und Rückblicke, gesperrte Einträge ohne PIN nicht lesbar', async () => {
+	test('data for the filter: feelings and reviews, locked entries not readable without PIN', async () => {
 		const html = await (await c.get('/archive')).text();
 		assert.match(html, /date:"2026-03-02",mood:2,locked:false,readable:true,kinds:\[[^\]]*"feelings"[^\]]*\],emotions:\["joy"\]/);
 		assert.match(html, /date:"2026-03-05",mood:null,locked:true,readable:false,kinds:\[[^\]]*\],emotions:\[\]/);
@@ -79,21 +79,21 @@ describe('Alle Einträge', () => {
 		await c.api('/api/pin', undefined, 'DELETE');
 	});
 
-	test('Ohne Anmeldung zur Anmeldung umgeleitet', async () => {
+	test('redirected to the sign-in without signing in', async () => {
 		const res = await new Client(server.url).get('/archive');
 		assert.equal(res.status, 303);
 		assert.equal(res.headers.get('location'), '/login');
 	});
 });
 
-describe('Suche', () => {
-	test('Findet unabhängig von Gross-/Kleinschreibung, Akzenten und ß', async () => {
+describe('Search', () => {
+	test('finds regardless of case, accents and ß', async () => {
 		assert.deepEqual(dates((await search('CAFE')).results), ['2026-02-27']);
 		assert.deepEqual(dates((await search('strasse')).results), ['2026-02-27']);
 		assert.deepEqual(dates((await search('bucher')).results), ['2026-03-02']);
 	});
 
-	test('Alle Begriffe müssen vorkommen; Auszug mit Markierung und Feld', async () => {
+	test('all terms have to occur; excerpt with highlight and field', async () => {
 		const { results } = await search('see kaffee');
 		assert.equal(results.length, 1);
 		const [r] = results;
@@ -102,7 +102,7 @@ describe('Suche', () => {
 		assert.deepEqual(r.parts.filter((p) => p.hit).map((p) => p.text), ['Kaffee']);
 	});
 
-	test('Gefühle in der Sprache der App', async () => {
+	test('feelings in the language of the app', async () => {
 		assert.deepEqual(dates((await search('freude')).results), ['2026-03-02']);
 		const general = (language: string) =>
 			c.action('/settings?/general', { name: 'Testperson', language, theme: 'system', sessionMinutes: '30', welcome: 'on' });
@@ -112,11 +112,11 @@ describe('Suche', () => {
 		assert.deepEqual(dates(en.results), ['2026-03-02']);
 	});
 
-	test('Geleerte Einträge werden nicht gefunden', async () => {
+	test('cleared entries are not found', async () => {
 		assert.deepEqual(dates((await search('geleert')).results), []);
 	});
 
-	test('Gesperrte Einträge nur mit offener PIN', async () => {
+	test('locked entries only with an open PIN', async () => {
 		const closed = await search('see');
 		assert.deepEqual(dates(closed.results), ['2026-02-27']);
 		assert.equal(closed.skippedLocked, 1);
@@ -128,12 +128,12 @@ describe('Suche', () => {
 		await c.api('/api/pin', undefined, 'DELETE');
 	});
 
-	test('Leere oder unsinnige Anfragen', async () => {
+	test('empty or nonsense requests', async () => {
 		for (const q of ['', '   ', undefined, null]) {
 			const r = await search(q);
 			assert.equal(r.status, 200);
 			assert.deepEqual(r.results, []);
-			assert.equal(r.skippedLocked, 0, 'ohne Begriff wird nichts gezählt');
+			assert.equal(r.skippedLocked, 0, 'without a term nothing is counted');
 		}
 		assert.equal((await search({ x: 1 })).status, 200);
 		assert.equal((await search('x'.repeat(10_000))).status, 200);
@@ -141,12 +141,12 @@ describe('Suche', () => {
 		assert.equal(bad.status, 400);
 	});
 
-	test('Nur per POST und nur angemeldet', async () => {
+	test('only via POST and only signed in', async () => {
 		assert.equal((await c.get('/api/search?query=see')).status, 405);
 		assert.equal((await search('see', new Client(server.url))).status, 401);
 	});
 
-	test('Suchbegriff landet nicht im Log', async () => {
+	test('the search term does not end up in the log', async () => {
 		await search('Unverwechselbar');
 		assert.doesNotMatch(server.output(), /Unverwechselbar/i);
 	});
