@@ -11,15 +11,18 @@ const dictionaries: Record<Lang, Record<string, string>> = { de, en, it };
 
 /**
  * Spelling variants: only the texts that differ from the language file (de.ts: Germany, en.ts: USA).
- * Switzerland and Liechtenstein write "ss" instead of "ß"; English outside the USA uses British spelling.
+ * Switzerland and Liechtenstein write "ss" instead of "ß"; English uses British spelling except in US_SPELLING.
  */
 const VARIANTS: Record<string, Record<string, string>> = { 'de-CH': deCH, 'en-GB': enGB };
+
+/** English with American spelling: the USA and its territories, the Philippines, Canada ("analyze", "customize"). */
+const US_SPELLING = ['US', 'AS', 'GU', 'MP', 'PR', 'UM', 'VI', 'PH', 'CA'];
 
 function variantOf(tag: string): Record<string, string> | null {
 	const lang = langOf(tag);
 	const region = regionOf(tag);
 	if (lang === 'de' && (region === 'CH' || region === 'LI')) return VARIANTS['de-CH'];
-	if (lang === 'en' && region && region !== 'US') return VARIANTS['en-GB'];
+	if (lang === 'en' && region && !US_SPELLING.includes(region)) return VARIANTS['en-GB'];
 	return null;
 }
 

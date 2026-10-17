@@ -11,10 +11,11 @@ The topmost version without a date is still in development.
 - Italian as a third language (*Settings → Language*, and automatically for browsers set to Italian). The
   instructions in the file for an AI chat stay in English.
 - *Settings → Region*: the country decides the format of dates and numbers and the spelling (e.g. German in
-  Switzerland: “3.5”, “ss”; German in Germany: “3,5”, “ß”; English outside the USA: British spelling). “Automatic”
-  takes the country from the browser language or, if that doesn't tell it, from the device's time zone; a preview
-  shows the format. Without a known country the defaults are German (Germany), English (US) and Italian (Italy).
-  Push messages and the backup converter use the region of your last login.
+  Switzerland: “3.5”, “ss”; German in Germany: “3,5”, “ß”; English: British spelling except in the USA, Canada and
+  the Philippines). “Automatic” takes the country from the device's time zone (phones set it from their location)
+  or else from the browser language; a preview shows the format. All countries with a format of their own are available (German: 7,
+  English: 122, Italian: 4). Without a known country the defaults are German (Germany), English (US) and Italian
+  (Italy). Push messages and the backup converter use the region of your last login.
 - Filter in “All entries” by the energy of the weekly review (empty … full of energy). Like the feelings, it only
   matches days with a weekly review.
 

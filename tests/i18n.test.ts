@@ -80,12 +80,13 @@ test('spelling variants only change existing texts and keep the placeholders', (
 	}
 });
 
-test('English: US spelling, British for the other English-speaking countries', () => {
+test('English: US spelling in the USA, its territories, the Philippines and Canada, British elsewhere', () => {
 	assert.equal(translate('en', 'insights.run'), 'Analyze');
 	assert.equal(translate('en-US', 'insights.run'), 'Analyze');
 	assert.equal(translate('en-GB', 'insights.run'), 'Analyse');
 	assert.equal(translate('en-CH', 'insights.run'), 'Analyse');
 	assert.equal(translate('en-AU', 'insights.run'), 'Analyse');
+	for (const tag of ['en-CA', 'en-PR', 'en-GU', 'en-PH']) assert.equal(translate(tag, 'insights.run'), 'Analyze', tag);
 });
 
 test('welcome card: all texts exist', () => {

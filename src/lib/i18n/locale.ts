@@ -52,13 +52,19 @@ function browserLocales(acceptLanguage: string | null): string[] {
 }
 
 /**
- * Country of the device: 1. country of a browser language matching the app language (de-CH for German),
- * 2. country of the device time zone (Europe/Zurich → CH), 3. country of another browser language (en-CH).
+ * Country of the device, the first one with a format for the app language:
+ * 1. country of the device time zone (Europe/Zurich → CH) – phones set it from their location, while e.g. Safari
+ *    on an iPhone in Switzerland often reports "de-DE" as browser language,
+ * 2. country of a browser language matching the app language (de-AT for German),
+ * 3. country of another browser language (fr-CH → CH).
+ * If none of them has a format for the language, the first known country (the default format applies then).
  */
 export function detectCountry(acceptLanguage: string | null, lang: Lang, timeZone?: string | null): string | null {
 	const tags = browserLocales(acceptLanguage);
-	const matching = tags.find((tag) => tag.split('-')[0].toLowerCase() === lang);
-	return (matching && regionOf(matching)) || countryOfTimeZone(timeZone) || (tags[0] && regionOf(tags[0])) || null;
+	const matching = tags.filter((tag) => tag.split('-')[0].toLowerCase() === lang);
+	const others = tags.filter((tag) => !matching.includes(tag));
+	const candidates = [countryOfTimeZone(timeZone), ...[...matching, ...others].map(regionOf)].filter((c): c is string => !!c);
+	return candidates.find((c) => localeFor(lang, c) === `${lang}-${c}`) ?? candidates[0] ?? null;
 }
 
 /** Locale for the app language and the country of the device (see detectCountry). */

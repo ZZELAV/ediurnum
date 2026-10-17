@@ -20,12 +20,15 @@ test('country from a browser language matching the app language', () => {
 	assert.equal(pickLocale('en-GB,en;q=0.9', 'en'), 'en-GB');
 });
 
-test('otherwise the country of the device time zone', () => {
+test('the country of the device time zone comes first, if the language has a format for it', () => {
 	assert.equal(pickLocale('en-US,en;q=0.9', 'de', 'Europe/Zurich'), 'de-CH', 'browser in English, app in German, device in Switzerland');
 	assert.equal(pickLocale(null, 'it', 'Europe/Zurich'), 'it-CH');
 	assert.equal(pickLocale(null, 'en', 'Europe/Zurich'), 'en-CH');
 	assert.equal(pickLocale(null, 'de', 'Europe/Vienna'), 'de-AT');
-	assert.equal(pickLocale('de-DE', 'de', 'Europe/Zurich'), 'de-DE', 'the browser language comes first');
+	assert.equal(pickLocale('de-DE', 'de', 'Europe/Zurich'), 'de-CH', 'Safari on an iPhone in Switzerland reports de-DE');
+	assert.equal(pickLocale('de-AT', 'de', 'America/New_York'), 'de-AT', 'no German format for the USA: the browser language');
+	assert.equal(pickLocale('en-US', 'en', 'Asia/Tokyo'), 'en-JP');
+	assert.equal(pickLocale('en-US', 'en', 'Asia/Calcutta'), 'en-IN', 'old name of a time zone');
 });
 
 test('otherwise the country of another browser language, if the language is used there', () => {

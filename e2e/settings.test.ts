@@ -85,16 +85,16 @@ describe('General', () => {
 		assert.match(await html('it-IT,it;q=0.9'), /<html lang="it-IT"/);
 	});
 
-	test('the country of the device: browser language, then time zone; spelling of the country', async () => {
+	test('the country of the device: time zone, then browser language', async () => {
 		const client = new Client(server.url);
 		client.cookies.set('lang', 'de');
 		const html = async (lang: string) => (await client.get('/login', { 'accept-language': lang })).text();
 		assert.match(await html('en-US'), /<html lang="de-DE"/, 'no country for German: default');
 		client.cookies.set('tz', encodeURIComponent('Europe/Zurich'));
 		assert.match(await html('en-US'), /<html lang="de-CH"/, 'country from the time zone');
-		assert.match(await html('de-AT'), /<html lang="de-AT"/, 'the browser language comes first');
+		assert.match(await html('de-AT'), /<html lang="de-CH"/, 'the time zone comes first');
 		client.cookies.set('lang', 'en');
-		assert.match(await html('en-US'), /<html lang="en-US"/);
+		assert.match(await html('en-US'), /<html lang="en-CH"/, 'English in Switzerland');
 	});
 
 	test('region: chosen country instead of the device, also on the login page; invalid ones become "auto"', async () => {
