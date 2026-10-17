@@ -8,8 +8,13 @@ The topmost version without a date is still in development.
 
 ### Added
 
-- Italian as a third language (*Settings → Language*, and automatically for browsers set to Italian). The texts are
-  not translated yet and appear in English; dates and numbers already use the Italian format.
+- Italian as a third language (*Settings → Language*, and automatically for browsers set to Italian). The
+  instructions in the file for an AI chat stay in English.
+- *Settings → Region*: the country decides the format of dates and numbers and the spelling (e.g. German in
+  Switzerland: “3.5”, “ss”; German in Germany: “3,5”, “ß”; English outside the USA: British spelling). “Automatic”
+  takes the country from the browser language or, if that doesn't tell it, from the device's time zone; a preview
+  shows the format. Without a known country the defaults are German (Germany), English (US) and Italian (Italy).
+  Push messages and the backup converter use the region of your last login.
 - Filter in “All entries” by the energy of the weekly review (empty … full of energy). Like the feelings, it only
   matches days with a weekly review.
 
@@ -23,9 +28,15 @@ The topmost version without a date is still in development.
   automatically on the first start – nothing changes in the app, and locked entries stay locked.
 - Backups use format version 3. Older backups can still be restored; backups from 1.1.0 can't be restored in 1.0.0
   or older, so update all installations before moving a backup between them.
-
-- English is the default language: browsers set to a language other than German now get the app in English
+- “Lock after leaving the app” is now called “Lock automatically”; its explanation opens from the “i” next to it.
+- English is the default language: browsers set to a language the app doesn't offer now get the app in English
   (before: German unless the browser was set to English). Existing journals keep their language.
+
+### Removed
+
+- Locking after a number of minutes without activity (the former setting “Lock automatically (in minutes)”). The
+  journal still locks after leaving the app (if not set to “never”), when you lock it yourself and after 12 hours
+  at the latest.
 
 ### Fixed
 

@@ -63,7 +63,7 @@ export const actions: Actions = {
 					},
 					custom: loadReminders().custom
 				},
-				locals.lang
+				locals.locale
 			)
 		);
 		return { section: 'reviews', success: 'reminders.reviewsSaved' };

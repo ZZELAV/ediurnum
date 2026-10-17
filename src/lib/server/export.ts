@@ -1,6 +1,6 @@
 import { SECTIONS } from '#lib/templates.ts';
-import { locale, translate } from '#lib/i18n/index.ts';
-import type { Entry, Lang } from '#lib/types.ts';
+import { translate } from '#lib/i18n/index.ts';
+import type { Entry } from '#lib/types.ts';
 
 /**
  * Readable export (plain text!): one prepared document per entry (`entryDocs`), from which Markdown and PDF are made.
@@ -23,9 +23,9 @@ export interface EntryDoc {
 	free: string;
 }
 
-export function entryDocs(entries: Entry[], lang: Lang): EntryDoc[] {
-	const t = (key: string) => translate(lang, key);
-	const dateFmt = new Intl.DateTimeFormat(locale(lang), {
+export function entryDocs(entries: Entry[], loc: string): EntryDoc[] {
+	const t = (key: string) => translate(loc, key);
+	const dateFmt = new Intl.DateTimeFormat(loc, {
 		weekday: 'long',
 		day: 'numeric',
 		month: 'long',
@@ -68,9 +68,9 @@ export function entryDocs(entries: Entry[], lang: Lang): EntryDoc[] {
 export const plain = (text: string) => text.trim().replace(/^(\s*)#/gm, '$1\\#');
 
 /** Entries as Markdown (days as `###`) – for the AI file and the readable export. */
-export function formatEntries(entries: Entry[], lang: Lang): string {
-	const t = (key: string) => translate(lang, key);
-	return entryDocs(entries, lang)
+export function formatEntries(entries: Entry[], loc: string): string {
+	const t = (key: string) => translate(loc, key);
+	return entryDocs(entries, loc)
 		.map((d) => {
 			const lines = [`### ${d.heading}`];
 			if (d.mood) lines.push(`${t('entry.mood')}: ${d.mood}/5 (${t(`mood.${d.mood}`)})`);
@@ -88,8 +88,8 @@ export function formatEntries(entries: Entry[], lang: Lang): string {
 		.join('\n\n');
 }
 
-export function exportMarkdown(entries: Entry[], lang: Lang): string {
-	return `# ediurnum – ${translate(lang, 'export.title')}\n\n${formatEntries(entries, lang).replace(/^### /gm, '## ')}\n`;
+export function exportMarkdown(entries: Entry[], loc: string): string {
+	return `# ediurnum – ${translate(loc, 'export.title')}\n\n${formatEntries(entries, loc).replace(/^### /gm, '## ')}\n`;
 }
 
 export function exportJson(entries: Entry[], skippedLocked: number): string {

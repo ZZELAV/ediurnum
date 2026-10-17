@@ -38,7 +38,7 @@ export const actions: Actions = {
 		await setPassword(dek, password);
 		destroyAllSessions();
 		log.info('password reset with recovery key');
-		startSession(event.cookies, dek);
+		startSession(event, dek);
 		redirect(303, '/');
 	}
 };

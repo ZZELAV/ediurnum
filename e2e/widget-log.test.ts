@@ -1,6 +1,6 @@
 /**
  * Area 7: dashboard widget, Docker log, session cookie.
- * (Locking after leaving the app: e2e/session.test.ts; after inactivity it takes at least 5 minutes.)
+ * (Locking after leaving the app: e2e/session.test.ts.)
  */
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';

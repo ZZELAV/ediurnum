@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { complete } from './providers.ts';
 import { formatEntries, plain } from '../export.ts';
-import { translate } from '#lib/i18n/index.ts';
+import { langOf, translate } from '#lib/i18n/index.ts';
 import { isEmptyProfile, profileMarkdown, type Profile } from '#lib/profile.ts';
-import type { AiAgent, Analysis, Entry, Lang } from '#lib/types.ts';
+import type { AiAgent, Analysis, Entry } from '#lib/types.ts';
 
 /** The instructions to the AI exist in German and English; other languages get the English ones. */
 const TONES: Record<AiAgent['tone'], Record<'de' | 'en', string>> = {
@@ -33,8 +33,8 @@ export const MAX_INSTRUCTIONS = 8000;
  * Default instructions to the AI: role, rules and structure of the answer. The writer can adapt this part
  * in the insights; buildSystemPrompt adds the tone and the focus points.
  */
-export function defaultInstructions(lang: Lang): string {
-	if (lang !== 'de') {
+export function defaultInstructions(loc: string): string {
+	if (langOf(loc) !== 'de') {
 		return [
 			'You are a reflective companion for a personal journal called "ediurnum".',
 			'You receive journal entries (daily gratitude and experiences, weekly feelings, monthly learning and growth) and help the writer understand themselves better and grow.',
@@ -57,10 +57,10 @@ export function defaultInstructions(lang: Lang): string {
  * With `chat` the focus points get their own heading, so an answer copied from the chat
  * reliably contains them (see parseResponse).
  */
-export function buildSystemPrompt(agent: PromptOptions, lang: Lang, format: 'api' | 'chat' = 'api'): string {
+export function buildSystemPrompt(agent: PromptOptions, loc: string, format: 'api' | 'chat' = 'api'): string {
 	const n = Math.min(7, Math.max(1, agent.maxFocusPoints || 4));
-	const instructions = agent.instructions?.trim() || defaultInstructions(lang);
-	if (lang !== 'de') {
+	const instructions = agent.instructions?.trim() || defaultInstructions(loc);
+	if (langOf(loc) !== 'de') {
 		return [
 			instructions,
 			TONES[agent.tone]?.en ?? TONES.balanced.en,
@@ -94,17 +94,17 @@ export function buildSystemPrompt(agent: PromptOptions, lang: Lang, format: 'api
 		.join('\n\n');
 }
 
-export function buildUserPrompt(entries: Entry[], lang: Lang, from: string, to: string, question: string): string {
+export function buildUserPrompt(entries: Entry[], loc: string, from: string, to: string, question: string): string {
 	const intro =
-		lang !== 'de'
+		langOf(loc) !== 'de'
 			? `Here are my journal entries from ${from} to ${to}.`
 			: `Hier sind meine Tagebucheinträge vom ${from} bis ${to}.`;
 	const q = question.trim()
-		? lang !== 'de'
+		? langOf(loc) !== 'de'
 			? `\n\nPlease pay special attention to this: ${plain(question)}`
 			: `\n\nBitte achte besonders auf Folgendes: ${plain(question)}`
 		: '';
-	return `${intro}${q}\n\n${formatEntries(entries, lang)}`;
+	return `${intro}${q}\n\n${formatEntries(entries, loc)}`;
 }
 
 /** List items without bullets and bold text; duplicates and empty ones are dropped, at most seven. */
@@ -147,24 +147,25 @@ export function parseResponse(text: string): { body: string; focusPoints: string
 /** Markdown file for any AI chat: instructions, self-assessment and entries in one document. */
 export function buildChatMarkdown(params: {
 	options: PromptOptions;
-	lang: Lang;
+	/** Locale (e.g. de-CH) or language */
+	locale: string;
 	profile?: { profile: Profile; name: string } | null;
 	entries: Entry[];
 	from: string;
 	to: string;
 	question: string;
 }): string {
-	const { options, lang, profile, entries, from, to, question } = params;
-	const en = lang !== 'de';
+	const { options, locale: loc, profile, entries, from, to, question } = params;
+	const en = langOf(loc) !== 'de';
 	const about =
 		profile && (!isEmptyProfile(profile.profile) || profile.name.trim())
-			? profileMarkdown(profile.profile, profile.name, (key) => translate(lang, key))
+			? profileMarkdown(profile.profile, profile.name, (key) => translate(loc, key))
 			: '';
 	return [
 		en ? '# ediurnum – journal review' : '# ediurnum – Tagebuch-Auswertung',
 		en ? '## Your task' : '## Dein Auftrag',
 		// expected answer headings as a list, so they don't disturb the structure of the file
-		buildSystemPrompt(options, lang, 'chat').replace(/^## (.+)$/gm, '- `## $1`'),
+		buildSystemPrompt(options, loc, 'chat').replace(/^## (.+)$/gm, '- `## $1`'),
 		...(about
 			? [
 					en ? '## About me (self-assessment)' : '## Über mich (Selbsteinschätzung)',
@@ -175,20 +176,21 @@ export function buildChatMarkdown(params: {
 				]
 			: []),
 		en ? '## My journal entries' : '## Meine Tagebucheinträge',
-		buildUserPrompt(entries, lang, from, to, question)
+		buildUserPrompt(entries, loc, from, to, question)
 	].join('\n\n');
 }
 
 export async function runAnalysis(params: {
 	agent: AiAgent;
-	lang: Lang;
+	/** Locale (e.g. de-CH) or language */
+	locale: string;
 	entries: Entry[];
 	from: string;
 	to: string;
 	question: string;
 }): Promise<Analysis> {
-	const { agent, lang, entries, from, to, question } = params;
-	const text = await complete(agent, buildSystemPrompt(agent, lang), buildUserPrompt(entries, lang, from, to, question));
+	const { agent, locale: loc, entries, from, to, question } = params;
+	const text = await complete(agent, buildSystemPrompt(agent, loc), buildUserPrompt(entries, loc, from, to, question));
 	const { body, focusPoints } = parseResponse(text);
 	return {
 		id: randomUUID(),

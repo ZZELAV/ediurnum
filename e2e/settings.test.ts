@@ -24,7 +24,7 @@ async function login(password = PASSWORD) {
 }
 
 const general = (fields: Record<string, string>) =>
-	c.action('/settings?/general', { name: 'Testperson', language: 'de', theme: 'system', sessionMinutes: '30', welcome: 'on', leaveMinutes: '1', ...fields });
+	c.action('/settings?/general', { name: 'Testperson', language: 'de', theme: 'system', welcome: 'on', leaveMinutes: '1', ...fields });
 
 /** Settings as the page loads them */
 async function settings() {
@@ -38,8 +38,8 @@ async function settings() {
 }
 
 describe('General', () => {
-	test('name, language, theme, times, focus mode, welcome card', async () => {
-		const r = await general({ name: '  Vale  ', language: 'en', theme: 'dark', sessionMinutes: '45', focusMode: 'on', welcome: '', leaveMinutes: '5' });
+	test('name, language, theme, locking, focus mode, welcome card', async () => {
+		const r = await general({ name: '  Vale  ', language: 'en', theme: 'dark', focusMode: 'on', welcome: '', leaveMinutes: '5' });
 		assert.equal(r.type, 'success');
 		assert.match(c.lastSetCookie.join(';'), /lang=en/);
 		assert.match(c.lastSetCookie.join(';'), /theme=dark/);
@@ -47,23 +47,19 @@ describe('General', () => {
 		assert.equal(s.name, 'Vale');
 		assert.equal(s.language, 'en');
 		assert.equal(s.theme, 'dark');
-		assert.equal(s.sessionMinutes, 45);
+		assert.equal(s.sessionMinutes, undefined, 'no longer a setting');
 		assert.equal(s.focusMode, true);
 		assert.equal(s.welcomeHidden, true);
 		assert.equal(s.leaveMinutes, 5);
-		assert.match(await (await c.get('/settings')).text(), /<html lang="en"/);
+		assert.match(await (await c.get('/settings')).text(), /<html lang="en-CH"/, 'English with the country of the browser (de-CH)');
 	});
 
 	test('limits and invalid values', async () => {
-		await general({ sessionMinutes: '1', theme: 'pink', language: 'fr', name: 'x'.repeat(200) });
-		let s = await settings();
-		assert.equal(s.sessionMinutes, 5);
+		await general({ theme: 'pink', language: 'fr', name: 'x'.repeat(200) });
+		const s = await settings();
 		assert.equal(s.theme, 'dark', 'an unknown theme changes nothing');
 		assert.equal(s.language, 'en', 'an unknown language changes nothing');
 		assert.equal(String(s.name).length, 60);
-		await general({ sessionMinutes: '99999' });
-		s = await settings();
-		assert.equal(s.sessionMinutes, 720);
 		await general({ theme: 'system' });
 		assert.equal((await settings()).name, 'Testperson');
 	});
@@ -73,7 +69,7 @@ describe('General', () => {
 		const { client } = await login();
 		assert.equal(client.cookies.get('theme'), 'dark');
 		await client.action('/logout', {});
-		assert.match(await (await client.get('/login')).text(), /<html lang="de" data-theme="dark"/);
+		assert.match(await (await client.get('/login')).text(), /<html lang="de-CH" data-theme="dark"/);
 		client.cookies.set('theme', 'pink');
 		assert.match(await (await client.get('/login')).text(), /data-theme="system"/, 'an unknown theme follows the system');
 		assert.match(await (await new Client(server.url).get('/login')).text(), /data-theme="system"/, 'without a cookie the system decides');
@@ -82,10 +78,56 @@ describe('General', () => {
 
 	test('without a session the browser language decides, English for unknown languages', async () => {
 		const html = async (lang: string) => (await new Client(server.url).get('/login', { 'accept-language': lang })).text();
-		assert.match(await html('de-CH,de;q=0.9'), /<html lang="de"/);
-		assert.match(await html('en-US,en;q=0.9'), /<html lang="en"/);
-		assert.match(await html('fr-CH,fr;q=0.9,de;q=0.8'), /<html lang="en"/);
-		assert.match(await html('it-CH,it;q=0.9'), /<html lang="it"/);
+		assert.match(await html('de-CH,de;q=0.9'), /<html lang="de-CH"/);
+		assert.match(await html('en-US,en;q=0.9'), /<html lang="en-US"/);
+		assert.match(await html('fr-CH,fr;q=0.9,de;q=0.8'), /<html lang="en-CH"/);
+		assert.match(await html('it-CH,it;q=0.9'), /<html lang="it-CH"/);
+		assert.match(await html('it-IT,it;q=0.9'), /<html lang="it-IT"/);
+	});
+
+	test('the country of the device: browser language, then time zone; spelling of the country', async () => {
+		const client = new Client(server.url);
+		client.cookies.set('lang', 'de');
+		const html = async (lang: string) => (await client.get('/login', { 'accept-language': lang })).text();
+		assert.match(await html('en-US'), /<html lang="de-DE"/, 'no country for German: default');
+		client.cookies.set('tz', encodeURIComponent('Europe/Zurich'));
+		assert.match(await html('en-US'), /<html lang="de-CH"/, 'country from the time zone');
+		assert.match(await html('de-AT'), /<html lang="de-AT"/, 'the browser language comes first');
+		client.cookies.set('lang', 'en');
+		assert.match(await html('en-US'), /<html lang="en-US"/);
+	});
+
+	test('region: chosen country instead of the device, also on the login page; invalid ones become "auto"', async () => {
+		const page = async () => (await c.get('/settings', { 'accept-language': 'de-DE,de;q=0.9' })).text();
+		assert.match(await page(), /<html lang="de-DE"/, 'auto: country of the browser');
+		await general({ region: 'AT' });
+		assert.equal((await settings()).region, 'AT');
+		assert.match(await page(), /<html lang="de-AT"/);
+		assert.equal(c.cookies.get('region'), 'AT');
+		const login = new Client(server.url);
+		for (const [k, v] of c.cookies) if (k !== 'ediurnum_session') login.cookies.set(k, v);
+		assert.match(await (await login.get('/login')).text(), /<html lang="de-AT"/, 'login page from the cookie');
+		await general({ language: 'it', region: 'AT' });
+		assert.equal((await settings()).region, 'auto', 'no Italian format for Austria');
+		await general({ region: 'XX' });
+		assert.equal((await settings()).region, 'auto');
+	});
+
+	test('the locale of the device is remembered at login (push messages, converter)', async () => {
+		const reminderLang = () => {
+			const db = new DatabaseSync(join(server.dataDir, 'ediurnum.db'));
+			const raw = (db.prepare(`SELECT value FROM meta WHERE key = 'reminders'`).get() as { value: string }).value;
+			db.close();
+			return (JSON.parse(raw) as { lang: string }).lang;
+		};
+		const client = new Client(server.url);
+		await client.action('/login', { password: PASSWORD }, { 'accept-language': 'de-DE,de;q=0.9' });
+		assert.equal(reminderLang(), 'de-DE');
+		await client.action('/logout', {});
+		const again = new Client(server.url);
+		await again.action('/login', { password: PASSWORD });
+		assert.equal(reminderLang(), 'de-CH');
+		await again.action('/logout', {});
 	});
 
 	test('settings are stored only encrypted in the database', () => {

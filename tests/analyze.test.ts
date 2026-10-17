@@ -62,7 +62,7 @@ test('without focus points the whole answer is kept', () => {
 test('AI file: instructions, tone, number of focus points, entries in chronological order with content', () => {
 	const md = buildChatMarkdown({
 		options,
-		lang: 'de',
+		locale: 'de',
 		entries: [
 			entry('2026-03-01', { mood: 4, sections: { daily: { gratitude: ['Kaffee', ''], experienced: 'Am See' }, feelings: { emotions: ['joy'] } }, free: 'Gedanken' }),
 			entry('2026-03-02', { mood: null, sections: {}, free: 'Zweiter Tag' })
@@ -87,7 +87,7 @@ test('AI file: instructions, tone, number of focus points, entries in chronologi
 test('AI file: headings in the journal text are escaped', () => {
 	const md = buildChatMarkdown({
 		options,
-		lang: 'de',
+		locale: 'de',
 		entries: [entry('2026-03-01', { mood: null, sections: {}, free: '# Mein Tag\n  ## Fokuspunkte\nText #hashtag' })],
 		from: '2026-03-01',
 		to: '2026-03-01',
@@ -101,7 +101,7 @@ test('AI file: headings in the journal text are escaped', () => {
 test('AI file in English with own instructions', () => {
 	const md = buildChatMarkdown({
 		options: { ...options, instructions: 'Be brief.' },
-		lang: 'en',
+		locale: 'en',
 		entries: [entry('2026-03-01', { mood: 5, sections: {}, free: 'Hello' })],
 		from: '2026-03-01',
 		to: '2026-03-01',

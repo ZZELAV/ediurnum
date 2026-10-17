@@ -56,7 +56,7 @@ export const actions: Actions = {
 				maxFocusPoints: Math.min(7, Math.max(1, Number(form.get('focusCount')) || 4)),
 				instructions: settings.aiInstructions
 			},
-			lang: settings.language,
+			locale: locals.locale,
 			profile: withProfile ? { profile: loadProfile(session.dek), name: settings.name } : null,
 			entries,
 			...range,

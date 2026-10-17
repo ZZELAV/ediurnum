@@ -1,6 +1,6 @@
 import { decryptJson, encryptJson, SETTINGS_AAD as AAD } from './crypto.ts';
 import { getMeta, setMeta } from './db.ts';
-import { DEFAULT_LANG } from '#lib/i18n/index.ts';
+import { AUTO_REGION, DEFAULT_LANG, isLocale, isRegion, langOf, locale } from '#lib/i18n/index.ts';
 import type { AiAgent, PublicAiAgent, Settings, Theme } from '#lib/types.ts';
 
 export function isTheme(value: unknown): value is Theme {
@@ -11,8 +11,9 @@ export function defaultSettings(): Settings {
 	return {
 		name: '',
 		language: DEFAULT_LANG,
+		region: AUTO_REGION,
+		locale: locale(DEFAULT_LANG),
 		theme: 'system',
-		sessionMinutes: 30,
 		leaveMinutes: 1,
 		focusMode: false,
 		welcomeHidden: false,
@@ -26,8 +27,13 @@ export function loadSettings(dek: Buffer): Settings {
 	const raw = getMeta('settings');
 	if (!raw) return defaultSettings();
 	const settings = { ...defaultSettings(), ...decryptJson<Partial<Settings>>(dek, Buffer.from(raw, 'base64'), AAD) };
+	// removed in 1.1.0: locking after inactivity
+	delete (settings as Partial<Settings> & { sessionMinutes?: number }).sessionMinutes;
 	// unknown themes (e.g. a removed one) follow the system again
 	if (!isTheme(settings.theme)) settings.theme = 'system';
+	if (!isRegion(settings.language, settings.region)) settings.region = AUTO_REGION;
+	// settings from before 1.1.0 have no locale yet; it is set at the next login
+	if (!isLocale(settings.locale) || langOf(settings.locale) !== settings.language) settings.locale = locale(settings.language);
 	return settings;
 }
 

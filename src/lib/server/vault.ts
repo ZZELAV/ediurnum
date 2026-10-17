@@ -28,10 +28,9 @@ export interface Session {
 	dek: Buffer;
 	createdAt: number;
 	lastSeen: number;
-	idleMs: number;
 	/** Lock when the app has been left for this long (0 = off) */
 	awayMs: number;
-	/** Since when the app has been left (0 = in the foreground), see #lib/idle */
+	/** Since when the app has been left (0 = in the foreground), see #lib/away */
 	awaySince: number;
 	lockKey: Buffer | null;
 	lockUntil: number;
@@ -106,14 +105,13 @@ export async function setPassword(dek: Buffer, newPassword: string) {
 // Sessions
 // --------------------------------------------------------------------------
 
-export function createSession(dek: Buffer, idleMinutes: number, leaveMinutes = 0): Session {
+export function createSession(dek: Buffer, leaveMinutes = 0): Session {
 	const now = Date.now();
 	const s: Session = {
 		token: randomToken(),
 		dek,
 		createdAt: now,
 		lastSeen: now,
-		idleMs: Math.max(5, idleMinutes) * 60 * 1000,
 		awayMs: Math.max(0, leaveMinutes) * 60 * 1000,
 		awaySince: 0,
 		lockKey: null,
@@ -124,13 +122,13 @@ export function createSession(dek: Buffer, idleMinutes: number, leaveMinutes = 0
 }
 
 /**
- * Ends the session if it has expired (inactivity, maximum duration, app left) and closes an
+ * Ends the session if it has expired (maximum duration, app left) and closes an
  * expired PIN. Doesn't count as activity itself – otherwise the regular clean-up would keep every session open.
  */
 function expire(token: string, s: Session, now: number): boolean {
 	const left = s.awayMs > 0 && s.awaySince > 0 && now - s.awaySince > s.awayMs;
-	if (now - s.lastSeen > s.idleMs || now - s.createdAt > ABSOLUTE_MAX_MS || left) {
-		const reason = now - s.createdAt > ABSOLUTE_MAX_MS ? 'max-duration' : left ? 'left-app' : 'inactivity';
+	if (now - s.createdAt > ABSOLUTE_MAX_MS || left) {
+		const reason = left ? 'left-app' : 'max-duration';
 		log.info('journal closed automatically', { reason });
 		destroySession(token);
 		return true;

@@ -3,7 +3,7 @@ import { endSession, requireSession } from '#lib/server/auth.ts';
 import { markAway } from '#lib/server/vault.ts';
 import { log } from '#lib/server/log.ts';
 
-/** Keeps the session open as long as reading or writing happens in the browser (see #lib/idle). */
+/** The app is in the foreground (again), see #lib/away. */
 export const GET: RequestHandler = (event) => {
 	markAway(requireSession(event), false);
 	return Response.json({ ok: true });
@@ -15,9 +15,9 @@ export const POST: RequestHandler = (event) => {
 	return Response.json({ ok: true });
 };
 
-/** Closes the journal after inactivity in the browser. */
+/** Closes the journal when the app was away for longer than set (noticed by the browser when coming back). */
 export const DELETE: RequestHandler = (event) => {
 	endSession(event.cookies);
-	log.info('journal closed automatically', { reason: 'inactivity' });
+	log.info('journal closed automatically', { reason: 'left-app' });
 	return Response.json({ ok: true });
 };

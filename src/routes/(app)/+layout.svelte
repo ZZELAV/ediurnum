@@ -4,12 +4,12 @@
 	import { page } from '$app/state';
 	import { t } from '#lib/i18n/t.ts';
 	import PinBar from '#lib/components/PinBar.svelte';
-	import { watchIdle } from '#lib/idle.ts';
+	import { watchAway } from '#lib/away.ts';
 
 	let { data, children } = $props();
 
-	// after the set time without activity or after leaving the app the journal also locks itself on the screen.
-	$effect(() => watchIdle(data.sessionMinutes, data.leaveMinutes));
+	// after leaving the app for the set time the journal also locks itself on the screen.
+	$effect(() => watchAway(data.leaveMinutes));
 
 	// register the service worker (only for push, without a cache) early – this makes ediurnum
 	// installable in browsers that require a service worker for it, too.

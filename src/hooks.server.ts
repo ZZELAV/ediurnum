@@ -7,8 +7,8 @@ import { getSession, isInitialized } from '#lib/server/vault.ts';
 import { isTheme, loadSettings } from '#lib/server/settings.ts';
 import { dataDir } from '#lib/server/db.ts';
 import { log } from '#lib/server/log.ts';
-import { isLang, pickLang, pickLocale } from '#lib/i18n/index.ts';
-import { SESSION_COOKIE } from '#lib/server/auth.ts';
+import { isLang, isRegion, pickLang } from '#lib/i18n/index.ts';
+import { SESSION_COOKIE, settingsLocale } from '#lib/server/auth.ts';
 
 const PUBLIC_PATHS = ['/setup', '/login', '/recover'];
 /** Check a token themselves instead of the session (e.g. dashboard widget). */
@@ -44,7 +44,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const cookieLang = event.cookies.get('lang');
 	event.locals.lang =
 		event.locals.settings?.language ?? (isLang(cookieLang) ? cookieLang : pickLang(event.request.headers.get('accept-language')));
-	event.locals.locale = pickLocale(event.request.headers.get('accept-language'), event.locals.lang);
+	// locale = language of the app + region of the settings or country of the device, e.g. de-CH
+	const cookieRegion = event.cookies.get('region');
+	const region = event.locals.settings?.region ?? (isRegion(event.locals.lang, cookieRegion) ? cookieRegion : null);
+	({ locale: event.locals.locale, deviceCountry: event.locals.deviceCountry } = settingsLocale(event, { language: event.locals.lang, region: region ?? 'auto' }));
 	const cookieTheme = event.cookies.get('theme');
 	event.locals.theme = event.locals.settings?.theme ?? (isTheme(cookieTheme) ? cookieTheme : 'system');
 
@@ -66,7 +69,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	const response = await resolve(event, {
-		transformPageChunk: ({ html }) => html.replace('%lang%', event.locals.lang).replace('%theme%', event.locals.theme)
+		transformPageChunk: ({ html }) => html.replace('%lang%', event.locals.locale).replace('%theme%', event.locals.theme)
 	});
 
 	response.headers.set('X-Content-Type-Options', 'nosniff');

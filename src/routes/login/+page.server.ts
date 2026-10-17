@@ -18,7 +18,7 @@ export const actions: Actions = {
 			return fail(400, { error: 'error.wrongPassword' });
 		}
 		registerSuccess(key);
-		startSession(event.cookies, dek);
+		startSession(event, dek);
 		log.info('journal opened', { ip });
 		redirect(303, '/');
 	}

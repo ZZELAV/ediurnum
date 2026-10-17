@@ -16,7 +16,7 @@ before(async () => {
 after(() => server.stop());
 
 const general = (leaveMinutes: string) =>
-	c.action('/settings?/general', { name: 'Testperson', language: 'de', theme: 'system', sessionMinutes: '30', welcome: 'on', leaveMinutes });
+	c.action('/settings?/general', { name: 'Testperson', language: 'de', theme: 'system', welcome: 'on', leaveMinutes });
 
 const leaveSetting = async () => {
 	const html = await (await c.get('/settings')).text();

@@ -17,14 +17,14 @@ export const GET: RequestHandler = async (event) => {
 	const session = requireSession(event);
 	const param = event.url.searchParams.get('format');
 	const format = param === 'json' || param === 'pdf' ? param : 'md';
-	const lang = event.locals.lang;
+	const loc = event.locals.locale;
 	const { entries, skippedLocked } = readableEntries(session);
 	const body =
 		format === 'pdf'
-			? await exportPdf(entries, lang, skippedLocked, pdfFonts)
+			? await exportPdf(entries, loc, skippedLocked, pdfFonts)
 			: format === 'json'
 				? exportJson(entries, skippedLocked)
-				: exportMarkdown(entries, lang);
+				: exportMarkdown(entries, loc);
 	log.info('readable export downloaded', { format, skippedLocked });
 	return new Response(body as BodyInit, {
 		headers: {

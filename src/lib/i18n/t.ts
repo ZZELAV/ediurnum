@@ -9,7 +9,7 @@ function currentLang(): Lang {
 }
 
 /**
- * Format for dates and numbers (determined by the server from Accept-Language). If it doesn't match the current
+ * Locale for formats and texts (determined by the server from the device). If it doesn't match the current
  * language – e.g. right after switching the language –, the default format of the language applies.
  */
 export function currentLocale(): string {
@@ -23,9 +23,9 @@ export function fmtNumber(value: number, digits = 1): string {
 	return new Intl.NumberFormat(currentLocale(), { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
 }
 
-/** Translates a key into the current language. Use in components only. */
+/** Translates a key into the current language (spelling of the country, e.g. de-CH). Use in components only. */
 export function t(key: string, params?: Record<string, string | number>): string {
-	return translate(currentLang(), key, params);
+	return translate(currentLocale(), key, params);
 }
 
 export function fmtDate(iso: string, style: 'long' | 'medium' | 'short' | 'weekday' | 'dayMonth' = 'long'): string {

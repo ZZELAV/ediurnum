@@ -15,7 +15,7 @@ import { createInterface } from 'node:readline';
 import { parseRecoveryKey } from '#lib/server/crypto.ts';
 import {
 	backupEntries,
-	backupLanguage,
+	backupLocale,
 	lockedCount,
 	parseBackupHeader,
 	readBackup,
@@ -150,14 +150,14 @@ const target = resolve((await ask(T.output(suggested))) || suggested);
 if (existsSync(target) && (await ask(T.overwrite)).toLowerCase() !== 'y') fail(T.cancelled);
 
 // 5. convert and save (readable only for the own user)
-const lang = backupLanguage(data, dek);
+const loc = backupLocale(data, dek);
 const { entries, skippedLocked } = backupEntries(data, dek, lockKey);
 let body: string | Uint8Array;
 if (format === 'pdf') {
 	const dir = new URL('../src/lib/server/pdf/fonts/', import.meta.url);
 	const fonts = Object.fromEntries(Object.values(FONT_FILES).flat().map((f) => [f, readFileSync(new URL(f, dir))]));
-	body = await exportPdf(entries, lang, skippedLocked, fonts);
-} else body = format === 'json' ? exportJson(entries, skippedLocked) : exportMarkdown(entries, lang);
+	body = await exportPdf(entries, loc, skippedLocked, fonts);
+} else body = format === 'json' ? exportJson(entries, skippedLocked) : exportMarkdown(entries, loc);
 writeFileSync(target, body, { mode: 0o600 });
 dek.fill(0);
 lockKey?.fill(0);

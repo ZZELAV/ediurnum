@@ -53,9 +53,12 @@ export type PublicAiAgent = Omit<AiAgent, 'apiKey'> & { hasApiKey: boolean };
 export interface Settings {
 	name: string; // first name for the greeting (not a login name)
 	language: Lang;
+	/** Settings → Region: "auto" (country of the device) or a country such as CH */
+	region: string;
+	/** Locale at the last login or save (e.g. de-CH) – for push messages and the converter script */
+	locale: string;
 	theme: Theme;
-	sessionMinutes: number;
-	leaveMinutes: number; // lock after leaving the app (0 = never), see #lib/idle
+	leaveMinutes: number; // lock after leaving the app (0 = never), see #lib/away
 	focusMode: boolean;
 	welcomeHidden: boolean; // welcome card on the start page hidden
 	aiInstructions: string; // own instructions to the AI (empty = default from #lib/server/ai/analyze)

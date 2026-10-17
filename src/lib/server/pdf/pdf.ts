@@ -1,8 +1,8 @@
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
-import { locale, translate } from '#lib/i18n/index.ts';
+import { translate } from '#lib/i18n/index.ts';
 import { entryDocs, type EntryField } from '../export.ts';
-import type { Entry, Lang } from '#lib/types.ts';
+import type { Entry } from '#lib/types.ts';
 
 /**
  * Readable export as PDF – from the same prepared documents as the Markdown (`entryDocs`).
@@ -90,8 +90,8 @@ function wrap(face: Face, text: string, size: number, maxWidth: number): string[
 	return lines;
 }
 
-export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: number, fontFiles: PdfFonts): Promise<Uint8Array> {
-	const t = (key: string, params?: Record<string, string | number>) => translate(lang, key, params);
+export async function exportPdf(entries: Entry[], loc: string, skippedLocked: number, fontFiles: PdfFonts): Promise<Uint8Array> {
+	const t = (key: string, params?: Record<string, string | number>) => translate(loc, key, params);
 	const doc = await PDFDocument.create();
 	doc.registerFontkit(fontkit);
 	const faces = {} as Record<FaceName, Face>;
@@ -130,8 +130,8 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 	};
 
 	// header
-	const docs = entryDocs(entries, lang);
-	const today = new Intl.DateTimeFormat(locale(lang), { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+	const docs = entryDocs(entries, loc);
+	const today = new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 	paragraph('ediurnum', faces.sansBold, 10, ACCENT);
 	y -= 4;
 	paragraph(t('export.title'), faces.serifBold, 26);
@@ -198,7 +198,7 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 	});
 
 	doc.setTitle(`ediurnum – ${t('export.title')}`);
-	doc.setLanguage(locale(lang));
+	doc.setLanguage(loc);
 	doc.setCreator('ediurnum');
 	doc.setProducer('ediurnum');
 	return doc.save();

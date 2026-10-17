@@ -3,16 +3,20 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { de } from '../src/lib/i18n/de.ts';
+import { deCH } from '../src/lib/i18n/de-CH.ts';
 import { en } from '../src/lib/i18n/en.ts';
+import { enGB } from '../src/lib/i18n/en-GB.ts';
 import { SECTIONS } from '../src/lib/templates.ts';
-import { isLang, locale, pickLang, pickLocale, translate } from '../src/lib/i18n/index.ts';
+import { isLang, locale, pickLang, translate } from '../src/lib/i18n/index.ts';
 import { it } from '../src/lib/i18n/it.ts';
 
-test('both languages have the same keys', () => {
-	const missingEn = Object.keys(de).filter((k) => !(k in en));
-	const missingDe = Object.keys(en).filter((k) => !(k in de));
-	assert.deepEqual(missingEn, [], `missing in en.ts: ${missingEn.join(', ')}`);
-	assert.deepEqual(missingDe, [], `missing in de.ts: ${missingDe.join(', ')}`);
+test('all languages have the same keys', () => {
+	for (const [name, dict] of Object.entries({ de, it })) {
+		const missing = Object.keys(en).filter((k) => !(k in dict));
+		const extra = Object.keys(dict).filter((k) => !(k in en));
+		assert.deepEqual(missing, [], `missing in ${name}.ts: ${missing.join(', ')}`);
+		assert.deepEqual(extra, [], `missing in en.ts: ${extra.join(', ')}`);
+	}
 });
 
 test('all text keys used in the code exist', () => {
@@ -58,8 +62,30 @@ test('singular forms (.one) have a base form, no text is empty', () => {
 	assert.deepEqual(empty, []);
 });
 
-test('Swiss spelling: no "ß" in the German texts', () => {
-	assert.deepEqual(Object.keys(de).filter((k) => de[k].includes('ß')), []);
+test('Swiss spelling: every German text with "ß" has a variant with "ss" in de-CH.ts', () => {
+	assert.deepEqual(Object.keys(de).filter((k) => de[k].includes('ß') && !(k in deCH)), []);
+	assert.deepEqual(Object.keys(deCH).filter((k) => deCH[k].includes('ß')), [], 'no "ß" in de-CH.ts');
+	assert.equal(translate('de-CH', 'setup.intro'), deCH['setup.intro']);
+	assert.equal(translate('de-LI', 'setup.intro'), deCH['setup.intro']);
+	assert.match(translate('de-DE', 'setup.intro'), /heißt/);
+	assert.match(translate('de-AT', 'setup.intro'), /heißt/);
+});
+
+test('spelling variants only change existing texts and keep the placeholders', () => {
+	const vars = (s: string) => [...new Set(s.match(/{w+}/g) ?? [])].sort().join(',');
+	for (const [variant, base] of [[deCH, de], [enGB, en]]) {
+		assert.deepEqual(Object.keys(variant).filter((k) => !(k in base)), [], 'unknown keys');
+		assert.deepEqual(Object.keys(variant).filter((k) => vars(variant[k]) !== vars(base[k])), [], 'placeholders differ');
+		assert.deepEqual(Object.keys(variant).filter((k) => variant[k] === base[k]), [], 'same text as the base');
+	}
+});
+
+test('English: US spelling, British for the other English-speaking countries', () => {
+	assert.equal(translate('en', 'insights.run'), 'Analyze');
+	assert.equal(translate('en-US', 'insights.run'), 'Analyze');
+	assert.equal(translate('en-GB', 'insights.run'), 'Analyse');
+	assert.equal(translate('en-CH', 'insights.run'), 'Analyse');
+	assert.equal(translate('en-AU', 'insights.run'), 'Analyse');
 });
 
 test('welcome card: all texts exist', () => {
@@ -85,9 +111,8 @@ test('English is the default: for browsers in other languages and for missing te
 	delete en['test.onlyEnglish'];
 });
 
-test('Italian: may be incomplete, but only with known keys, the same placeholders and no empty texts', () => {
+test('Italian: the same placeholders as in English and no empty texts', () => {
 	const vars = (s: string) => [...new Set(s.match(/\{\w+\}/g) ?? [])].sort().join(',');
-	assert.deepEqual(Object.keys(it).filter((k) => !(k in en)), [], 'unknown keys');
 	assert.deepEqual(Object.keys(it).filter((k) => vars(it[k]) !== vars(en[k])), [], 'placeholders differ');
 	assert.deepEqual(Object.keys(it).filter((k) => !it[k].trim()), [], 'empty texts');
 });
@@ -98,5 +123,4 @@ test('Italian: chosen for Italian browsers, missing texts in English, own format
 	assert.ok(isLang('it') && !isLang('fr') && !isLang('toString'));
 	assert.equal(translate('it', 'nav.stats'), it['nav.stats'] ?? en['nav.stats']);
 	assert.equal(locale('it'), 'it-IT');
-	assert.equal(pickLocale('it-CH,it;q=0.9', 'it'), 'it-CH');
 });

@@ -13,7 +13,7 @@ import {
 } from '../src/lib/server/crypto.ts';
 import {
 	backupEntries,
-	backupLanguage,
+	backupLocale,
 	encodeBackup,
 	lockedCount,
 	parseBackupHeader,
@@ -69,7 +69,7 @@ describe('Markdown', () => {
 
 	test('export: title, days as ##, locked ones (without content) are left out', () => {
 		const md = exportMarkdown([entry('2026-10-15', { mood: null, sections: {}, free: 'A' }), { ...entry('2026-10-16', full), content: null }], 'en');
-		assert.match(md, /^# ediurnum – Journal\n\n## Thursday, 15 October 2026\n\*\*Free thoughts\*\*\nA\n$/);
+		assert.match(md, /^# ediurnum – Journal\n\n## Thursday, October 15, 2026\n\*\*Free thoughts\*\*\nA\n$/);
 	});
 
 	test('JSON contains the entries and the number of skipped locked ones', () => {
@@ -152,7 +152,7 @@ describe('Reading backups (also for the converter script)', async () => {
 
 	test('entries oldest first; locked ones only with the PIN; cleared ones are left out', async () => {
 		const read = readBackup(text, dek);
-		assert.equal(backupLanguage(read, dek), 'en');
+		assert.equal(backupLocale(read, dek), 'en');
 		assert.equal(lockedCount(read), 1);
 
 		const without = backupEntries(read, dek, null);

@@ -1,25 +1,82 @@
+import { DEFAULT_LANG, isLang } from './langs.ts';
+import { AUTO_REGION, countryOfTimeZone } from './regions.ts';
 import type { Lang } from '#lib/types.ts';
 
-const DEFAULT_LOCALES: Record<Lang, string> = { de: 'de-CH', en: 'en-GB', it: 'it-IT' };
+/**
+ * Locale = language of the app plus country of the device (e.g. `de-CH`). It decides the format of dates and
+ * numbers and the spelling variant of the texts (see translate). The language is set in the app, the country
+ * comes from Settings → Region or – with "automatic" – from the device.
+ */
 
-/** Default format per language if the browser doesn't give a matching one. */
+const DEFAULT_LOCALES: Record<Lang, string> = { de: 'de-DE', en: 'en-US', it: 'it-IT' };
+
+/** Default locale of a language, if the country is unknown or has no format of its own for it. */
 export function locale(lang: Lang): string {
 	return DEFAULT_LOCALES[lang];
 }
 
-/**
- * Format for dates and numbers: the first entry of `Accept-Language` with a region that matches the app language
- * (e.g. `de-DE` → "3,3", `en-US` → "Oct 10"). Otherwise the default format of the language.
- */
-export function pickLocale(acceptLanguage: string | null, lang: Lang): string {
-	for (const part of (acceptLanguage ?? '').slice(0, 200).split(',')) {
-		const tag = part.split(';')[0].trim();
-		if (!/^[a-z]{2,3}-[a-z0-9]{2,8}$/i.test(tag) || tag.split('-')[0].toLowerCase() !== lang) continue;
-		try {
-			return Intl.getCanonicalLocales(tag)[0];
-		} catch {
-			// skip an invalid entry
-		}
+/** Language of a locale such as `de-CH` (unknown ones: English). */
+export function langOf(tag: string): Lang {
+	const lang = tag.split('-')[0].toLowerCase();
+	return isLang(lang) ? lang : DEFAULT_LANG;
+}
+
+/** Stored locale such as `de-CH` or a language such as `de` (only languages of the app). */
+export function isLocale(v: unknown): v is string {
+	return typeof v === 'string' && /^[a-z]{2}(-[A-Z]{2})?$/.test(v) && isLang(v.slice(0, 2));
+}
+
+/** Country of a locale such as `de-CH`, or null. */
+export function regionOf(tag: string): string | null {
+	const region = tag.split('-')[1];
+	return region && /^[a-z]{2}$/i.test(region) ? region.toUpperCase() : null;
+}
+
+/** Language and country as a locale, if the format data (ICU) knows this combination, otherwise the default. */
+export function localeFor(lang: Lang, country: string | null): string {
+	if (country && /^[A-Z]{2}$/.test(country)) {
+		const tag = `${lang}-${country}`;
+		// unknown combinations such as de-US fall back to "de" – then the default of the language applies
+		if (new Intl.DateTimeFormat(tag).resolvedOptions().locale === tag) return tag;
 	}
 	return locale(lang);
+}
+
+/** Entries of Accept-Language with a country, in order (e.g. ["de-CH", "en-US"]). */
+function browserLocales(acceptLanguage: string | null): string[] {
+	return (acceptLanguage ?? '')
+		.slice(0, 200)
+		.split(',')
+		.map((part) => part.split(';')[0].trim())
+		.filter((tag) => /^[a-z]{2,3}-[a-z]{2}$/i.test(tag));
+}
+
+/**
+ * Country of the device: 1. country of a browser language matching the app language (de-CH for German),
+ * 2. country of the device time zone (Europe/Zurich → CH), 3. country of another browser language (en-CH).
+ */
+export function detectCountry(acceptLanguage: string | null, lang: Lang, timeZone?: string | null): string | null {
+	const tags = browserLocales(acceptLanguage);
+	const matching = tags.find((tag) => tag.split('-')[0].toLowerCase() === lang);
+	return (matching && regionOf(matching)) || countryOfTimeZone(timeZone) || (tags[0] && regionOf(tags[0])) || null;
+}
+
+/** Locale for the app language and the country of the device (see detectCountry). */
+export function pickLocale(acceptLanguage: string | null, lang: Lang, timeZone?: string | null): string {
+	return localeFor(lang, detectCountry(acceptLanguage, lang, timeZone));
+}
+
+/**
+ * Locale for the settings: a chosen region (Settings → Region) or, with "auto", the country of the device.
+ * `deviceCountry` is the detected country (for the label "Automatic (…)"), also when a region is chosen.
+ */
+export function resolveLocale(
+	lang: Lang,
+	region: string | null | undefined,
+	acceptLanguage: string | null,
+	timeZone?: string | null
+): { locale: string; deviceCountry: string | null } {
+	const deviceCountry = detectCountry(acceptLanguage, lang, timeZone);
+	const chosen = region && region !== AUTO_REGION ? region : null;
+	return { locale: localeFor(lang, chosen ?? deviceCountry), deviceCountry };
 }

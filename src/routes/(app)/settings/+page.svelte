@@ -3,13 +3,31 @@
 	import { fade } from 'svelte/transition';
 	import { ask } from '#lib/confirm.svelte.ts';
 	import { enhance } from '$app/forms';
-	import { fmtDate, t } from '#lib/i18n/t.ts';
-	import { LANGS } from '#lib/i18n/index.ts';
+	import { currentLocale, fmtDate, t } from '#lib/i18n/t.ts';
+	import { AUTO_REGION, LANGS, localeFor, REGIONS } from '#lib/i18n/index.ts';
+	import type { Lang } from '#lib/types.ts';
 	import { CHANGELOG_URL, REPO_URL } from '#lib/changelog.ts';
 	import { expiring } from '#lib/flash.svelte.ts';
 	import PasswordInput from '#lib/components/PasswordInput.svelte';
+	import InfoButton from '#lib/components/InfoButton.svelte';
 
 	let { data, form } = $props();
+
+	// language and region as selected (not saved yet): the list of countries and the preview follow them
+	let language = $derived<Lang>(data.settings.language);
+	let region = $derived(data.settings.region);
+	const countryName = (code: string) => new Intl.DisplayNames([currentLocale()], { type: 'region' }).of(code) ?? code;
+	const regions = $derived(REGIONS[language].map((code) => ({ code, name: countryName(code) })).sort((a, b) => a.name.localeCompare(b.name)));
+	// "automatic" = country of the device; the label names the country whose format applies
+	const autoLocale = $derived(localeFor(language, data.deviceCountry));
+	const previewLocale = $derived(region === AUTO_REGION ? autoLocale : localeFor(language, region));
+	const preview = $derived(
+		`${new Intl.DateTimeFormat(previewLocale, { dateStyle: 'full' }).format(new Date())} · ${new Intl.NumberFormat(previewLocale, { minimumFractionDigits: 2 }).format(1234.5)}`
+	);
+	function changeLanguage(value: Lang) {
+		language = value;
+		if (region !== AUTO_REGION && !REGIONS[value].includes(region)) region = AUTO_REGION;
+	}
 
 	// theme: without an own choice the app follows the system; the one currently in effect is shown.
 	let systemDark = $state(false);
@@ -72,8 +90,15 @@
 				</div>
 				<div class="field">
 					<label for="lang">{t('settings.language')}</label>
-					<select id="lang" name="language" value={data.settings.language}>
+					<select id="lang" name="language" value={language} onchange={(e) => changeLanguage(e.currentTarget.value as Lang)}>
 						{#each Object.entries(LANGS) as [code, name] (code)}<option value={code}>{name}</option>{/each}
+					</select>
+				</div>
+				<div class="field">
+					<label for="region">{t('settings.region')}</label>
+					<select id="region" name="region" bind:value={region}>
+						<option value={AUTO_REGION}>{t('settings.region.auto', { country: countryName(autoLocale.split('-')[1]) })}</option>
+						{#each regions as r (r.code)}<option value={r.code}>{r.name}</option>{/each}
 					</select>
 				</div>
 				<div class="field">
@@ -85,17 +110,15 @@
 					<input type="hidden" name="theme" value={chosenTheme ?? data.settings.theme} />
 				</div>
 				<div class="field">
-					<label for="sess">{t('settings.session')}</label>
-					<input id="sess" name="sessionMinutes" type="number" min="5" max="720" value={data.settings.sessionMinutes} />
-				</div>
-				<div class="field">
-					<label for="leave">{t('settings.leave')}</label>
+					<div class="label-row">
+						<label for="leave">{t('settings.leave')}</label>
+						<InfoButton text={t('settings.leaveHint')} />
+					</div>
 					<select id="leave" name="leaveMinutes" value={String(data.settings.leaveMinutes)}>
 						{#each [1, 5, 15, 0] as m (m)}<option value={String(m)}>{t(`settings.leave.${m}`)}</option>{/each}
 					</select>
 				</div>
-				<p class="faint hint">{t('settings.leaveHint')}</p>
-				{#if data.settings.theme === 'system' && !chosenTheme}<p class="faint hint">{t('settings.themeSystemHint')}</p>{/if}
+				<p class="faint hint">{t('settings.regionPreview', { example: preview })}</p>
 				<div class="field check">
 					<label class="switch-label">
 						<input type="checkbox" role="switch" name="focusMode" checked={data.settings.focusMode} />
@@ -308,6 +331,15 @@
 		align-items: center;
 		gap: 0.55rem;
 		color: var(--ink);
+		margin: 0;
+	}
+	.label-row {
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+		margin-bottom: 0.3rem;
+	}
+	.label-row label {
 		margin: 0;
 	}
 	.hint {

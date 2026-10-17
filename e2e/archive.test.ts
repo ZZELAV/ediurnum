@@ -105,7 +105,7 @@ describe('Search', () => {
 	test('feelings in the language of the app', async () => {
 		assert.deepEqual(dates((await search('freude')).results), ['2026-03-02']);
 		const general = (language: string) =>
-			c.action('/settings?/general', { name: 'Testperson', language, theme: 'system', sessionMinutes: '30', welcome: 'on' });
+			c.action('/settings?/general', { name: 'Testperson', language, theme: 'system', welcome: 'on' });
 		assert.equal((await general('en')).type, 'success');
 		const en = await search('joy');
 		await general('de');

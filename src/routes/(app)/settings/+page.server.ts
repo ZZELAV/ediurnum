@@ -2,14 +2,14 @@ import { fail, redirect } from '@sveltejs/kit';
 import { randomUUID } from 'node:crypto';
 import type { Actions, PageServerLoad } from './$types';
 import changelog from '../../../../CHANGELOG.md?raw';
-import { isLang } from '#lib/i18n/index.ts';
+import { AUTO_REGION, isLang, isRegion } from '#lib/i18n/index.ts';
 import { renderMarkdown } from '#lib/markdown.ts';
 import { changelogSection } from '#lib/changelog.ts';
 import { isEmptyProfile } from '#lib/profile.ts';
 import { loadProfile } from '#lib/server/profile.ts';
 import { log } from '#lib/server/log.ts';
 import { presetById } from '#lib/ai-presets.ts';
-import { SESSION_COOKIE, setDisplayCookies } from '#lib/server/auth.ts';
+import { SESSION_COOKIE, setDisplayCookies, settingsLocale } from '#lib/server/auth.ts';
 import { purgeContent, resetAll } from '#lib/server/purge.ts';
 import { countLocked, rekeyLocked } from '#lib/server/entries.ts';
 import { transaction } from '#lib/server/db.ts';
@@ -47,26 +47,28 @@ export const load: PageServerLoad = ({ locals }) => {
 const LEAVE_MINUTES = [1, 5, 15, 0];
 
 export const actions: Actions = {
-	general: async ({ request, locals, cookies }) => {
+	general: async (event) => {
+		const { request, locals, cookies } = event;
 		const session = locals.session!;
 		const form = await request.formData();
 		const settings = loadSettings(session.dek);
 		const language = form.get('language');
 		const theme = form.get('theme');
-		const minutes = Number(form.get('sessionMinutes'));
 		const leave = Number(form.get('leaveMinutes'));
 		settings.name = String(form.get('name') ?? '').trim().slice(0, 60);
 		if (isLang(language)) settings.language = language;
+		// a region of another language (e.g. after switching the language) becomes "automatic"
+		const region = form.get('region');
+		settings.region = isRegion(settings.language, region) ? region : AUTO_REGION;
 		if (isTheme(theme)) settings.theme = theme;
 		settings.focusMode = form.get('focusMode') === 'on';
 		settings.welcomeHidden = form.get('welcome') !== 'on';
-		if (Number.isFinite(minutes)) settings.sessionMinutes = Math.min(720, Math.max(5, Math.round(minutes)));
 		if (LEAVE_MINUTES.includes(leave)) settings.leaveMinutes = leave;
+		settings.locale = settingsLocale(event, settings).locale;
 		saveSettings(session.dek, settings);
-		session.idleMs = settings.sessionMinutes * 60 * 1000;
 		session.awayMs = settings.leaveMinutes * 60 * 1000;
 		setDisplayCookies(cookies, settings);
-		setReminderLang(settings.language);
+		setReminderLang(settings.locale);
 		return { section: 'general', success: 'settings.saved' };
 	},
 

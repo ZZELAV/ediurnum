@@ -2,7 +2,7 @@ import { gunzipSync, gzipSync } from 'node:zlib';
 import { decrypt, decryptJson, encrypt, keyFingerprint, SETTINGS_AAD, unlockWithPin } from './crypto.ts';
 import { decryptContent, toMeta, type EntryRow } from './records.ts';
 import { isEmptyContent } from '#lib/templates.ts';
-import { DEFAULT_LANG, isLang } from '#lib/i18n/index.ts';
+import { DEFAULT_LANG, isLang, isLocale } from '#lib/i18n/index.ts';
 import type { Entry, Lang } from '#lib/types.ts';
 
 /**
@@ -91,10 +91,11 @@ export function readBackup(text: string, dek: Buffer): BackupData {
 	}
 }
 
-/** Language from the (encrypted) settings in the backup; English if none is stored. */
-export function backupLanguage(data: BackupData, dek: Buffer): Lang {
+/** Locale (or language) from the (encrypted) settings in the backup; English if none is stored. */
+export function backupLocale(data: BackupData, dek: Buffer): string {
 	if (!data.meta.settings) return DEFAULT_LANG;
-	const s = decryptJson<{ language?: string }>(dek, Buffer.from(data.meta.settings, 'base64'), SETTINGS_AAD);
+	const s = decryptJson<{ language?: string; locale?: string }>(dek, Buffer.from(data.meta.settings, 'base64'), SETTINGS_AAD);
+	if (isLocale(s.locale) && s.locale.slice(0, 2) === s.language) return s.locale;
 	return isLang(s.language) ? s.language : DEFAULT_LANG;
 }
 

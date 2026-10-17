@@ -1,6 +1,6 @@
 import { addDays, daysBetween, isIsoDate, weekdayOf } from './dates.ts';
 import { DEFAULT_LANG } from './i18n/index.ts';
-import type { EntryMeta, Lang, SectionKind } from './types.ts';
+import type { EntryMeta, SectionKind } from './types.ts';
 
 /**
  * Reminders for the recurring reviews and custom reminders.
@@ -12,7 +12,8 @@ export interface ReminderConfig {
 	feelings: { enabled: boolean; weekday: number; time: string }; // 0 = Sunday
 	growth: { enabled: boolean; day: number | 'last'; time: string };
 	custom: CustomReminder[];
-	lang: Lang;
+	/** Language of the messages, with the country of the device if known (e.g. de-CH) */
+	lang: string;
 }
 
 export type CustomRepeat = 'once' | 'daily' | 'weekly' | 'monthly';
@@ -40,7 +41,7 @@ export interface CustomReminder extends ReminderSchedule {
 	createdAt: string;
 }
 
-export function defaultReminders(lang: Lang = DEFAULT_LANG): ReminderConfig {
+export function defaultReminders(lang: string = DEFAULT_LANG): ReminderConfig {
 	return {
 		feelings: { enabled: true, weekday: 0, time: '19:00' },
 		growth: { enabled: true, day: 'last', time: '19:00' },
@@ -86,7 +87,7 @@ export function sanitizeCustomReminder(input: unknown): CustomReminder | CustomR
 	};
 }
 
-export function sanitizeReminders(input: unknown, lang: Lang): ReminderConfig {
+export function sanitizeReminders(input: unknown, lang: string): ReminderConfig {
 	const d = defaultReminders(lang);
 	const raw = (input ?? {}) as Partial<ReminderConfig>;
 	const time = (v: unknown, fallback: string) => (typeof v === 'string' && TIME_RE.test(v) ? v : fallback);
