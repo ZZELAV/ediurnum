@@ -8,8 +8,8 @@ const t = (key: string) => (key === 'emotion.joy' ? 'Freude' : key);
 const entry: EntryContent = {
 	mood: 4,
 	sections: {
-		erlebt: { gratitude: ['Kaffee im Café am See', ''], highlight: 'Sonnenuntergang' },
-		gefuehl: { emotions: ['joy'] }
+		daily: { gratitude: ['Kaffee im Café am See', ''], highlight: 'Sonnenuntergang' },
+		feelings: { emotions: ['joy'] }
 	},
 	free: 'Lange mit Anna telefoniert.'
 };
@@ -19,7 +19,7 @@ const marked = (hit: ReturnType<typeof matchEntry>) => hit!.parts.filter((p) => 
 
 test('Suche ignoriert Gross-/Kleinschreibung und Akzente', () => {
 	const hit = matchEntry(entry, searchTerms('CAFE'), t);
-	assert.equal(hit?.field, 'section.erlebt.gratitude');
+	assert.equal(hit?.field, 'section.daily.gratitude');
 	assert.deepEqual(marked(hit), ['Café']);
 });
 
@@ -30,7 +30,7 @@ test('Alle Begriffe müssen vorkommen, auch in verschiedenen Feldern', () => {
 
 test('Gefühle werden in der Sprache der App gefunden', () => {
 	const hit = matchEntry(entry, searchTerms('freude'), t);
-	assert.equal(hit?.field, 'section.gefuehl.emotions');
+	assert.equal(hit?.field, 'section.feelings.emotions');
 });
 
 test('Lange Texte werden um die Fundstelle gekürzt', () => {
@@ -71,6 +71,6 @@ test('Suchbegriffe: doppelte entfernt, höchstens acht', () => {
 });
 
 test('Leere Felder und Listen ergeben keinen Treffer', () => {
-	const c: EntryContent = { mood: 3, sections: { erlebt: { gratitude: ['', ' '], highlight: '  ' } }, free: '' };
+	const c: EntryContent = { mood: 3, sections: { daily: { gratitude: ['', ' '], highlight: '  ' } }, free: '' };
 	assert.equal(matchEntry(c, searchTerms('a'), t), null);
 });

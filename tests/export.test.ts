@@ -44,8 +44,8 @@ const entry = (date: string, content: EntryContent): Entry => ({
 const full: EntryContent = {
 	mood: 4,
 	sections: {
-		erlebt: { gratitude: ['Kaffee', '', ' Sonne '], experienced: '# Kein Titel\nZweite Zeile', highlight: '', takeaway: '' },
-		gefuehl: { energy: 3, emotions: ['joy', 'tired'] }
+		daily: { gratitude: ['Kaffee', '', ' Sonne '], experienced: '# Kein Titel\nZweite Zeile', highlight: '', takeaway: '' },
+		feelings: { energy: 3, emotions: ['joy', 'tired'] }
 	},
 	free: ' Frei '
 };
@@ -55,12 +55,12 @@ describe('Markdown', () => {
 		const expected = [
 			'### Freitag, 16. Oktober 2026',
 			'Stimmung: 4/5 (gut)',
-			`**${t('section.erlebt.title')}**`,
-			`- ${t('section.erlebt.gratitude')}: Kaffee; Sonne`,
-			`- ${t('section.erlebt.experienced')}: \\# Kein Titel\nZweite Zeile`,
-			`**${t('section.gefuehl.title')}**`,
-			`- ${t('section.gefuehl.energy')}: 3/5`,
-			`- ${t('section.gefuehl.emotions')}: Freude; Müdigkeit`,
+			`**${t('section.daily.title')}**`,
+			`- ${t('section.daily.gratitude')}: Kaffee; Sonne`,
+			`- ${t('section.daily.experienced')}: \\# Kein Titel\nZweite Zeile`,
+			`**${t('section.feelings.title')}**`,
+			`- ${t('section.feelings.energy')}: 3/5`,
+			`- ${t('section.feelings.emotions')}: Freude; Müdigkeit`,
 			'**Freie Gedanken**',
 			'Frei'
 		].join('\n');
@@ -108,7 +108,7 @@ describe('Backup lesen (auch für das Konverter-Skript)', async () => {
 	const row = (id: string, date: string, content: EntryContent, extra: Record<string, unknown> = {}) => ({
 		id,
 		date,
-		kinds: 'erlebt',
+		kinds: 'daily',
 		locked: 0,
 		ai_allowed: 1,
 		empty: 0,
@@ -159,7 +159,7 @@ describe('Backup lesen (auch für das Konverter-Skript)', async () => {
 		assert.deepEqual(without.entries.map((e) => e.date), ['2026-03-01', '2026-03-02']);
 		assert.equal(without.skippedLocked, 1);
 		assert.equal(without.entries[0].content?.free, 'erster');
-		assert.deepEqual(without.entries[0].kinds, ['erlebt']);
+		assert.deepEqual(without.entries[0].kinds, ['daily']);
 
 		assert.equal(await unlockBackupPin(read, dek, '9999'), null);
 		const key = await unlockBackupPin(read, dek, '1234');
@@ -167,5 +167,27 @@ describe('Backup lesen (auch für das Konverter-Skript)', async () => {
 		const withPin = backupEntries(read, dek, key);
 		assert.deepEqual(withPin.entries.map((e) => [e.date, e.locked]), [['2026-03-01', false], ['2026-03-02', false], ['2026-03-03', true]]);
 		assert.equal(withPin.skippedLocked, 0);
+	});
+
+	test('Backups up to format version 2 with legacy section kinds read like current ones', async () => {
+		const legacyContent = {
+			...full,
+			sections: { erlebt: full.sections.daily, gefuehl: full.sections.feelings, wachstum: { learned: 'Neu' } }
+		} as unknown as EntryContent;
+		const current = { ...full, sections: { ...full.sections, growth: { learned: 'Neu' } } };
+		const legacy: BackupData = {
+			...data,
+			entries: rowsToJson([
+				row('a', '2026-03-01', legacyContent, { kinds: 'erlebt,gefuehl,wachstum' }),
+				row('c', '2026-03-03', legacyContent, { kinds: 'gefuehl', locked: 1 })
+			])
+		};
+		const read = readBackup(JSON.stringify({ ...JSON.parse(encodeBackup(dek, legacy, '1.0.0')), version: 2 }), dek);
+		const { entries } = backupEntries(read, dek, await unlockBackupPin(read, dek, '1234'));
+		assert.deepEqual(entries.map((e) => e.kinds), [['daily', 'feelings', 'growth'], ['feelings']]);
+		for (const e of entries) assert.deepEqual(e.content, current);
+		// same Markdown as from an entry in the current format
+		assert.equal(exportMarkdown(entries.slice(0, 1), 'de'), exportMarkdown([{ ...entries[0], content: current }], 'de'));
+		assert.match(exportMarkdown(entries, 'de'), /Neu erlernt/);
 	});
 });

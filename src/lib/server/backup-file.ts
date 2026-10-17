@@ -1,8 +1,8 @@
 import { gunzipSync, gzipSync } from 'node:zlib';
-import { decrypt, decryptJson, encrypt, entryAad, keyFingerprint, SETTINGS_AAD, unlockWithPin } from './crypto.ts';
-import { toMeta, type EntryRow } from './records.ts';
+import { decrypt, decryptJson, encrypt, keyFingerprint, SETTINGS_AAD, unlockWithPin } from './crypto.ts';
+import { decryptContent, toMeta, type EntryRow } from './records.ts';
 import { isEmptyContent } from '#lib/templates.ts';
-import type { Entry, EntryContent, Lang } from '#lib/types.ts';
+import type { Entry, Lang } from '#lib/types.ts';
 
 /**
  * Backup-Format (.ediurnum):
@@ -15,8 +15,11 @@ import type { Entry, EntryContent, Lang } from '#lib/types.ts';
  */
 
 const AAD = 'ediurnum/backup/v1';
-/** 1: bis 0.1.0-beta.5 · 2: Einträge mit Spalte "empty" (Schema 3). Ältere Versionen bleiben lesbar. */
-const VERSION = 2;
+/**
+ * 1: up to 0.1.0-beta.5 · 2: entries with column "empty" (schema 3) · 3: English section kinds (schema 4, 1.1.0).
+ * Older versions stay readable (legacy kinds are converted when read and restored); older apps reject version 3.
+ */
+const VERSION = 3;
 
 export interface BackupHeader {
 	format: 'ediurnum-backup';
@@ -121,7 +124,7 @@ export function backupEntries(data: BackupData, dek: Buffer, lockKey: Buffer | n
 			skippedLocked++;
 			continue;
 		}
-		const content = decryptJson<EntryContent>(key, r.payload, entryAad(r.id, r.revision));
+		const content = decryptContent(key, r.payload, r.id, r.revision);
 		// Backups vor Format-Version 2 kennen die Spalte "empty" nicht
 		if (r.empty === undefined && isEmptyContent(content)) continue;
 		entries.push({ ...toMeta(r), content });

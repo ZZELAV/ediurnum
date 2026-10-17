@@ -1,5 +1,5 @@
 import { encodeBackup, jsonToRow, rowsToJson, type BackupData } from './backup-file.ts';
-import { getDb, getMeta, setMeta, transaction } from './db.ts';
+import { getDb, getMeta, setMeta, transaction, upgradeLegacyKinds } from './db.ts';
 import { listEntryMeta, getEntry } from './entries.ts';
 import type { Session } from './vault.ts';
 import type { Entry } from '#lib/types.ts';
@@ -45,6 +45,8 @@ export function restoreBackup(data: BackupData) {
 		insertRows('entries', data.entries);
 		insertRows('entry_revisions', data.revisions);
 		insertRows('analyses', data.analyses);
+		// backups up to format version 2 still use the legacy section kinds
+		upgradeLegacyKinds(d);
 	});
 }
 

@@ -1,13 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { EMOTIONS, emptyContent, filledKinds, isEmptyContent, sanitizeContent, SECTIONS, sectionDef } from '../src/lib/templates.ts';
+import { EMOTIONS, emptyContent, filledKinds, isEmptyContent, sanitizeContent, SECTIONS, sectionDef, upgradeContent, upgradeKind, upgradeSections } from '../src/lib/templates.ts';
 
 test('Feld-IDs bleiben stabil (alte Antworten hängen daran – nie umbenennen, nur ergänzen)', () => {
 	const ids = Object.fromEntries(SECTIONS.map((s) => [s.kind, s.fields.map((f) => f.id)]));
 	const required = {
-		erlebt: ['gratitude', 'experienced', 'highlight', 'takeaway'],
-		gefuehl: ['energy', 'emotions', 'energizers', 'drainers', 'onMyMind'],
-		wachstum: ['learned', 'proud', 'growth', 'nextFocus']
+		daily: ['gratitude', 'experienced', 'highlight', 'takeaway'],
+		feelings: ['energy', 'emotions', 'energizers', 'drainers', 'onMyMind'],
+		growth: ['learned', 'proud', 'growth', 'nextFocus']
 	};
 	for (const [kind, fields] of Object.entries(required)) {
 		for (const f of fields) assert.ok(ids[kind]?.includes(f), `${kind}.${f} fehlt`);
@@ -21,29 +21,29 @@ test('Abschnitte: Reihenfolge und Rhythmus', () => {
 	assert.deepEqual(
 		SECTIONS.map((s) => [s.kind, s.rhythm]),
 		[
-			['erlebt', 'daily'],
-			['gefuehl', 'weekly'],
-			['wachstum', 'monthly']
+			['daily', 'daily'],
+			['feelings', 'weekly'],
+			['growth', 'monthly']
 		]
 	);
-	assert.equal(sectionDef('gefuehl').kind, 'gefuehl');
+	assert.equal(sectionDef('feelings').kind, 'feelings');
 });
 
 test('Leerer Inhalt', () => {
 	const c = emptyContent();
-	assert.deepEqual(c, { mood: null, sections: { erlebt: {} }, free: '' });
+	assert.deepEqual(c, { mood: null, sections: { daily: {} }, free: '' });
 	assert.ok(isEmptyContent(c));
 	assert.ok(isEmptyContent({ ...c, free: '  \n ' }), 'nur Leerraum zählt als leer');
-	assert.ok(isEmptyContent({ ...c, sections: { erlebt: { gratitude: ['', ' ', ''] } } }));
+	assert.ok(isEmptyContent({ ...c, sections: { daily: { gratitude: ['', ' ', ''] } } }));
 	assert.ok(!isEmptyContent({ ...c, mood: 3 }), 'eine Stimmung allein ist ein Eintrag');
 	assert.ok(!isEmptyContent({ ...c, free: 'x' }));
-	assert.ok(!isEmptyContent({ ...c, sections: { gefuehl: { energy: 2 } } }));
+	assert.ok(!isEmptyContent({ ...c, sections: { feelings: { energy: 2 } } }));
 });
 
 test('Gefüllte Abschnitte', () => {
-	assert.deepEqual(filledKinds({ mood: null, free: '', sections: { erlebt: { gratitude: ['', 'x', ''] } } }), ['erlebt']);
-	assert.deepEqual(filledKinds({ mood: null, free: '', sections: { gefuehl: { emotions: [] }, wachstum: { learned: ' ' } } }), []);
-	assert.deepEqual(filledKinds({ mood: null, free: '', sections: { wachstum: { proud: 'a' }, erlebt: { highlight: 'b' } } }), ['erlebt', 'wachstum']);
+	assert.deepEqual(filledKinds({ mood: null, free: '', sections: { daily: { gratitude: ['', 'x', ''] } } }), ['daily']);
+	assert.deepEqual(filledKinds({ mood: null, free: '', sections: { feelings: { emotions: [] }, growth: { learned: ' ' } } }), []);
+	assert.deepEqual(filledKinds({ mood: null, free: '', sections: { growth: { proud: 'a' }, daily: { highlight: 'b' } } }), ['daily', 'growth']);
 });
 
 test('Bereinigung: nur bekannte Felder und gültige Werte', () => {
@@ -52,8 +52,8 @@ test('Bereinigung: nur bekannte Felder und gültige Werte', () => {
 		free: 'frei',
 		evil: 'x',
 		sections: {
-			erlebt: { highlight: 'Sonnenaufgang', hacker: 'x', gratitude: ['a', 2, 'c', 'd'] },
-			gefuehl: { energy: 4, emotions: ['joy', 'unbekannt', 3] },
+			daily: { highlight: 'Sonnenaufgang', hacker: 'x', gratitude: ['a', 2, 'c', 'd'] },
+			feelings: { energy: 4, emotions: ['joy', 'unbekannt', 3] },
 			unbekannt: { a: 1 }
 		}
 	});
@@ -61,12 +61,12 @@ test('Bereinigung: nur bekannte Felder und gültige Werte', () => {
 	assert.equal(c.free, 'frei');
 	assert.ok(!('evil' in c));
 	assert.ok(!('unbekannt' in c.sections));
-	assert.ok(!('hacker' in c.sections.erlebt!));
-	assert.deepEqual(c.sections.erlebt!.gratitude, ['a', '', 'c']);
-	assert.equal(c.sections.erlebt!.experienced, '', 'fehlende Felder werden leer ergänzt');
-	assert.deepEqual(c.sections.gefuehl!.emotions, ['joy']);
-	assert.equal(c.sections.gefuehl!.energy, 4);
-	assert.ok(!('wachstum' in c.sections), 'nicht geöffnete Abschnitte bleiben weg');
+	assert.ok(!('hacker' in c.sections.daily!));
+	assert.deepEqual(c.sections.daily!.gratitude, ['a', '', 'c']);
+	assert.equal(c.sections.daily!.experienced, '', 'fehlende Felder werden leer ergänzt');
+	assert.deepEqual(c.sections.feelings!.emotions, ['joy']);
+	assert.equal(c.sections.feelings!.energy, 4);
+	assert.ok(!('growth' in c.sections), 'nicht geöffnete Abschnitte bleiben weg');
 });
 
 test('Bereinigung: Stimmung und Skalen nur ganze Zahlen von 1 bis 5', () => {
@@ -75,24 +75,62 @@ test('Bereinigung: Stimmung und Skalen nur ganze Zahlen von 1 bis 5', () => {
 	assert.equal(mood(5), 5);
 	assert.equal(mood('3'), 3);
 	for (const v of [0, 6, 2.5, -1, 'x', '', null, undefined]) assert.equal(mood(v), null, String(v));
-	assert.equal(sanitizeContent({ sections: { gefuehl: { energy: 0 } } }).sections.gefuehl!.energy, null);
+	assert.equal(sanitizeContent({ sections: { feelings: { energy: 0 } } }).sections.feelings!.energy, null);
 });
 
 test('Bereinigung: Erlebt ist immer vorhanden, falsche Typen werden zu leer', () => {
-	assert.deepEqual(sanitizeContent(null), { mood: null, sections: { erlebt: {} }, free: '' });
-	assert.deepEqual(sanitizeContent('Unsinn'), { mood: null, sections: { erlebt: {} }, free: '' });
-	const c = sanitizeContent({ sections: { erlebt: 'kein Objekt', gefuehl: { emotions: 'joy' } }, free: 42 });
-	assert.deepEqual(c.sections.erlebt, {});
-	assert.deepEqual(c.sections.gefuehl!.emotions, []);
+	assert.deepEqual(sanitizeContent(null), { mood: null, sections: { daily: {} }, free: '' });
+	assert.deepEqual(sanitizeContent('Unsinn'), { mood: null, sections: { daily: {} }, free: '' });
+	const c = sanitizeContent({ sections: { daily: 'kein Objekt', feelings: { emotions: 'joy' } }, free: 42 });
+	assert.deepEqual(c.sections.daily, {});
+	assert.deepEqual(c.sections.feelings!.emotions, []);
 	assert.equal(c.free, '');
 });
 
 test('Bereinigung: Längen sind begrenzt', () => {
 	const c = sanitizeContent({
 		free: 'x'.repeat(200_000),
-		sections: { erlebt: { experienced: 'y'.repeat(60_000), gratitude: ['z'.repeat(2000)] } }
+		sections: { daily: { experienced: 'y'.repeat(60_000), gratitude: ['z'.repeat(2000)] } }
 	});
 	assert.equal(c.free.length, 100_000);
-	assert.equal((c.sections.erlebt!.experienced as string).length, 50_000);
-	assert.equal((c.sections.erlebt!.gratitude as string[])[0].length, 1000);
+	assert.equal((c.sections.daily!.experienced as string).length, 50_000);
+	assert.equal((c.sections.daily!.gratitude as string[])[0].length, 1000);
+});
+
+test('Legacy section kinds (up to 1.0.0) get their current names', () => {
+	assert.equal(upgradeKind('erlebt'), 'daily');
+	assert.equal(upgradeKind('gefuehl'), 'feelings');
+	assert.equal(upgradeKind('wachstum'), 'growth');
+	assert.equal(upgradeKind('daily'), 'daily');
+	assert.equal(upgradeKind('toString'), 'toString', 'no lookup on the prototype');
+	assert.equal(upgradeKind(''), '');
+});
+
+test('Legacy sections: renamed in place, current names win, unchanged objects stay the same', () => {
+	const sections = { gefuehl: { energy: 2 }, erlebt: { highlight: 'a' }, wachstum: { learned: 'b' } };
+	const upgraded = upgradeSections(sections);
+	assert.deepEqual(Object.keys(upgraded), ['feelings', 'daily', 'growth'], 'order kept');
+	assert.deepEqual(upgraded, { feelings: { energy: 2 }, daily: { highlight: 'a' }, growth: { learned: 'b' } });
+	assert.deepEqual(upgradeSections({ erlebt: { highlight: 'alt' }, daily: { highlight: 'neu' } }), { daily: { highlight: 'neu' } });
+	const current = { daily: {}, feelings: {} };
+	assert.equal(upgradeSections(current), current);
+	assert.deepEqual(upgradeSections({ __proto__: { erlebt: 1 } } as Record<string, unknown>), {});
+});
+
+test('Legacy content: converted when read, missing sections tolerated', () => {
+	const legacy = { mood: 3, sections: { erlebt: { highlight: 'x' } }, free: 'f' } as unknown as Parameters<typeof upgradeContent>[0];
+	assert.deepEqual(upgradeContent(legacy), { mood: 3, sections: { daily: { highlight: 'x' } }, free: 'f' });
+	assert.equal(legacy.sections.daily, undefined, 'input not changed');
+	const current = emptyContent();
+	assert.equal(upgradeContent(current), current);
+	const broken = { mood: null, free: '' } as unknown as Parameters<typeof upgradeContent>[0];
+	assert.equal(upgradeContent(broken), broken);
+});
+
+test('Sanitizing accepts legacy names from a page loaded before the update', () => {
+	const c = sanitizeContent({ mood: 4, sections: { erlebt: { highlight: 'alt' }, gefuehl: { energy: 5, emotions: ['joy', 'nope'] } }, free: '' });
+	assert.equal(c.sections.daily?.highlight, 'alt');
+	assert.equal(c.sections.feelings?.energy, 5);
+	assert.deepEqual(c.sections.feelings?.emotions, ['joy']);
+	assert.deepEqual(Object.keys(c.sections), ['daily', 'feelings']);
 });

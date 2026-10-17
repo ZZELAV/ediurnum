@@ -57,7 +57,7 @@ describe('AES-256-GCM', () => {
 
 	test('JSON hin und zurück', () => {
 		const key = generateKey();
-		const value = { mood: 4, sections: { erlebt: { gratitude: ['a', ''] } }, free: 'ü' };
+		const value = { mood: 4, sections: { daily: { gratitude: ['a', ''] } }, free: 'ü' };
 		assert.deepEqual(decryptJson(key, encryptJson(key, value, 'k'), 'k'), value);
 	});
 });

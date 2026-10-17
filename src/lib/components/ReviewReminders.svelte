@@ -5,12 +5,12 @@
 	import type { ReminderConfig } from '#lib/reminders.ts';
 
 	interface Props {
-		gefuehl: ReminderConfig['gefuehl'] & { next: string | null };
-		wachstum: ReminderConfig['wachstum'] & { next: string | null };
+		feelings: ReminderConfig['feelings'] & { next: string | null };
+		growth: ReminderConfig['growth'] & { next: string | null };
 		today: string;
 		feedback?: { kind: string; text: string } | null;
 	}
-	let { gefuehl, wachstum, today, feedback = null }: Props = $props();
+	let { feelings, growth, today, feedback = null }: Props = $props();
 
 	const monthDays = Array.from({ length: 28 }, (_, i) => i + 1);
 
@@ -27,46 +27,46 @@
 	<fieldset class="reminder">
 		<legend>
 			<label class="switch">
-				<input type="checkbox" role="switch" name="gefuehlEnabled" checked={gefuehl.enabled} />
-				<span><strong>{t('section.gefuehl.title')}</strong> <span class="faint">· {t('entry.rhythm.weekly')}</span></span>
+				<input type="checkbox" role="switch" name="feelingsEnabled" checked={feelings.enabled} />
+				<span><strong>{t('section.feelings.title')}</strong> <span class="faint">· {t('entry.rhythm.weekly')}</span></span>
 			</label>
 		</legend>
 		<div class="grid">
 			<div class="field">
 				<label for="r-gw">{t('settings.remindWeekday')}</label>
-				<select id="r-gw" name="gefuehlWeekday" value={String(gefuehl.weekday)}>
+				<select id="r-gw" name="feelingsWeekday" value={String(feelings.weekday)}>
 					{#each WEEK_ORDER as d (d)}<option value={String(d)}>{weekdayName(d)}</option>{/each}
 				</select>
 			</div>
 			<div class="field">
 				<label for="r-gt">{t('settings.remindTime')}</label>
-				<input id="r-gt" name="gefuehlTime" type="time" value={gefuehl.time} required />
+				<input id="r-gt" name="feelingsTime" type="time" value={feelings.time} required />
 			</div>
 		</div>
-		{#if gefuehl.enabled && gefuehl.next}<p class="faint next">{nextText(gefuehl.next, gefuehl.time)}</p>{/if}
+		{#if feelings.enabled && feelings.next}<p class="faint next">{nextText(feelings.next, feelings.time)}</p>{/if}
 	</fieldset>
 
 	<fieldset class="reminder">
 		<legend>
 			<label class="switch">
-				<input type="checkbox" role="switch" name="wachstumEnabled" checked={wachstum.enabled} />
-				<span><strong>{t('section.wachstum.title')}</strong> <span class="faint">· {t('entry.rhythm.monthly')}</span></span>
+				<input type="checkbox" role="switch" name="growthEnabled" checked={growth.enabled} />
+				<span><strong>{t('section.growth.title')}</strong> <span class="faint">· {t('entry.rhythm.monthly')}</span></span>
 			</label>
 		</legend>
 		<div class="grid">
 			<div class="field">
 				<label for="r-wd">{t('settings.remindDay')}</label>
-				<select id="r-wd" name="wachstumDay" value={String(wachstum.day)}>
+				<select id="r-wd" name="growthDay" value={String(growth.day)}>
 					<option value="last">{t('settings.remindLastDay')}</option>
 					{#each monthDays as d (d)}<option value={String(d)}>{d}.</option>{/each}
 				</select>
 			</div>
 			<div class="field">
 				<label for="r-wt">{t('settings.remindTime')}</label>
-				<input id="r-wt" name="wachstumTime" type="time" value={wachstum.time} required />
+				<input id="r-wt" name="growthTime" type="time" value={growth.time} required />
 			</div>
 		</div>
-		{#if wachstum.enabled && wachstum.next}<p class="faint next">{nextText(wachstum.next, wachstum.time)}</p>{/if}
+		{#if growth.enabled && growth.next}<p class="faint next">{nextText(growth.next, growth.time)}</p>{/if}
 	</fieldset>
 
 	<button class="btn">{t('common.save')}</button>

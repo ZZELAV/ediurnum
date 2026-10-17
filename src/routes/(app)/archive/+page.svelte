@@ -167,7 +167,7 @@
 							<div>
 								<p class="faint group">{t('stats.reviews')}</p>
 								<div class="pills">
-									{#each [['gefuehl', 'weekly'], ['wachstum', 'monthly']] as const as [kind, label] (kind)}
+									{#each [['feelings', 'weekly'], ['growth', 'monthly']] as const as [kind, label] (kind)}
 										{@const on = filter.kinds.includes(kind)}
 										<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.kinds, kind)}>
 											{t(`entry.suggest.${label}`)}

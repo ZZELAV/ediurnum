@@ -165,18 +165,18 @@ describe('Zeitplan der Rückblicke', () => {
 		({ client: c } = await login());
 		const weekday = new Date(zurichNow().date + 'T00:00:00Z').getUTCDay();
 		const r = await c.action('/reminders?/reviews', {
-			gefuehlEnabled: 'on',
-			gefuehlWeekday: String(weekday),
-			gefuehlTime: '00:00',
-			wachstumEnabled: 'on',
-			wachstumDay: '99',
-			wachstumTime: '25:00'
+			feelingsEnabled: 'on',
+			feelingsWeekday: String(weekday),
+			feelingsTime: '00:00',
+			growthEnabled: 'on',
+			growthDay: '99',
+			growthTime: '25:00'
 		});
 		assert.equal(r.type, 'success');
 		const cfg = JSON.parse(readMeta('reminders')!);
-		assert.deepEqual(cfg.gefuehl, { enabled: true, weekday, time: '00:00' });
-		assert.deepEqual(cfg.wachstum, { enabled: true, day: 'last', time: '19:00' });
-		assert.equal(readMeta('reminder_sent_gefuehl'), zurichNow().date);
+		assert.deepEqual(cfg.feelings, { enabled: true, weekday, time: '00:00' });
+		assert.deepEqual(cfg.growth, { enabled: true, day: 'last', time: '19:00' });
+		assert.equal(readMeta('reminder_sent_feelings'), zurichNow().date);
 	});
 
 	test('Seite zeigt die Erinnerungen', async () => {

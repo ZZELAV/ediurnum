@@ -2,6 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { DATA_DIR } from '$app/env/private';
+import { LEGACY_KINDS, upgradeSections } from '#lib/templates.ts';
 
 /**
  * SQLite-Datenbank (node:sqlite, ohne native Zusatzpakete).
@@ -9,7 +10,7 @@ import { DATA_DIR } from '$app/env/private';
  * Klartext sind nur technische Metadaten: IDs, Datum, Zeitstempel,
  * Sperr-/KI-Flags und welche Abschnitte ein Eintrag enthält.
  */
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 
 let db: DatabaseSync | null = null;
 
@@ -77,8 +78,45 @@ function migrate(d: DatabaseSync) {
 		// erhalten, zählen aber nicht als geschrieben (Liste, Kalender, Serie, Widget).
 		d.exec(`ALTER TABLE entries ADD COLUMN empty INTEGER NOT NULL DEFAULT 0`);
 	}
+	if (current < 4) {
+		// English section kinds (daily/feelings/growth instead of erlebt/gefuehl/wachstum) in the plain-text parts;
+		// encrypted contents are converted when read (decryptContent in records.ts)
+		d.exec('BEGIN IMMEDIATE');
+		try {
+			upgradeLegacyKinds(d);
+			d.prepare(`INSERT OR REPLACE INTO meta (key, value) VALUES ('schema', ?)`).run(String(SCHEMA_VERSION));
+			d.exec('COMMIT');
+		} catch (e) {
+			d.exec('ROLLBACK');
+			throw e;
+		}
+	}
 	if (current < SCHEMA_VERSION) {
 		d.prepare(`INSERT OR REPLACE INTO meta (key, value) VALUES ('schema', ?)`).run(String(SCHEMA_VERSION));
+	}
+}
+
+/**
+ * Renames legacy section kinds in all plain-text places: `entries.kinds`, the reminder schedule (`meta.reminders`)
+ * and the "sent today" markers. Idempotent – also used after restoring a backup up to format version 2.
+ */
+export function upgradeLegacyKinds(d: DatabaseSync) {
+	for (const [legacy, kind] of Object.entries(LEGACY_KINDS)) {
+		// kinds is a comma-separated list; match whole names only
+		d.prepare(
+			`UPDATE entries SET kinds = trim(replace(',' || kinds || ',', ',' || ? || ',', ',' || ? || ','), ',') WHERE ',' || kinds || ',' LIKE '%,' || ? || ',%'`
+		).run(legacy, kind, legacy);
+		const sent = d.prepare('SELECT value FROM meta WHERE key = ?').get(`reminder_sent_${legacy}`) as { value: string } | undefined;
+		if (sent) {
+			d.prepare('INSERT OR IGNORE INTO meta (key, value) VALUES (?, ?)').run(`reminder_sent_${kind}`, sent.value);
+			d.prepare('DELETE FROM meta WHERE key = ?').run(`reminder_sent_${legacy}`);
+		}
+	}
+	const reminders = d.prepare(`SELECT value FROM meta WHERE key = 'reminders'`).get() as { value: string } | undefined;
+	if (reminders) {
+		const cfg = JSON.parse(reminders.value) as Record<string, unknown>;
+		const upgraded = upgradeSections(cfg);
+		if (upgraded !== cfg) d.prepare(`UPDATE meta SET value = ? WHERE key = 'reminders'`).run(JSON.stringify(upgraded));
 	}
 }
 

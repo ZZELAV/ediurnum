@@ -4,6 +4,15 @@ All notable changes to ediurnum are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [Semantic Versioning](https://semver.org).
 The topmost version without a date is still in development.
 
+## [1.1.0]
+
+### Changed
+
+- The three sections are stored under English names (daily, feelings, growth). Existing journals are updated
+  automatically on the first start – nothing changes in the app, and locked entries stay locked.
+- Backups use format version 3. Older backups can still be restored; backups from 1.1.0 can't be restored in 1.0.0
+  or older, so update all installations before moving a backup between them.
+
 ## [1.0.0] - 2026-10-17
 
 ### Added

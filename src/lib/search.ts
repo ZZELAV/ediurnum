@@ -8,7 +8,7 @@ import type { EntryContent } from './types.ts';
  */
 
 export interface SearchHit {
-	/** Textschlüssel des Feldes, in dem der Auszug steht (z. B. `section.erlebt.highlight`). */
+	/** Textschlüssel des Feldes, in dem der Auszug steht (z. B. `section.daily.highlight`). */
 	field: string;
 	/** Auszug als Abschnitte; `hit` markiert gefundene Stellen. */
 	parts: { text: string; hit: boolean }[];

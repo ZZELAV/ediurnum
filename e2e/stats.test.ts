@@ -46,7 +46,7 @@ describe('Statistik', () => {
 
 	test('Kennzahlen; gesperrte Einträge zählen ohne PIN nur bei Anzahl, Serien und Rückblicken', async () => {
 		const save = (date: string, content: unknown) => c.api(`/api/entry/${date}`, { content });
-		await save(zurichToday(-2), { mood: 2, sections: { gefuehl: { energy: 3, emotions: ['joy', 'stressed'] } }, free: '' });
+		await save(zurichToday(-2), { mood: 2, sections: { feelings: { energy: 3, emotions: ['joy', 'stressed'] } }, free: '' });
 		await save(zurichToday(-1), { mood: 4, sections: {}, free: 'gestern' });
 		await c.action('/settings?/pin', { pin: PIN, confirm: PIN });
 		await c.api(`/api/entry/${zurichToday(-2)}/lock`, { locked: true });

@@ -8,8 +8,8 @@ import { randomUUID } from 'node:crypto';
 import { log } from './log.ts';
 import {
 	defaultReminders,
-	isGefuehlDue,
-	isWachstumDue,
+	isFeelingsDue,
+	isGrowthDue,
 	lastMonthlyDueOnOrBefore,
 	MAX_CUSTOM_REMINDERS,
 	minutesOf,
@@ -51,9 +51,9 @@ export function saveReviewSchedule(cfg: ReminderConfig, now = new Date()) {
 	saveReminders(cfg);
 	const today = todayIso(now);
 	const minutes = now.getHours() * 60 + now.getMinutes();
-	if (now.getDay() === cfg.gefuehl.weekday && minutes >= minutesOf(cfg.gefuehl.time)) setMeta('reminder_sent_gefuehl', today);
-	if (lastMonthlyDueOnOrBefore(today, cfg.wachstum.day) === today && minutes >= minutesOf(cfg.wachstum.time)) {
-		setMeta('reminder_sent_wachstum', today);
+	if (now.getDay() === cfg.feelings.weekday && minutes >= minutesOf(cfg.feelings.time)) setMeta('reminder_sent_feelings', today);
+	if (lastMonthlyDueOnOrBefore(today, cfg.growth.day) === today && minutes >= minutesOf(cfg.growth.time)) {
+		setMeta('reminder_sent_growth', today);
 	}
 }
 
@@ -225,25 +225,25 @@ async function reminderTick(now = new Date()) {
 	const t = (key: string) => translate(cfg.lang, key);
 
 	if (
-		cfg.gefuehl.enabled &&
-		now.getDay() === cfg.gefuehl.weekday &&
-		minutes >= minutesOf(cfg.gefuehl.time) &&
-		getMeta('reminder_sent_gefuehl') !== today &&
-		isGefuehlDue(today, metas, cfg)
+		cfg.feelings.enabled &&
+		now.getDay() === cfg.feelings.weekday &&
+		minutes >= minutesOf(cfg.feelings.time) &&
+		getMeta('reminder_sent_feelings') !== today &&
+		isFeelingsDue(today, metas, cfg)
 	) {
-		setMeta('reminder_sent_gefuehl', today);
-		await sendToAll({ title: t('push.gefuehl.title'), body: t('push.gefuehl.body'), url: `/entry/${today}`, tag: 'gefuehl' });
+		setMeta('reminder_sent_feelings', today);
+		await sendToAll({ title: t('push.feelings.title'), body: t('push.feelings.body'), url: `/entry/${today}`, tag: 'feelings' });
 	}
 
 	if (
-		cfg.wachstum.enabled &&
-		lastMonthlyDueOnOrBefore(today, cfg.wachstum.day) === today &&
-		minutes >= minutesOf(cfg.wachstum.time) &&
-		getMeta('reminder_sent_wachstum') !== today &&
-		isWachstumDue(today, metas, cfg)
+		cfg.growth.enabled &&
+		lastMonthlyDueOnOrBefore(today, cfg.growth.day) === today &&
+		minutes >= minutesOf(cfg.growth.time) &&
+		getMeta('reminder_sent_growth') !== today &&
+		isGrowthDue(today, metas, cfg)
 	) {
-		setMeta('reminder_sent_wachstum', today);
-		await sendToAll({ title: t('push.wachstum.title'), body: t('push.wachstum.body'), url: `/entry/${today}`, tag: 'wachstum' });
+		setMeta('reminder_sent_growth', today);
+		await sendToAll({ title: t('push.growth.title'), body: t('push.growth.body'), url: `/entry/${today}`, tag: 'growth' });
 	}
 
 	const markers = sentMarkers();

@@ -18,7 +18,7 @@ let backupFile: string;
 before(async () => {
 	server = await startServer();
 	({ client: c, recoveryKey } = await setupJournal(server));
-	await c.api('/api/entry/2026-05-01', { content: { mood: 4, sections: { erlebt: { gratitude: ['Kaffee im Café', '', ''] } }, free: 'Offen lesbar' } });
+	await c.api('/api/entry/2026-05-01', { content: { mood: 4, sections: { daily: { gratitude: ['Kaffee im Café', '', ''] } }, free: 'Offen lesbar' } });
 	await c.api('/api/entry/2026-05-02', { content: { mood: 2, sections: {}, free: 'Geheim mit PIN' } });
 	await c.action('/settings?/pin', { pin: PIN, confirm: PIN });
 	await c.api('/api/entry/2026-05-02/lock', { locked: true });

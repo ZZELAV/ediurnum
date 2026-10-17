@@ -9,8 +9,8 @@ import { DatabaseSync } from 'node:sqlite';
 import { decrypt, encrypt, parseRecoveryKey } from '../src/lib/server/crypto.ts';
 import { Client, PASSWORD, setupJournal, startServer, type TestServer } from './helpers.ts';
 
-const filled = (text: string) => ({ mood: 3, sections: { erlebt: { gratitude: ['', '', ''], experienced: text, highlight: '', takeaway: '' } }, free: '' });
-const cleared = { mood: null, sections: { erlebt: { gratitude: ['', '', ''], experienced: '', highlight: '', takeaway: '' } }, free: '' };
+const filled = (text: string) => ({ mood: 3, sections: { daily: { gratitude: ['', '', ''], experienced: text, highlight: '', takeaway: '' } }, free: '' });
+const cleared = { mood: null, sections: { daily: { gratitude: ['', '', ''], experienced: '', highlight: '', takeaway: '' } }, free: '' };
 
 describe('Komplett geleerter Eintrag', () => {
 	let server: TestServer;
@@ -54,7 +54,7 @@ describe('Komplett geleerter Eintrag', () => {
 	});
 });
 
-describe('Migration einer bestehenden Datenbank (Schema 2 → 3)', () => {
+describe('Migration einer bestehenden Datenbank (Schema 2 → 4)', () => {
 	test('fügt das Kennzeichen hinzu, bestehende Einträge zählen weiter', async () => {
 		const first = await startServer();
 		const { client } = await setupJournal(first);
@@ -74,7 +74,7 @@ describe('Migration einer bestehenden Datenbank (Schema 2 → 3)', () => {
 			const r = await c.api('/api/export/plain?format=json');
 			assert.deepEqual((r.json.entries as { date: string }[]).map((e) => e.date), ['2026-04-01']);
 			db = new DatabaseSync(file);
-			assert.equal((db.prepare(`SELECT value FROM meta WHERE key = 'schema'`).get() as { value: string }).value, '3');
+			assert.equal((db.prepare(`SELECT value FROM meta WHERE key = 'schema'`).get() as { value: string }).value, '4');
 			assert.equal((db.prepare('SELECT empty FROM entries').get() as { empty: number }).empty, 0);
 			db.close();
 		} finally {
@@ -118,8 +118,8 @@ describe('Backup-Versionen', () => {
 		return { target, c, r };
 	}
 
-	test('Aktuelle Backups haben Version 2 und behalten geleerte Einträge als geleert', async () => {
-		assert.equal(backup.version, 2);
+	test('Aktuelle Backups haben Version 3 und behalten geleerte Einträge als geleert', async () => {
+		assert.equal(backup.version, 3);
 		const { target, c, r } = await restore(JSON.stringify(backup));
 		try {
 			assert.equal(r.location, '/');
@@ -165,7 +165,7 @@ describe('Backup-Versionen', () => {
 	});
 
 	test('Backups einer neueren Version werden mit Hinweis abgelehnt', async () => {
-		const { target, r } = await restore(repack(3, () => {}));
+		const { target, r } = await restore(repack(4, () => {}));
 		try {
 			assert.equal(r.data?.error, 'backup.tooNew');
 		} finally {

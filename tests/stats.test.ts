@@ -5,11 +5,11 @@ import { EMOTIONS } from '../src/lib/templates.ts';
 
 const day = (date: string, mood: number | null = null, extra: Partial<StatsDay> = {}): StatsDay => ({
 	date,
-	kinds: ['erlebt'],
+	kinds: ['daily'],
 	content: { mood, energy: null, emotions: [] },
 	...extra
 });
-const locked = (date: string, kinds: StatsDay['kinds'] = ['erlebt']): StatsDay => ({ date, kinds, content: null });
+const locked = (date: string, kinds: StatsDay['kinds'] = ['daily']): StatsDay => ({ date, kinds, content: null });
 
 test('Zeitraum: letzte 30/90/365 Tage inklusive heute, „Alles“ ab dem ersten Eintrag', () => {
 	assert.equal(periodStart('30', '2026-10-11', '2025-01-01'), '2026-09-12');
@@ -98,7 +98,7 @@ test('Ungültige Werte zählen nicht', () => {
 			day('2026-10-01', 7),
 			day('2026-10-02', 0),
 			day('2026-10-03', 2.5),
-			{ date: '2026-10-04', kinds: ['gefuehl'], content: { mood: 3, energy: 9, emotions: ['joy', 'joy', 'unknown'] } }
+			{ date: '2026-10-04', kinds: ['feelings'], content: { mood: 3, energy: 9, emotions: ['joy', 'joy', 'unknown'] } }
 		],
 		'2026-10-01',
 		'2026-10-04'
@@ -110,7 +110,7 @@ test('Ungültige Werte zählen nicht', () => {
 
 test('Gefühle: Häufigkeit absteigend, bei Gleichstand in der Reihenfolge der Auswahl; angenehm/belastend', () => {
 	const review = (date: string, emotions: string[], energy: number) =>
-		({ date, kinds: ['gefuehl'], content: { mood: null, energy, emotions } }) satisfies StatsDay;
+		({ date, kinds: ['feelings'], content: { mood: null, energy, emotions } }) satisfies StatsDay;
 	const s = computeStats(
 		[review('2026-10-04', ['stressed', 'joy'], 2), review('2026-10-11', ['tired', 'stressed', 'calm'], 4)],
 		'2026-10-01',
@@ -133,10 +133,10 @@ test('Gefühle: Häufigkeit absteigend, bei Gleichstand in der Reihenfolge der A
 test('Rückblicke: geschrieben pro Woche ab Montag bzw. pro Monat, möglich aus der Länge des Zeitraums', () => {
 	// 1.–14.10.2026: 14 Tage = 2 mögliche Wochen, 1 Monat
 	const days = [
-		day('2026-09-30', null, { kinds: ['gefuehl'] }), // vor dem Zeitraum
-		day('2026-10-04', null, { kinds: ['erlebt', 'gefuehl'] }),
-		day('2026-10-03', null, { kinds: ['gefuehl'] }), // gleiche Woche
-		day('2026-10-13', null, { kinds: ['wachstum'] })
+		day('2026-09-30', null, { kinds: ['feelings'] }), // vor dem Zeitraum
+		day('2026-10-04', null, { kinds: ['daily', 'feelings'] }),
+		day('2026-10-03', null, { kinds: ['feelings'] }), // gleiche Woche
+		day('2026-10-13', null, { kinds: ['growth'] })
 	];
 	const s = computeStats(days, '2026-10-01', '2026-10-14');
 	assert.deepEqual(s.weeklyReviews, { done: 1, total: 2 });
@@ -165,20 +165,20 @@ test('Rückblicke: angebrochene Wochen am Rand zählen als geschrieben, aber nie
 	const days: StatsDay[] = [];
 	for (let d = '2025-10-01'; d <= '2026-10-17'; d = new Date(Date.parse(d) + 86400000).toISOString().slice(0, 10)) {
 		const kinds: StatsDay['kinds'] = [];
-		if (new Date(d).getUTCDay() === 0) kinds.push('gefuehl');
-		if (d.endsWith('-01')) kinds.push('wachstum');
+		if (new Date(d).getUTCDay() === 0) kinds.push('feelings');
+		if (d.endsWith('-01')) kinds.push('growth');
 		if (kinds.length) days.push(day(d, null, { kinds }));
 	}
 	const s = computeStats(days, from, '2026-10-17');
 	assert.deepEqual(s.weeklyReviews, { done: 52, total: 52 });
 	assert.deepEqual(s.monthlyReviews, { done: 12, total: 12 });
 	// zusätzlich am Mittwoch ein Rückblick in der laufenden Woche → 53 Wochen berührt, gezählt 52
-	const more = computeStats([...days, day('2026-10-14', null, { kinds: ['gefuehl'] })], from, '2026-10-17');
+	const more = computeStats([...days, day('2026-10-14', null, { kinds: ['feelings'] })], from, '2026-10-17');
 	assert.deepEqual(more.weeklyReviews, { done: 52, total: 52 });
 });
 
 test('Gesperrte Einträge ohne PIN: zählen für Anzahl, Serien und Rückblicke, nicht für Stimmung', () => {
-	const days = [day('2026-10-09', 4), locked('2026-10-10', ['gefuehl']), day('2026-10-11', 2)];
+	const days = [day('2026-10-09', 4), locked('2026-10-10', ['feelings']), day('2026-10-11', 2)];
 	const s = computeStats(days, '2026-10-01', '2026-10-11');
 	assert.equal(s.written, 3);
 	assert.equal(s.hidden, 1);

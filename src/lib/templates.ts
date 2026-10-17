@@ -44,7 +44,7 @@ export const EMOTIONS = [
  */
 export const SECTIONS: SectionDef[] = [
 	{
-		kind: 'erlebt',
+		kind: 'daily',
 		rhythm: 'daily',
 		fields: [
 			{ id: 'gratitude', type: 'lines', count: 3 },
@@ -54,7 +54,7 @@ export const SECTIONS: SectionDef[] = [
 		]
 	},
 	{
-		kind: 'gefuehl',
+		kind: 'feelings',
 		rhythm: 'weekly',
 		fields: [
 			{ id: 'energy', type: 'scale' },
@@ -65,7 +65,7 @@ export const SECTIONS: SectionDef[] = [
 		]
 	},
 	{
-		kind: 'wachstum',
+		kind: 'growth',
 		rhythm: 'monthly',
 		fields: [
 			{ id: 'learned', type: 'textarea' },
@@ -76,12 +76,42 @@ export const SECTIONS: SectionDef[] = [
 	}
 ];
 
+/**
+ * Section kinds up to 1.0.0 had German names. They still occur in encrypted entries and revisions (converted when
+ * read and rewritten on the next save), in backups up to format version 2 and in databases before schema 4.
+ */
+export const LEGACY_KINDS: Record<string, SectionKind> = { erlebt: 'daily', gefuehl: 'feelings', wachstum: 'growth' };
+
+/** Current name of a section kind; unknown names are returned unchanged. */
+export const upgradeKind = (kind: string): string => (Object.hasOwn(LEGACY_KINDS, kind) ? LEGACY_KINDS[kind] : kind);
+
+/**
+ * Renames legacy section keys and keeps their order (saving compares the JSON of old and new content).
+ * A key with the current name wins over its legacy twin.
+ */
+export function upgradeSections<T>(sections: Record<string, T>): Record<string, T> {
+	if (!Object.keys(sections).some((k) => Object.hasOwn(LEGACY_KINDS, k))) return sections;
+	const out: Record<string, T> = {};
+	for (const [k, v] of Object.entries(sections)) {
+		if (!Object.hasOwn(LEGACY_KINDS, k)) out[k] = v;
+		else if (!Object.hasOwn(sections, LEGACY_KINDS[k])) out[LEGACY_KINDS[k]] = v;
+	}
+	return out;
+}
+
+/** Entry content with current section names (see LEGACY_KINDS). */
+export function upgradeContent(content: EntryContent): EntryContent {
+	const sections = content.sections && typeof content.sections === 'object' ? content.sections : {};
+	const upgraded = upgradeSections(sections);
+	return upgraded === sections ? content : { ...content, sections: upgraded };
+}
+
 export function sectionDef(kind: SectionKind): SectionDef {
 	return SECTIONS.find((s) => s.kind === kind)!;
 }
 
 export function emptyContent(): EntryContent {
-	return { mood: null, sections: { erlebt: {} }, free: '' };
+	return { mood: null, sections: { daily: {} }, free: '' };
 }
 
 function hasValue(v: unknown): boolean {
@@ -111,8 +141,10 @@ export function sanitizeContent(input: unknown): EntryContent {
 	const mood = Number(raw.mood);
 	out.mood = Number.isInteger(mood) && mood >= 1 && mood <= 5 ? mood : null;
 	out.free = typeof raw.free === 'string' ? raw.free.slice(0, 100_000) : '';
+	// a page loaded before the update may still send legacy section names
+	const sections = raw.sections && typeof raw.sections === 'object' ? upgradeSections(raw.sections as Record<string, unknown>) : {};
 	for (const def of SECTIONS) {
-		const src = raw.sections?.[def.kind];
+		const src = sections[def.kind];
 		if (!src || typeof src !== 'object') continue;
 		const sec: Record<string, string | number | string[] | null> = {};
 		for (const f of def.fields) {
@@ -134,6 +166,6 @@ export function sanitizeContent(input: unknown): EntryContent {
 		}
 		out.sections[def.kind] = sec;
 	}
-	if (!out.sections.erlebt) out.sections.erlebt = {};
+	if (!out.sections.daily) out.sections.daily = {};
 	return out;
 }

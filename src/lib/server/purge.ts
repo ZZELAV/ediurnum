@@ -10,8 +10,8 @@ import { destroyAllSessions } from './vault.ts';
 export function purgeContent() {
 	transaction(() => {
 		getDb().exec('DELETE FROM entry_revisions; DELETE FROM entries; DELETE FROM analyses;');
-		setMeta('reminder_sent_gefuehl', null);
-		setMeta('reminder_sent_wachstum', null);
+		setMeta('reminder_sent_feelings', null);
+		setMeta('reminder_sent_growth', null);
 	});
 	compact();
 }

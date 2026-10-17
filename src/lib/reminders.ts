@@ -8,8 +8,8 @@ import type { EntryMeta, Lang, SectionKind } from './types.ts';
  * Tagebuch gesperrt ist.
  */
 export interface ReminderConfig {
-	gefuehl: { enabled: boolean; weekday: number; time: string }; // 0 = Sonntag
-	wachstum: { enabled: boolean; day: number | 'last'; time: string };
+	feelings: { enabled: boolean; weekday: number; time: string }; // 0 = Sonntag
+	growth: { enabled: boolean; day: number | 'last'; time: string };
 	custom: CustomReminder[];
 	lang: Lang;
 }
@@ -41,8 +41,8 @@ export interface CustomReminder extends ReminderSchedule {
 
 export function defaultReminders(lang: Lang = 'de'): ReminderConfig {
 	return {
-		gefuehl: { enabled: true, weekday: 0, time: '19:00' },
-		wachstum: { enabled: true, day: 'last', time: '19:00' },
+		feelings: { enabled: true, weekday: 0, time: '19:00' },
+		growth: { enabled: true, day: 'last', time: '19:00' },
 		custom: [],
 		lang
 	};
@@ -89,18 +89,18 @@ export function sanitizeReminders(input: unknown, lang: Lang): ReminderConfig {
 	const d = defaultReminders(lang);
 	const raw = (input ?? {}) as Partial<ReminderConfig>;
 	const time = (v: unknown, fallback: string) => (typeof v === 'string' && TIME_RE.test(v) ? v : fallback);
-	const weekday = Number(raw.gefuehl?.weekday);
-	const day = raw.wachstum?.day === 'last' ? 'last' : Number(raw.wachstum?.day);
+	const weekday = Number(raw.feelings?.weekday);
+	const day = raw.growth?.day === 'last' ? 'last' : Number(raw.growth?.day);
 	return {
-		gefuehl: {
-			enabled: Boolean(raw.gefuehl?.enabled),
-			weekday: Number.isInteger(weekday) && weekday >= 0 && weekday <= 6 ? weekday : d.gefuehl.weekday,
-			time: time(raw.gefuehl?.time, d.gefuehl.time)
+		feelings: {
+			enabled: Boolean(raw.feelings?.enabled),
+			weekday: Number.isInteger(weekday) && weekday >= 0 && weekday <= 6 ? weekday : d.feelings.weekday,
+			time: time(raw.feelings?.time, d.feelings.time)
 		},
-		wachstum: {
-			enabled: Boolean(raw.wachstum?.enabled),
-			day: day === 'last' || (Number.isInteger(day) && day >= 1 && day <= 28) ? day : d.wachstum.day,
-			time: time(raw.wachstum?.time, d.wachstum.time)
+		growth: {
+			enabled: Boolean(raw.growth?.enabled),
+			day: day === 'last' || (Number.isInteger(day) && day >= 1 && day <= 28) ? day : d.growth.day,
+			time: time(raw.growth?.time, d.growth.time)
 		},
 		custom: (Array.isArray(raw.custom) ? raw.custom : [])
 			.map(sanitizeCustomReminder)
@@ -191,14 +191,14 @@ function isReviewDue(date: string, metas: ReviewMeta[], kind: SectionKind, sched
 	return daysBetween(since, scheduled) >= gap;
 }
 
-export function isGefuehlDue(date: string, metas: ReviewMeta[], cfg: ReminderConfig): boolean {
-	if (!cfg.gefuehl.enabled) return false;
-	return isReviewDue(date, metas, 'gefuehl', lastWeekdayOnOrBefore(date, cfg.gefuehl.weekday), WEEKLY_GAP_DAYS);
+export function isFeelingsDue(date: string, metas: ReviewMeta[], cfg: ReminderConfig): boolean {
+	if (!cfg.feelings.enabled) return false;
+	return isReviewDue(date, metas, 'feelings', lastWeekdayOnOrBefore(date, cfg.feelings.weekday), WEEKLY_GAP_DAYS);
 }
 
-export function isWachstumDue(date: string, metas: ReviewMeta[], cfg: ReminderConfig): boolean {
-	if (!cfg.wachstum.enabled) return false;
-	return isReviewDue(date, metas, 'wachstum', lastMonthlyDueOnOrBefore(date, cfg.wachstum.day), MONTHLY_GAP_DAYS);
+export function isGrowthDue(date: string, metas: ReviewMeta[], cfg: ReminderConfig): boolean {
+	if (!cfg.growth.enabled) return false;
+	return isReviewDue(date, metas, 'growth', lastMonthlyDueOnOrBefore(date, cfg.growth.day), MONTHLY_GAP_DAYS);
 }
 
 /**
@@ -206,17 +206,17 @@ export function isWachstumDue(date: string, metas: ReviewMeta[], cfg: ReminderCo
  * nicht nur nach Wochentag bzw. Monatstag. Ohne Einträge zählt heute als erster Eintrag.
  */
 export function nextReview(
-	kind: 'gefuehl' | 'wachstum',
+	kind: 'feelings' | 'growth',
 	metas: ReviewMeta[],
 	cfg: ReminderConfig,
 	today: string,
 	nowMinutes: number
 ): string | null {
 	const schedule: ReminderSchedule =
-		kind === 'gefuehl'
-			? { repeat: 'weekly', date: '', weekdays: [cfg.gefuehl.weekday], day: 1, time: cfg.gefuehl.time }
-			: { repeat: 'monthly', date: '', weekdays: [], day: cfg.wachstum.day, time: cfg.wachstum.time };
-	const isDue = kind === 'gefuehl' ? isGefuehlDue : isWachstumDue;
+		kind === 'feelings'
+			? { repeat: 'weekly', date: '', weekdays: [cfg.feelings.weekday], day: 1, time: cfg.feelings.time }
+			: { repeat: 'monthly', date: '', weekdays: [], day: cfg.growth.day, time: cfg.growth.time };
+	const isDue = kind === 'feelings' ? isFeelingsDue : isGrowthDue;
 	const known = metas.length ? metas : [{ date: today, kinds: [] }];
 	for (let i = 0; i <= 93; i++) {
 		const d = addDays(today, i);
@@ -227,8 +227,8 @@ export function nextReview(
 }
 
 export interface Suggestions {
-	gefuehl: { suggested: boolean; daysSince: number | null };
-	wachstum: { suggested: boolean };
+	feelings: { suggested: boolean; daysSince: number | null };
+	growth: { suggested: boolean };
 }
 
 /**
@@ -237,13 +237,13 @@ export interface Suggestions {
  */
 export function suggestionsFor(date: string, metas: EntryMeta[], cfg: ReminderConfig): Suggestions {
 	const past = metas.filter((m) => m.date <= date);
-	const lastGefuehl = past.find((m) => m.date !== date && m.kinds.includes('gefuehl'))?.date ?? null;
+	const lastFeelings = past.find((m) => m.date !== date && m.kinds.includes('feelings'))?.date ?? null;
 	return {
-		gefuehl: {
-			suggested: isGefuehlDue(date, past, cfg),
-			daysSince: lastGefuehl ? daysBetween(lastGefuehl, date) : null
+		feelings: {
+			suggested: isFeelingsDue(date, past, cfg),
+			daysSince: lastFeelings ? daysBetween(lastFeelings, date) : null
 		},
-		wachstum: { suggested: isWachstumDue(date, past, cfg) }
+		growth: { suggested: isGrowthDue(date, past, cfg) }
 	};
 }
 

@@ -46,7 +46,7 @@
 		if (entry) meta = { ...entry };
 	});
 
-	const optional = SECTIONS.filter((s) => s.kind !== 'erlebt');
+	const optional = SECTIONS.filter((s) => s.kind !== 'daily');
 	const visibleKinds = $derived(SECTIONS.map((s) => s.kind).filter((k) => content.sections[k] !== undefined));
 
 	$effect(() => {
@@ -132,15 +132,15 @@
 	});
 
 	const isSuggested = (kind: SectionKind) =>
-		kind === 'gefuehl' ? suggestions.gefuehl.suggested : kind === 'wachstum' ? suggestions.wachstum.suggested : false;
+		kind === 'feelings' ? suggestions.feelings.suggested : kind === 'growth' ? suggestions.growth.suggested : false;
 	const missing = $derived(optional.filter((s) => content.sections[s.kind] === undefined));
 	const suggestedCards = $derived(missing.filter((s) => isSuggested(s.kind) && !dismissed[s.kind]));
 	const quietAdds = $derived(missing.filter((s) => !suggestedCards.includes(s)));
 
 	function suggestionReason(kind: SectionKind): string {
-		if (kind === 'wachstum') return t('dashboard.suggestWachstum');
-		const days = suggestions.gefuehl.daysSince;
-		return days === null ? t('dashboard.suggestGefuehlNever') : t('dashboard.suggestGefuehl', { days });
+		if (kind === 'growth') return t('dashboard.suggestGrowth');
+		const days = suggestions.feelings.daysSince;
+		return days === null ? t('dashboard.suggestFeelingsNever') : t('dashboard.suggestFeelings', { days });
 	}
 
 	function later(kind: SectionKind) {
@@ -217,7 +217,7 @@
 
 {#snippet sectionIcon(kind: SectionKind)}
 	<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-		{#if kind === 'gefuehl'}
+		{#if kind === 'feelings'}
 			<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
 		{:else}
 			<path d="M12 21v-9" /><path d="M12 12c0-4 3-7 7-7 0 4-3 7-7 7z" /><path d="M12 15c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z" />
@@ -309,7 +309,7 @@
 				{/each}
 
 				{#each visibleKinds as kind (kind)}
-					<SectionBlock {kind} bind:values={content.sections[kind]!} onremove={kind === 'erlebt' ? undefined : () => removeSection(kind)} />
+					<SectionBlock {kind} bind:values={content.sections[kind]!} onremove={kind === 'daily' ? undefined : () => removeSection(kind)} />
 				{/each}
 
 				<section class="card">
@@ -434,7 +434,7 @@
 		align-items: start;
 		border-left: 3px solid var(--dusk);
 	}
-	.suggest.wachstum {
+	.suggest.growth {
 		border-left-color: var(--gold);
 	}
 	.suggest-icon {
@@ -446,7 +446,7 @@
 		background: var(--dusk-soft);
 		color: var(--dusk);
 	}
-	.suggest.wachstum .suggest-icon {
+	.suggest.growth .suggest-icon {
 		background: color-mix(in srgb, var(--gold) 18%, transparent);
 		color: color-mix(in srgb, var(--gold) 70%, var(--ink));
 	}

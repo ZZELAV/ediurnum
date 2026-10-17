@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
 	defaultReminders,
-	isGefuehlDue,
-	isWachstumDue,
+	isFeelingsDue,
+	isGrowthDue,
 	lastMonthlyDueOnOrBefore,
 	lastWeekdayOnOrBefore,
 	nextOccurrence,
@@ -43,80 +43,80 @@ test('Monatliche Fälligkeit: Monatsletzter und fixer Tag', () => {
 	assert.equal(lastMonthlyDueOnOrBefore('2026-10-20', 15), '2026-10-15');
 });
 
-const start = meta('2026-09-01', ['erlebt']); // Tagebuch läuft schon länger
+const start = meta('2026-09-01', ['daily']); // Tagebuch läuft schon länger
 
 test('Gefühl: fällig am Sonntag, wenn seit rund einer Woche kein Rückblick', () => {
-	assert.equal(isGefuehlDue('2026-10-11', [start], cfg), true);
-	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-04', ['gefuehl']), start], cfg), true);
-	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-05', ['gefuehl']), start], cfg), true); // einen Tag zu spät geschrieben
+	assert.equal(isFeelingsDue('2026-10-11', [start], cfg), true);
+	assert.equal(isFeelingsDue('2026-10-11', [meta('2026-10-04', ['feelings']), start], cfg), true);
+	assert.equal(isFeelingsDue('2026-10-11', [meta('2026-10-05', ['feelings']), start], cfg), true); // einen Tag zu spät geschrieben
 });
 
 test('Gefühl: nicht fällig, wenn der letzte Rückblick weniger als eine Woche zurückliegt', () => {
-	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-09', ['erlebt', 'gefuehl']), start], cfg), false);
-	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-06', ['gefuehl']), start], cfg), false);
+	assert.equal(isFeelingsDue('2026-10-11', [meta('2026-10-09', ['daily', 'feelings']), start], cfg), false);
+	assert.equal(isFeelingsDue('2026-10-11', [meta('2026-10-06', ['feelings']), start], cfg), false);
 	// … dafür am Sonntag darauf
-	assert.equal(isGefuehlDue('2026-10-18', [meta('2026-10-06', ['gefuehl']), start], cfg), true);
+	assert.equal(isFeelingsDue('2026-10-18', [meta('2026-10-06', ['feelings']), start], cfg), true);
 });
 
 test('Neues Tagebuch: Wochenrückblick erst nach der ersten Woche', () => {
-	assert.equal(isGefuehlDue('2026-10-11', [], cfg), false);
-	assert.equal(isGefuehlDue('2026-10-11', [meta('2026-10-08', ['erlebt'])], cfg), false);
-	assert.equal(isGefuehlDue('2026-10-18', [meta('2026-10-08', ['erlebt'])], cfg), true);
+	assert.equal(isFeelingsDue('2026-10-11', [], cfg), false);
+	assert.equal(isFeelingsDue('2026-10-11', [meta('2026-10-08', ['daily'])], cfg), false);
+	assert.equal(isFeelingsDue('2026-10-18', [meta('2026-10-08', ['daily'])], cfg), true);
 });
 
 test('Gefühl: bleibt nach dem Sonntag fällig, bis es geschrieben ist', () => {
-	assert.equal(isGefuehlDue('2026-10-13', [meta('2026-10-04', ['gefuehl']), start], cfg), true);
-	assert.equal(isGefuehlDue('2026-10-13', [meta('2026-10-12', ['gefuehl']), start], cfg), false);
+	assert.equal(isFeelingsDue('2026-10-13', [meta('2026-10-04', ['feelings']), start], cfg), true);
+	assert.equal(isFeelingsDue('2026-10-13', [meta('2026-10-12', ['feelings']), start], cfg), false);
 });
 
 test('Weiterentwicklung: fällig am Monatsletzten, wenn seit rund einem Monat kein Rückblick', () => {
-	assert.equal(isWachstumDue('2026-10-31', [start], cfg), true);
-	assert.equal(isWachstumDue('2026-10-31', [meta('2026-09-30', ['wachstum']), start], cfg), true);
-	assert.equal(isWachstumDue('2026-10-31', [meta('2026-10-28', ['wachstum']), start], cfg), false);
-	assert.equal(isWachstumDue('2026-10-31', [meta('2026-10-10', ['wachstum']), start], cfg), false);
-	assert.equal(isWachstumDue('2026-11-30', [meta('2026-10-10', ['wachstum']), start], cfg), true);
+	assert.equal(isGrowthDue('2026-10-31', [start], cfg), true);
+	assert.equal(isGrowthDue('2026-10-31', [meta('2026-09-30', ['growth']), start], cfg), true);
+	assert.equal(isGrowthDue('2026-10-31', [meta('2026-10-28', ['growth']), start], cfg), false);
+	assert.equal(isGrowthDue('2026-10-31', [meta('2026-10-10', ['growth']), start], cfg), false);
+	assert.equal(isGrowthDue('2026-11-30', [meta('2026-10-10', ['growth']), start], cfg), true);
 });
 
 test('Neues Tagebuch: Monatsrückblick erst nach rund einem Monat', () => {
-	assert.equal(isWachstumDue('2026-10-31', [meta('2026-10-20', ['erlebt'])], cfg), false);
-	assert.equal(isWachstumDue('2026-11-30', [meta('2026-10-20', ['erlebt'])], cfg), true);
+	assert.equal(isGrowthDue('2026-10-31', [meta('2026-10-20', ['daily'])], cfg), false);
+	assert.equal(isGrowthDue('2026-11-30', [meta('2026-10-20', ['daily'])], cfg), true);
 });
 
 test('Nächster Rückblick berücksichtigt den Mindestabstand', () => {
 	// Neues Tagebuch am Samstag, 10. Oktober: erste Erinnerung erst am Sonntag darauf bzw. Ende November
-	const fresh = [meta('2026-10-10', ['erlebt'])];
-	assert.equal(nextReview('gefuehl', fresh, cfg, '2026-10-10', 600), '2026-10-18');
-	assert.equal(nextReview('wachstum', fresh, cfg, '2026-10-10', 600), '2026-11-30');
+	const fresh = [meta('2026-10-10', ['daily'])];
+	assert.equal(nextReview('feelings', fresh, cfg, '2026-10-10', 600), '2026-10-18');
+	assert.equal(nextReview('growth', fresh, cfg, '2026-10-10', 600), '2026-11-30');
 	// Ganz ohne Einträge zählt heute als Beginn
-	assert.equal(nextReview('gefuehl', [], cfg, '2026-10-10', 600), '2026-10-18');
+	assert.equal(nextReview('feelings', [], cfg, '2026-10-10', 600), '2026-10-18');
 	// Laufendes Tagebuch: der nächste Sonntag, heute nur vor der Uhrzeit
-	assert.equal(nextReview('gefuehl', [start], cfg, '2026-10-10', 600), '2026-10-11');
-	assert.equal(nextReview('gefuehl', [start], cfg, '2026-10-11', 18 * 60), '2026-10-11');
-	assert.equal(nextReview('gefuehl', [start], cfg, '2026-10-11', 20 * 60), '2026-10-18');
-	const off = sanitizeReminders({ gefuehl: { enabled: false }, wachstum: { enabled: false } }, 'de');
-	assert.equal(nextReview('gefuehl', [start], off, '2026-10-10', 600), null);
+	assert.equal(nextReview('feelings', [start], cfg, '2026-10-10', 600), '2026-10-11');
+	assert.equal(nextReview('feelings', [start], cfg, '2026-10-11', 18 * 60), '2026-10-11');
+	assert.equal(nextReview('feelings', [start], cfg, '2026-10-11', 20 * 60), '2026-10-18');
+	const off = sanitizeReminders({ feelings: { enabled: false }, growth: { enabled: false } }, 'de');
+	assert.equal(nextReview('feelings', [start], off, '2026-10-10', 600), null);
 });
 
 test('Ausgeschaltete Erinnerungen sind nie fällig', () => {
-	const off = sanitizeReminders({ gefuehl: { enabled: false }, wachstum: { enabled: false } }, 'de');
-	assert.equal(isGefuehlDue('2026-10-11', [], off), false);
-	assert.equal(isWachstumDue('2026-10-31', [], off), false);
+	const off = sanitizeReminders({ feelings: { enabled: false }, growth: { enabled: false } }, 'de');
+	assert.equal(isFeelingsDue('2026-10-11', [], off), false);
+	assert.equal(isGrowthDue('2026-10-31', [], off), false);
 });
 
 test('Ungültige Eingaben werden auf Standardwerte gesetzt', () => {
-	const c = sanitizeReminders({ gefuehl: { enabled: true, weekday: 9, time: '25:99' }, wachstum: { enabled: true, day: 31 } }, 'en');
-	assert.equal(c.gefuehl.weekday, 0);
-	assert.equal(c.gefuehl.time, '19:00');
-	assert.equal(c.wachstum.day, 'last');
+	const c = sanitizeReminders({ feelings: { enabled: true, weekday: 9, time: '25:99' }, growth: { enabled: true, day: 31 } }, 'en');
+	assert.equal(c.feelings.weekday, 0);
+	assert.equal(c.feelings.time, '19:00');
+	assert.equal(c.growth.day, 'last');
 	assert.equal(c.lang, 'en');
 });
 
 test('Heute geschriebener Rückblick beendet den Hinweis', () => {
-	const before = suggestionsFor('2026-10-11', [meta('2026-10-01', ['gefuehl'])], cfg);
-	assert.equal(before.gefuehl.suggested, true);
-	assert.equal(before.gefuehl.daysSince, 10);
-	const after = suggestionsFor('2026-10-11', [meta('2026-10-11', ['gefuehl']), meta('2026-10-01', ['gefuehl'])], cfg);
-	assert.equal(after.gefuehl.suggested, false);
+	const before = suggestionsFor('2026-10-11', [meta('2026-10-01', ['feelings'])], cfg);
+	assert.equal(before.feelings.suggested, true);
+	assert.equal(before.feelings.daysSince, 10);
+	const after = suggestionsFor('2026-10-11', [meta('2026-10-11', ['feelings']), meta('2026-10-01', ['feelings'])], cfg);
+	assert.equal(after.feelings.suggested, false);
 });
 
 const schedule = (s: Partial<ReminderSchedule>): ReminderSchedule => ({ repeat: 'daily', date: '', weekdays: [], day: 1, time: '08:00', ...s });
@@ -153,7 +153,7 @@ test('Eigene Erinnerung: Eingaben werden geprüft', () => {
 });
 
 test('Alte Zeitpläne ohne eigene Erinnerungen bleiben gültig', () => {
-	const c = sanitizeReminders({ gefuehl: { enabled: true, weekday: 2, time: '20:00' } }, 'de');
+	const c = sanitizeReminders({ feelings: { enabled: true, weekday: 2, time: '20:00' } }, 'de');
 	assert.deepEqual(c.custom, []);
-	assert.equal(c.gefuehl.weekday, 2);
+	assert.equal(c.feelings.weekday, 2);
 });

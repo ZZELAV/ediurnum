@@ -1,6 +1,6 @@
 {
   "name": "ediurnum",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A private, self-hosted, encrypted journal for daily reflection with optional AI feedback",
   "private": true,
   "license": "AGPL-3.0-only",

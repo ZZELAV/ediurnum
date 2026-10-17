@@ -195,8 +195,8 @@ export function computeStats(all: StatsDay[], from: string, to: string): Stats {
 		byMonth,
 		byWeekday,
 		emotions,
-		weeklyReviews: reviews('gefuehl', mondayOf, Math.max(1, Math.round(length / 7))),
-		monthlyReviews: reviews('wachstum', monthKey, Math.max(1, Math.round(length / DAYS_PER_MONTH))),
+		weeklyReviews: reviews('feelings', mondayOf, Math.max(1, Math.round(length / 7))),
+		monthlyReviews: reviews('growth', monthKey, Math.max(1, Math.round(length / DAYS_PER_MONTH))),
 		hidden: days.length - readable.length
 	};
 }

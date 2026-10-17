@@ -10,15 +10,15 @@
 	// „Heute nicht“ gilt auch hier (gleich wie im Eintrag)
 	let dismissed = $state<Partial<Record<SectionKind, boolean>>>({});
 	onMount(() => {
-		for (const k of ['gefuehl', 'wachstum'] as const) if (isDismissed(data.today, k)) dismissed[k] = true;
+		for (const k of ['feelings', 'growth'] as const) if (isDismissed(data.today, k)) dismissed[k] = true;
 	});
 	function later(kind: SectionKind) {
 		dismissed[kind] = true;
 		dismiss(data.today, kind);
 	}
 	const written = (kind: SectionKind) => data.todayMeta?.kinds.includes(kind) ?? false;
-	const showGefuehl = $derived(data.suggestions.gefuehl.suggested && !dismissed.gefuehl && !written('gefuehl'));
-	const showWachstum = $derived(data.suggestions.wachstum.suggested && !dismissed.wachstum && !written('wachstum'));
+	const showFeelings = $derived(data.suggestions.feelings.suggested && !dismissed.feelings && !written('feelings'));
+	const showGrowth = $derived(data.suggestions.growth.suggested && !dismissed.growth && !written('growth'));
 
 	const greeting = $derived(
 		data.hour < 5 ? 'greeting.night' : data.hour < 11 ? 'greeting.morning' : data.hour < 18 ? 'greeting.day' : 'greeting.evening'
@@ -55,28 +55,28 @@
 				<a class="btn" href="/entry/{data.today}">{data.todayMeta ? t('dashboard.continue') : t('dashboard.write')}</a>
 			</section>
 
-			{#if showGefuehl || showWachstum || data.onThisDay.length}
+			{#if showFeelings || showGrowth || data.onThisDay.length}
 				<section class="card">
 					<h2>{t('dashboard.suggestions')}</h2>
 					<ul class="suggest">
-						{#if showGefuehl}
+						{#if showFeelings}
 							<li>
 								<p>
 									<span class="chip dusk">{t('entry.suggest.weekly')}</span>
-									{s.gefuehl.daysSince === null ? t('dashboard.suggestGefuehlNever') : t('dashboard.suggestGefuehl', { days: s.gefuehl.daysSince })}
+									{s.feelings.daysSince === null ? t('dashboard.suggestFeelingsNever') : t('dashboard.suggestFeelings', { days: s.feelings.daysSince })}
 								</p>
 								<div class="row">
-									<a class="btn small" href="/entry/{data.today}?add=gefuehl">{t('entry.suggest.start')}</a>
-									<button type="button" class="btn quiet small" onclick={() => later('gefuehl')}>{t('entry.suggest.later')}</button>
+									<a class="btn small" href="/entry/{data.today}?add=feelings">{t('entry.suggest.start')}</a>
+									<button type="button" class="btn quiet small" onclick={() => later('feelings')}>{t('entry.suggest.later')}</button>
 								</div>
 							</li>
 						{/if}
-						{#if showWachstum}
+						{#if showGrowth}
 							<li>
-								<p><span class="chip gold">{t('entry.suggest.monthly')}</span> {t('dashboard.suggestWachstum')}</p>
+								<p><span class="chip gold">{t('entry.suggest.monthly')}</span> {t('dashboard.suggestGrowth')}</p>
 								<div class="row">
-									<a class="btn small" href="/entry/{data.today}?add=wachstum">{t('entry.suggest.start')}</a>
-									<button type="button" class="btn quiet small" onclick={() => later('wachstum')}>{t('entry.suggest.later')}</button>
+									<a class="btn small" href="/entry/{data.today}?add=growth">{t('entry.suggest.start')}</a>
+									<button type="button" class="btn quiet small" onclick={() => later('growth')}>{t('entry.suggest.later')}</button>
 								</div>
 							</li>
 						{/if}

@@ -19,7 +19,7 @@ export const load: PageServerLoad = ({ locals }) => {
 	const metas = listEntryMeta(); // neuester Tag zuerst
 	for (const m of metas) {
 		const e = m.locked && !session.lockKey ? null : getEntry(session, m.date);
-		const emotions = e?.content?.sections.gefuehl?.emotions;
+		const emotions = e?.content?.sections.feelings?.emotions;
 		const key = monthKey(m.date);
 		if (!byMonth.has(key)) byMonth.set(key, []);
 		byMonth.get(key)!.push({

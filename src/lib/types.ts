@@ -1,6 +1,6 @@
 export type Lang = 'de' | 'en';
 export type Theme = 'system' | 'light' | 'dark';
-export type SectionKind = 'erlebt' | 'gefuehl' | 'wachstum';
+export type SectionKind = 'daily' | 'feelings' | 'growth';
 
 export type FieldValue = string | number | string[] | null;
 

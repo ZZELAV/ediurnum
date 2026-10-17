@@ -22,7 +22,7 @@
 			.sort((a, b) => a.time.localeCompare(b.time))
 	);
 	const reviews = $derived(data.reviews);
-	const nothingToday = $derived(todayItems.length === 0 && !reviews.gefuehl.due && !reviews.wachstum.due);
+	const nothingToday = $derived(todayItems.length === 0 && !reviews.feelings.due && !reviews.growth.due);
 </script>
 
 <svelte:head><title>{t('reminders.title')} · ediurnum</title></svelte:head>
@@ -49,15 +49,15 @@
 			<p class="muted">{t('reminders.todayEmpty')}</p>
 		{:else}
 			<ul class="today-list">
-				{#if reviews.gefuehl.due}
+				{#if reviews.feelings.due}
 					<li>
-						<span class="chip dusk">{t('section.gefuehl.title')}</span>
+						<span class="chip dusk">{t('section.feelings.title')}</span>
 						<a href="/entry/{data.now.date}">{t('reminders.reviewDue')}</a>
 					</li>
 				{/if}
-				{#if reviews.wachstum.due}
+				{#if reviews.growth.due}
 					<li>
-						<span class="chip gold">{t('section.wachstum.title')}</span>
+						<span class="chip gold">{t('section.growth.title')}</span>
 						<a href="/entry/{data.now.date}">{t('reminders.reviewDue')}</a>
 					</li>
 				{/if}
@@ -81,7 +81,7 @@
 	<!-- Rückblicke -->
 	<section id="reviews" class="card">
 		<h2>{t('reminders.reviews')}</h2>
-		<ReviewReminders gefuehl={reviews.gefuehl} wachstum={reviews.wachstum} today={data.now.date} feedback={reviewFeedback} />
+		<ReviewReminders feelings={reviews.feelings} growth={reviews.growth} today={data.now.date} feedback={reviewFeedback} />
 	</section>
 
 	<!-- Push-Benachrichtigungen -->

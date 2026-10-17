@@ -25,15 +25,15 @@ export const load: PageServerLoad = () => {
 		now: { date: today, minutes },
 		custom: listCustomReminders(now),
 		reviews: {
-			gefuehl: {
-				...cfg.gefuehl,
-				due: suggestions.gefuehl.suggested,
-				next: nextReview('gefuehl', metas, cfg, today, minutes)
+			feelings: {
+				...cfg.feelings,
+				due: suggestions.feelings.suggested,
+				next: nextReview('feelings', metas, cfg, today, minutes)
 			},
-			wachstum: {
-				...cfg.wachstum,
-				due: suggestions.wachstum.suggested,
-				next: nextReview('wachstum', metas, cfg, today, minutes)
+			growth: {
+				...cfg.growth,
+				due: suggestions.growth.suggested,
+				next: nextReview('growth', metas, cfg, today, minutes)
 			}
 		},
 		push: {
@@ -47,19 +47,19 @@ export const actions: Actions = {
 	/** Zeitplan der Rückblicke (Gefühl wöchentlich, Weiterentwicklung monatlich). */
 	reviews: async ({ request, locals }) => {
 		const form = await request.formData();
-		const day = String(form.get('wachstumDay') ?? 'last');
+		const day = String(form.get('growthDay') ?? 'last');
 		saveReviewSchedule(
 			sanitizeReminders(
 				{
-					gefuehl: {
-						enabled: form.get('gefuehlEnabled') === 'on',
-						weekday: Number(form.get('gefuehlWeekday')),
-						time: String(form.get('gefuehlTime') ?? '')
+					feelings: {
+						enabled: form.get('feelingsEnabled') === 'on',
+						weekday: Number(form.get('feelingsWeekday')),
+						time: String(form.get('feelingsTime') ?? '')
 					},
-					wachstum: {
-						enabled: form.get('wachstumEnabled') === 'on',
+					growth: {
+						enabled: form.get('growthEnabled') === 'on',
 						day: day === 'last' ? 'last' : Number(day),
-						time: String(form.get('wachstumTime') ?? '')
+						time: String(form.get('growthTime') ?? '')
 					},
 					custom: loadReminders().custom
 				},

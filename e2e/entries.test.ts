@@ -10,7 +10,7 @@ import { Client, PIN, setupJournal, startServer, type TestServer } from './helpe
 
 const DAY = '2026-03-02';
 
-function erlebt(experienced: string) {
+function daily(experienced: string) {
 	return { gratitude: ['Kaffee', '', ''], experienced, highlight: '', takeaway: '' };
 }
 
@@ -47,22 +47,22 @@ function ageCurrentRevision(date: string) {
 
 describe('Schreiben', () => {
 	test('Neuer Eintrag wird verschlüsselt gespeichert', async () => {
-		const r = await c.api(`/api/entry/${DAY}`, { content: { mood: 4, sections: { erlebt: erlebt('Ein Tag am See') }, free: 'Gedanken' } });
+		const r = await c.api(`/api/entry/${DAY}`, { content: { mood: 4, sections: { daily: daily('Ein Tag am See') }, free: 'Gedanken' } });
 		assert.equal(r.status, 200);
 		const meta = r.json.meta as { date: string; revision: number; kinds: string[]; locked: boolean; aiAllowed: boolean };
 		assert.equal(meta.date, DAY);
 		assert.equal(meta.revision, 1);
-		assert.deepEqual(meta.kinds, ['erlebt']);
+		assert.deepEqual(meta.kinds, ['daily']);
 		assert.equal(meta.locked, false);
 		assert.equal(meta.aiAllowed, true);
 		const file = readFileSync(join(server.dataDir, 'ediurnum.db-wal'));
 		assert.ok(!file.includes(Buffer.from('Ein Tag am See')), 'kein Klartext in der Datenbank');
-		assert.equal((await readable()).get(DAY)?.sections.erlebt.experienced, 'Ein Tag am See');
+		assert.equal((await readable()).get(DAY)?.sections.daily.experienced, 'Ein Tag am See');
 	});
 
 	test('Leerer neuer Eintrag wird nicht angelegt', async () => {
 		const empty = { gratitude: ['', '', ''], experienced: '', highlight: '', takeaway: '' };
-		const r = await c.api('/api/entry/2026-03-01', { content: { mood: null, sections: { erlebt: empty }, free: '  ' } });
+		const r = await c.api('/api/entry/2026-03-01', { content: { mood: null, sections: { daily: empty }, free: '  ' } });
 		assert.equal(r.status, 200);
 		assert.equal(r.json.meta, null);
 		assert.equal(row('2026-03-01'), undefined);
@@ -74,8 +74,8 @@ describe('Schreiben', () => {
 				mood: 9,
 				evil: '<script>',
 				sections: {
-					erlebt: { experienced: 'ok', fremd: 'weg', gratitude: ['a', 5, 'c', 'd'] },
-					gefuehl: { energy: 7, emotions: ['joy', 'hacked'] },
+					daily: { experienced: 'ok', fremd: 'weg', gratitude: ['a', 5, 'c', 'd'] },
+					feelings: { energy: 7, emotions: ['joy', 'hacked'] },
 					unbekannt: { x: 1 }
 				},
 				free: 42
@@ -84,12 +84,12 @@ describe('Schreiben', () => {
 		const e = (await readable()).get('2026-02-01')!;
 		assert.equal(e.mood, null);
 		assert.equal(e.free, '');
-		assert.deepEqual(Object.keys(e.sections).sort(), ['erlebt', 'gefuehl']);
-		assert.equal(e.sections.erlebt.fremd, undefined);
-		assert.deepEqual(e.sections.erlebt.gratitude, ['a', '', 'c']);
-		assert.equal(e.sections.gefuehl.energy, null);
-		assert.deepEqual(e.sections.gefuehl.emotions, ['joy']);
-		assert.equal(row('2026-02-01')!.kinds, 'erlebt,gefuehl');
+		assert.deepEqual(Object.keys(e.sections).sort(), ['daily', 'feelings']);
+		assert.equal(e.sections.daily.fremd, undefined);
+		assert.deepEqual(e.sections.daily.gratitude, ['a', '', 'c']);
+		assert.equal(e.sections.feelings.energy, null);
+		assert.deepEqual(e.sections.feelings.emotions, ['joy']);
+		assert.equal(row('2026-02-01')!.kinds, 'daily,feelings');
 	});
 
 	test('Zukunft, ungültiges Datum und fehlerhafte Anfragen werden abgewiesen', async () => {
@@ -109,16 +109,16 @@ describe('Schreiben', () => {
 describe('Versionen', () => {
 	test('Am selben Tag bleibt es eine Version, unverändertes Speichern ändert nichts', async () => {
 		const before = row(DAY)!;
-		await c.api(`/api/entry/${DAY}`, { content: { mood: 3, sections: { erlebt: erlebt('Ein Tag am See, korrigiert') }, free: 'Gedanken' } });
+		await c.api(`/api/entry/${DAY}`, { content: { mood: 3, sections: { daily: daily('Ein Tag am See, korrigiert') }, free: 'Gedanken' } });
 		assert.equal(row(DAY)!.revision, before.revision);
 		const saved = db.prepare('SELECT updated_at FROM entries WHERE date = ?').get(DAY) as { updated_at: string };
-		await c.api(`/api/entry/${DAY}`, { content: { mood: 3, sections: { erlebt: erlebt('Ein Tag am See, korrigiert') }, free: 'Gedanken' } });
+		await c.api(`/api/entry/${DAY}`, { content: { mood: 3, sections: { daily: daily('Ein Tag am See, korrigiert') }, free: 'Gedanken' } });
 		assert.equal((db.prepare('SELECT updated_at FROM entries WHERE date = ?').get(DAY) as { updated_at: string }).updated_at, saved.updated_at);
 	});
 
 	test('Erste Bearbeitung an einem neuen Tag archiviert die bisherige Fassung', async () => {
 		ageCurrentRevision(DAY);
-		await c.api(`/api/entry/${DAY}`, { content: { mood: 2, sections: { erlebt: erlebt('Am nächsten Tag ergänzt') }, free: 'Gedanken' } });
+		await c.api(`/api/entry/${DAY}`, { content: { mood: 2, sections: { daily: daily('Am nächsten Tag ergänzt') }, free: 'Gedanken' } });
 		assert.equal(row(DAY)!.revision, 2);
 		const revs = db.prepare('SELECT revision FROM entry_revisions WHERE entry_id = ?').all(row(DAY)!.id) as { revision: number }[];
 		assert.deepEqual(revs.map((r) => r.revision), [1]);
@@ -128,7 +128,7 @@ describe('Versionen', () => {
 		const r = await c.api(`/api/entry/${DAY}/restore`, { revision: 1 });
 		assert.equal(r.status, 200);
 		assert.equal(row(DAY)!.revision, 3);
-		assert.equal((await readable()).get(DAY)?.sections.erlebt.experienced, 'Ein Tag am See, korrigiert');
+		assert.equal((await readable()).get(DAY)?.sections.daily.experienced, 'Ein Tag am See, korrigiert');
 		assert.equal((await c.api(`/api/entry/${DAY}/restore`, { revision: 99 })).status, 404);
 	});
 
@@ -209,7 +209,7 @@ describe('Sperren mit PIN', () => {
 		await c.api('/api/pin', undefined, 'DELETE');
 		assert.equal((await c.api('/api/pin', { pin: PIN })).status, 403, 'alte PIN gilt nicht mehr');
 		assert.equal((await c.api('/api/pin', { pin: '135790' })).status, 200);
-		assert.equal((await readable()).get(DAY)?.sections.erlebt.experienced, 'Ein Tag am See, korrigiert');
+		assert.equal((await readable()).get(DAY)?.sections.daily.experienced, 'Ein Tag am See, korrigiert');
 	});
 });
 

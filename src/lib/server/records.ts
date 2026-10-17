@@ -1,8 +1,10 @@
-import type { EntryMeta, SectionKind } from '#lib/types.ts';
+import { decryptJson, entryAad } from './crypto.ts';
+import { upgradeContent, upgradeKind } from '#lib/templates.ts';
+import type { EntryContent, EntryMeta, SectionKind } from '#lib/types.ts';
 
 /**
- * Zeile der Tabelle `entries` – gemeinsam für die Datenbank (entries.ts) und das Lesen von Backups
- * (backup-file.ts, auch im Konverter-Skript). Ohne Datenbank-Import, damit das Skript es laden kann.
+ * Row of the `entries` table – shared by the database (entries.ts) and by reading backups
+ * (backup-file.ts, also in the converter script). No database import, so the script can load it.
  */
 export interface EntryRow {
 	id: string;
@@ -10,7 +12,7 @@ export interface EntryRow {
 	kinds: string;
 	locked: number;
 	ai_allowed: number;
-	/** fehlt in Backups vor Format-Version 2 */
+	/** missing in backups before format version 2 */
 	empty: number;
 	revision: number;
 	rev_started_at: string;
@@ -23,11 +25,20 @@ export function toMeta(r: EntryRow): EntryMeta {
 	return {
 		id: r.id,
 		date: r.date,
-		kinds: (r.kinds ? r.kinds.split(',') : []) as SectionKind[],
+		// legacy names: backups up to format version 2 (the database is migrated in schema 4)
+		kinds: (r.kinds ? r.kinds.split(',').map(upgradeKind) : []) as SectionKind[],
 		locked: r.locked === 1,
 		aiAllowed: r.ai_allowed === 1,
 		revision: r.revision,
 		createdAt: r.created_at,
 		updatedAt: r.updated_at
 	};
+}
+
+/**
+ * Decrypts the content of an entry or revision. Always use this instead of `decryptJson`: it converts legacy
+ * section names (stored up to 1.0.0), so the rest of the app only sees current names.
+ */
+export function decryptContent(key: Buffer, payload: Uint8Array, entryId: string, revision: number): EntryContent {
+	return upgradeContent(decryptJson<EntryContent>(key, payload, entryAad(entryId, revision)));
 }

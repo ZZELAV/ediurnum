@@ -64,7 +64,7 @@ test('KI-Datei: Auftrag, Ton, Anzahl Fokuspunkte, Einträge chronologisch mit In
 		options,
 		lang: 'de',
 		entries: [
-			entry('2026-03-01', { mood: 4, sections: { erlebt: { gratitude: ['Kaffee', ''], experienced: 'Am See' }, gefuehl: { emotions: ['joy'] } }, free: 'Gedanken' }),
+			entry('2026-03-01', { mood: 4, sections: { daily: { gratitude: ['Kaffee', ''], experienced: 'Am See' }, feelings: { emotions: ['joy'] } }, free: 'Gedanken' }),
 			entry('2026-03-02', { mood: null, sections: {}, free: 'Zweiter Tag' })
 		],
 		from: '2026-03-01',

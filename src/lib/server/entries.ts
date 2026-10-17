@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { decryptJson, encryptJson, entryAad as aad } from './crypto.ts';
+import { encryptJson, entryAad as aad } from './crypto.ts';
 import { getDb, nowIso, transaction } from './db.ts';
 import { todayIso } from '#lib/dates.ts';
 import type { Session } from './vault.ts';
 import { filledKinds, isEmptyContent } from '#lib/templates.ts';
 import type { StatsDay } from '#lib/stats.ts';
 import type { Entry, EntryContent, EntryMeta, RevisionInfo } from '#lib/types.ts';
-import { toMeta, type EntryRow } from './records.ts';
+import { decryptContent, toMeta, type EntryRow } from './records.ts';
 
 interface RevisionRow {
 	entry_id: string;
@@ -53,7 +53,7 @@ export function getEntry(session: Session, date: string): Entry | null {
 	const key = keyFor(session, row.locked === 1);
 	return {
 		...toMeta(row),
-		content: key ? decryptJson<EntryContent>(key, row.payload, aad(row.id, row.revision)) : null
+		content: key ? decryptContent(key, row.payload, row.id, row.revision) : null
 	};
 }
 
@@ -87,7 +87,7 @@ export function saveEntry(
 
 	const locked = row.locked === 1;
 	const key = requireKey(session, locked);
-	const previous = decryptJson<EntryContent>(key, row.payload, aad(row.id, row.revision));
+	const previous = decryptContent(key, row.payload, row.id, row.revision);
 	if (JSON.stringify(previous) === JSON.stringify(content)) return toMeta(row);
 
 	const startNew =
@@ -126,7 +126,7 @@ export function listRevisions(session: Session, date: string): RevisionInfo[] {
 		{
 			revision: row.revision,
 			createdAt: row.updated_at,
-			content: currentKey ? decryptJson<EntryContent>(currentKey, row.payload, aad(row.id, row.revision)) : null
+			content: currentKey ? decryptContent(currentKey, row.payload, row.id, row.revision) : null
 		}
 	];
 	for (const r of revs) {
@@ -134,7 +134,7 @@ export function listRevisions(session: Session, date: string): RevisionInfo[] {
 		result.push({
 			revision: r.revision,
 			createdAt: r.saved_at,
-			content: key ? decryptJson<EntryContent>(key, r.payload, aad(row.id, r.revision)) : null
+			content: key ? decryptContent(key, r.payload, row.id, r.revision) : null
 		});
 	}
 	return result;
@@ -160,7 +160,7 @@ export function setLocked(session: Session, date: string, locked: boolean) {
 	const from = row.locked === 1 ? session.lockKey : session.dek;
 	const to = locked ? session.lockKey : session.dek;
 	transaction(() => {
-		const content = decryptJson<EntryContent>(from, row.payload, aad(row.id, row.revision));
+		const content = decryptContent(from, row.payload, row.id, row.revision);
 		getDb()
 			.prepare('UPDATE entries SET locked = ?, ai_allowed = CASE WHEN ? THEN 0 ELSE ai_allowed END, payload = ? WHERE id = ?')
 			.run(locked ? 1 : 0, locked ? 1 : 0, encryptJson(to, content, aad(row.id, row.revision)), row.id);
@@ -169,7 +169,7 @@ export function setLocked(session: Session, date: string, locked: boolean) {
 			.all(row.id) as unknown as RevisionRow[];
 		for (const r of revs) {
 			const k = r.locked === 1 ? session.lockKey! : session.dek;
-			const c = decryptJson<EntryContent>(k, r.payload, aad(row.id, r.revision));
+			const c = decryptContent(k, r.payload, row.id, r.revision);
 			getDb()
 				.prepare('UPDATE entry_revisions SET locked = ?, payload = ? WHERE entry_id = ? AND revision = ?')
 				.run(locked ? 1 : 0, encryptJson(to, c, aad(row.id, r.revision)), row.id, r.revision);
@@ -194,12 +194,12 @@ export function rekeyLocked(oldKey: Buffer, newKey: Buffer) {
 	const d = getDb();
 	const rows = d.prepare('SELECT * FROM entries WHERE locked = 1').all() as unknown as EntryRow[];
 	for (const r of rows) {
-		const c = decryptJson<EntryContent>(oldKey, r.payload, aad(r.id, r.revision));
+		const c = decryptContent(oldKey, r.payload, r.id, r.revision);
 		d.prepare('UPDATE entries SET payload = ? WHERE id = ?').run(encryptJson(newKey, c, aad(r.id, r.revision)), r.id);
 	}
 	const revs = d.prepare('SELECT * FROM entry_revisions WHERE locked = 1').all() as unknown as RevisionRow[];
 	for (const r of revs) {
-		const c = decryptJson<EntryContent>(oldKey, r.payload, aad(r.entry_id, r.revision));
+		const c = decryptContent(oldKey, r.payload, r.entry_id, r.revision);
 		d.prepare('UPDATE entry_revisions SET payload = ? WHERE entry_id = ? AND revision = ?').run(
 			encryptJson(newKey, c, aad(r.entry_id, r.revision)),
 			r.entry_id,
@@ -229,7 +229,7 @@ export function entriesForAi(
 			skippedLocked++;
 			continue;
 		}
-		entries.push({ ...toMeta(r), content: decryptJson<EntryContent>(key, r.payload, aad(r.id, r.revision)) });
+		entries.push({ ...toMeta(r), content: decryptContent(key, r.payload, r.id, r.revision) });
 	}
 	return { entries, skippedLocked };
 }
@@ -244,8 +244,8 @@ export function statsDays(session: Session, from = ''): StatsDay[] {
 		.all(from) as unknown as EntryRow[];
 	return rows.map((r) => {
 		const key = keyFor(session, r.locked === 1);
-		const c = key ? decryptJson<EntryContent>(key, r.payload, aad(r.id, r.revision)) : null;
-		const feeling = c?.sections.gefuehl;
+		const c = key ? decryptContent(key, r.payload, r.id, r.revision) : null;
+		const feeling = c?.sections.feelings;
 		return {
 			date: r.date,
 			kinds: toMeta(r).kinds,
