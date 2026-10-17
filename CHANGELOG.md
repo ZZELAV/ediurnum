@@ -22,6 +22,9 @@ The topmost version without a date is still in development.
 - Backups use format version 3. Older backups can still be restored; backups from 1.1.0 can't be restored in 1.0.0
   or older, so update all installations before moving a backup between them.
 
+- English is the default language: browsers set to a language other than German now get the app in English
+  (before: German unless the browser was set to English). Existing journals keep their language.
+
 ### Fixed
 
 - The login page now uses the appearance chosen in the settings instead of always following the device. The choice

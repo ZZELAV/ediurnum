@@ -2,7 +2,7 @@ import webpush from 'web-push';
 import { ORIGIN, VAPID_SUBJECT } from '$app/env/private';
 import { getDb, getMeta, nowIso, setMeta } from './db.ts';
 import { listEntryMeta } from './entries.ts';
-import { isLang, translate } from '#lib/i18n/index.ts';
+import { DEFAULT_LANG, isLang, translate } from '#lib/i18n/index.ts';
 import { todayIso } from '#lib/dates.ts';
 import { randomUUID } from 'node:crypto';
 import { log } from './log.ts';
@@ -36,7 +36,7 @@ export function loadReminders(): ReminderConfig {
 	const raw = getMeta('reminders');
 	if (!raw) return defaultReminders();
 	const parsed = JSON.parse(raw) as Partial<ReminderConfig>;
-	return sanitizeReminders(parsed, isLang(parsed.lang) ? parsed.lang : 'de');
+	return sanitizeReminders(parsed, isLang(parsed.lang) ? parsed.lang : DEFAULT_LANG);
 }
 
 export function saveReminders(cfg: ReminderConfig) {

@@ -1,5 +1,6 @@
 import { decryptJson, encryptJson, SETTINGS_AAD as AAD } from './crypto.ts';
 import { getMeta, setMeta } from './db.ts';
+import { DEFAULT_LANG } from '#lib/i18n/index.ts';
 import type { AiAgent, PublicAiAgent, Settings, Theme } from '#lib/types.ts';
 
 export function isTheme(value: unknown): value is Theme {
@@ -9,7 +10,7 @@ export function isTheme(value: unknown): value is Theme {
 export function defaultSettings(): Settings {
 	return {
 		name: '',
-		language: 'de',
+		language: DEFAULT_LANG,
 		theme: 'system',
 		sessionMinutes: 30,
 		leaveMinutes: 1,

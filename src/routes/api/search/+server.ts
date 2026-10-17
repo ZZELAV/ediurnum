@@ -11,7 +11,7 @@ import { getEntry, listEntryMeta } from '#lib/server/entries.ts';
  */
 export const POST: RequestHandler = async (event) => {
 	const session = requireSession(event);
-	const lang = event.locals.settings?.language ?? 'de';
+	const lang = event.locals.lang;
 	const { query } = await readJson(event.request);
 	const terms = searchTerms(String(query ?? '').slice(0, 200));
 

@@ -149,6 +149,8 @@ export class Client {
 	async request(path: string, init: RequestInit = {}): Promise<Response> {
 		const headers = new Headers(init.headers);
 		if (this.cookies.size) headers.set('cookie', this.cookieHeader());
+		// like a browser in Swiss German – the tests expect the German texts
+		if (!headers.has('accept-language')) headers.set('accept-language', 'de-CH,de;q=0.9');
 		if (init.method && init.method !== 'GET' && !headers.has('origin')) headers.set('origin', this.origin);
 		const res = await fetch(this.base + path, { ...init, headers, redirect: 'manual' });
 		this.store(res);

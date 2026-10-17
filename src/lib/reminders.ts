@@ -1,4 +1,5 @@
 import { addDays, daysBetween, isIsoDate, weekdayOf } from './dates.ts';
+import { DEFAULT_LANG } from './i18n/index.ts';
 import type { EntryMeta, Lang, SectionKind } from './types.ts';
 
 /**
@@ -39,7 +40,7 @@ export interface CustomReminder extends ReminderSchedule {
 	createdAt: string;
 }
 
-export function defaultReminders(lang: Lang = 'de'): ReminderConfig {
+export function defaultReminders(lang: Lang = DEFAULT_LANG): ReminderConfig {
 	return {
 		feelings: { enabled: true, weekday: 0, time: '19:00' },
 		growth: { enabled: true, day: 'last', time: '19:00' },
