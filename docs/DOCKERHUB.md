@@ -6,8 +6,6 @@ weekly and monthly reviews, reminders and optional AI insights through the AI ch
 *diurnum* (Latin for “diary”) + *e* for digital. Source code, documentation and changelog:
 **[github.com/ZZELAV/ediurnum](https://github.com/ZZELAV/ediurnum)** · License: AGPL-3.0
 
-> **Status: beta.** Usable, but expect changes. Keep encrypted backups.
-
 ## Features
 
 - One entry per day in 5–10 minutes: guided questions (experienced, feelings, learning & growth), free thoughts, mood

@@ -3,8 +3,6 @@
 *diurnum* (Latin for “diary”) + *e* for digital: a private, self-hosted, encrypted journal for daily reflection –
 with optional AI feedback for personal growth.
 
-> **Status: beta.** ediurnum is usable, but expect changes. Keep encrypted backups.
-
 ## Features
 
 - **One entry per day, 5–10 minutes**, with guided questions
