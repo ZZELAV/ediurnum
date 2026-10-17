@@ -8,10 +8,10 @@
 	const s = $derived(data.stats);
 	let pinDialog = $state(false);
 
-	// Neuester Monat links: Jahreszahl unter dem ersten Monat und jedem Dezember (dort beginnt das Vorjahr)
+	// newest month on the left: the year below the first month and below every December (where the previous year starts)
 	const showYear = (month: string, i: number) => i === 0 || month.endsWith('-12');
 
-	/** Höhe bzw. Breite eines Balkens in Prozent: Skala 1–5, damit Unterschiede sichtbar werden; „1“ bleibt als Strich sichtbar. */
+	/** Height or width of a bar in percent: scale 1–5 so differences show; „1“ stays visible as a line. */
 	const pct = (a: Average) => (a.avg === null ? 0 : Math.max(3, ((a.avg - 1) / 4) * 100));
 	const value = (a: Average) => (a.avg === null ? t('stats.none') : fmtNumber(a.avg));
 
@@ -81,7 +81,7 @@
 		{/if}
 
 		<div class="stack">
-			<!-- Kennzahlen -->
+			<!-- Key figures -->
 			<section class="tiles">
 				<div class="card tile">
 					<span class="eyebrow">{t('stats.streak')}</span>
@@ -111,13 +111,13 @@
 				</div>
 			</section>
 
-			<!-- Stimmungsverlauf im Zeitraum -->
+			<!-- Mood over the period -->
 			<section class="card">
 				<div class="card-title"><h2>{t('mood.chartTitle')}</h2></div>
 				<MoodChart points={s.moodTrend.points} weekly={s.moodTrend.weekly} from={s.from} to={s.to} />
 			</section>
 
-			<!-- Stimmung und Energie pro Monat, neuester links -->
+			<!-- Mood and energy per month, newest on the left -->
 			<section class="card">
 				<div class="card-title"><h2>{t('stats.byMonth')}</h2></div>
 				<p class="legend faint">
@@ -136,7 +136,7 @@
 						</div>
 					{/each}
 				</div>
-				<!-- im div: eine Tabelle hielte sich nicht an die Breite von 1 px und liesse die Seite seitlich überlaufen -->
+				<!-- in a div: a table wouldn't respect the width of 1 px and would make the page overflow sideways -->
 				<div class="visually-hidden"><table>
 					<caption>{t('stats.byMonth')}</caption>
 					<tbody>
@@ -152,7 +152,7 @@
 				</table></div>
 			</section>
 
-			<!-- Stimmung pro Wochentag -->
+			<!-- Mood per weekday -->
 			<section class="card">
 				<div class="card-title"><h2>{t('stats.byWeekday')}</h2></div>
 				<p class="faint">{t('stats.byWeekdayHint')}</p>
@@ -167,7 +167,7 @@
 				</ul>
 			</section>
 
-			<!-- Häufigste Gefühle -->
+			<!-- Most frequent feelings -->
 			<section class="card">
 				<div class="card-title"><h2>{t('stats.emotions')}</h2></div>
 				{#if s.emotions.length === 0}
@@ -181,7 +181,7 @@
 				{/if}
 			</section>
 
-			<!-- Rückblicke -->
+			<!-- Reviews -->
 			<section class="card">
 				<div class="card-title"><h2>{t('stats.reviews')}</h2></div>
 				{@render progress(t('stats.weekly'), s.weeklyReviews.done, s.weeklyReviews.total)}
@@ -212,7 +212,7 @@
 		gap: 0.75rem;
 	}
 	.tile {
-		/* schmale Kacheln: lange Wörter umbrechen statt hinausragen */
+		/* narrow tiles: wrap long words instead of sticking out */
 		overflow-wrap: anywhere;
 		hyphens: auto;
 		display: grid;
@@ -254,7 +254,7 @@
 		background: var(--dusk);
 	}
 
-	/* Monate: Säulen, bei vielen Monaten seitlich scrollbar */
+	/* months: columns, scrollable sideways when there are many months */
 	.months {
 		display: flex;
 		gap: 0.35rem;
@@ -290,7 +290,7 @@
 		min-height: 1em;
 	}
 
-	/* Waagrechte Balken (Wochentage, Gefühle) */
+	/* horizontal bars (weekdays, feelings) */
 	.hbars {
 		list-style: none;
 		margin: 0;

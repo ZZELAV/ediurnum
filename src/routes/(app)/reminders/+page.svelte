@@ -42,7 +42,7 @@
 		</p>
 	{/if}
 
-	<!-- Heute -->
+	<!-- Today -->
 	<section class="card today">
 		<h2>{t('reminders.today')}</h2>
 		{#if nothingToday}
@@ -72,19 +72,19 @@
 		{/if}
 	</section>
 
-	<!-- Eigene Erinnerungen -->
+	<!-- Custom reminders -->
 	<section class="card">
 		<h2>{t('reminders.custom')}</h2>
 		<CustomReminders items={data.custom} today={data.now.date} />
 	</section>
 
-	<!-- Rückblicke -->
+	<!-- Reviews -->
 	<section id="reviews" class="card">
 		<h2>{t('reminders.reviews')}</h2>
 		<ReviewReminders feelings={reviews.feelings} growth={reviews.growth} today={data.now.date} feedback={reviewFeedback} />
 	</section>
 
-	<!-- Push-Benachrichtigungen -->
+	<!-- Push notifications -->
 	<section id="push" class="card">
 		<h2>{t('settings.pushTitle')}</h2>
 		<PushDevices push={data.push} />

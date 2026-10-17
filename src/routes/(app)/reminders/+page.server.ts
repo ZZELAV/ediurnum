@@ -44,7 +44,7 @@ export const load: PageServerLoad = () => {
 };
 
 export const actions: Actions = {
-	/** Zeitplan der Rückblicke (Gefühl wöchentlich, Weiterentwicklung monatlich). */
+	/** Schedule of the reviews (feelings weekly, growth monthly). */
 	reviews: async ({ request, locals }) => {
 		const form = await request.formData();
 		const day = String(form.get('growthDay') ?? 'last');

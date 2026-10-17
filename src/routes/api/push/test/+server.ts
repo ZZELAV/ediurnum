@@ -3,7 +3,7 @@ import { requireSession } from '#lib/server/auth.ts';
 import { sendToAll } from '#lib/server/reminders.ts';
 import { translate } from '#lib/i18n/index.ts';
 
-/** Testbenachrichtigung an alle angemeldeten Geräte. */
+/** Test notification to all registered devices. */
 export const POST: RequestHandler = async (event) => {
 	requireSession(event);
 	const t = (key: string) => translate(event.locals.lang, key);

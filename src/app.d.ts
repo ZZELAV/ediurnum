@@ -9,7 +9,7 @@ declare global {
 			session: Session | null;
 			settings: Settings | null;
 			lang: Lang;
-			/** Format für Datum und Zahlen, z. B. `de-CH` (aus Accept-Language, passend zu `lang`) */
+			/** Format for dates and numbers, e.g. `de-CH` (from Accept-Language, matching `lang`) */
 			locale: string;
 		}
 		interface Error {

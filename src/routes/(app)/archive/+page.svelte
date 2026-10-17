@@ -11,14 +11,14 @@
 
 	let { data } = $props();
 
-	// Filter für Kalender und Suchergebnisse – nur im Browser. Bleibt erhalten, wenn man aus einem Eintrag zurückkommt.
+	// filter for the calendar and search results – only in the browser. Kept when coming back from an entry.
 	let filter = $state<DayFilter>({ moods: [], kinds: [], emotions: [] });
 	export const snapshot: Snapshot<DayFilter> = {
 		capture: () => $state.snapshot(filter),
 		restore: (v) => (filter = v)
 	};
 
-	// Auswahl als Dropdown unter dem Knopf; schliesst bei Klick daneben und mit Escape
+	// choice as a dropdown below the button; closes on a click outside and with Escape
 	let filterOpen = $state(false);
 	let filterMenu = $state<HTMLElement>();
 	function closeOnOutside(e: Event) {
@@ -34,7 +34,7 @@
 	const days = $derived(new Map(data.months.flatMap((m) => m.days.map((d) => [d.date, d]))));
 	const passes = (date: string) => !filtering || matchesFilter(days.get(date)!, filter);
 	const matched = $derived([...days.keys()].filter(passes).length);
-	// Gesperrte Einträge ohne PIN: Stimmung und Gefühle unbekannt, sie passen nur zu Rückblicken
+	// locked entries without the PIN: mood and feelings unknown, they only match reviews
 	const unreadable = $derived(filter.moods.length || filter.emotions.length ? [...days.values()].filter((d) => !d.readable).length : 0);
 
 	function toggle(list: (string | number)[], value: string | number) {
@@ -47,8 +47,8 @@
 		filter = { moods: [], kinds: [], emotions: [] };
 	}
 
-	// Suche beim Tippen (kurz verzögert). Der Begriff geht per POST an den Server und steht nie in der
-	// Adresse – sonst landete er im Browserverlauf und in den Protokollen des Reverse-Proxys.
+	// search while typing (slightly delayed). The term goes to the server via POST and never appears in the
+	// address – otherwise it would end up in the browser history and in the logs of the reverse proxy.
 	type Result = { date: string; mood: number | null; locked: boolean } & SearchHit;
 	let query = $state('');
 	let search = $state<{ query: string; results: Result[]; skippedLocked: number } | null>(null);
@@ -75,7 +75,7 @@
 		}, delay);
 	}
 
-	// PIN abgelaufen oder „Wieder sperren“: Ergebnisse neu holen, damit keine Auszüge gesperrter Einträge stehen bleiben
+	// PIN expired or „Wieder sperren“ (lock again): fetch the results again, so no excerpts of locked entries remain
 	let pinUntil: number | undefined;
 	$effect(() => {
 		const until = data.pinUnlockedUntil;
@@ -88,7 +88,7 @@
 		runSearch('');
 	}
 
-	/** Kalenderraster (Montag zuerst) mit leeren Zellen am Anfang. */
+	/** Calendar grid (Monday first) with empty cells at the start. */
 	function grid(month: string) {
 		const first = new Date(month + '-01T00:00:00Z');
 		const offset = (weekdayOf(month + '-01') + 6) % 7;
@@ -240,7 +240,7 @@
 				<button type="button" class="btn ghost small" onclick={clear}>{t('search.clear')}</button>
 			</section>
 		{:else if data.months.length > 0}
-			<!-- Legende: Farben der Tage = Stimmung -->
+			<!-- legend: colours of the days = mood -->
 			<ul class="legend faint" aria-label={t('archive.legend')}>
 				{#each [1, 2, 3, 4, 5] as m (m)}
 					<li><span class="swatch m{m}" aria-hidden="true"></span>{t(`mood.${m}`)}</li>
@@ -272,7 +272,7 @@
 								<span></span>
 							{:else}
 								{@const d = byDate.get(cell)}
-								<!-- Tage, die nicht zum Filter passen, erscheinen wie Tage ohne Eintrag -->
+								<!-- days that don't match the filter look like days without an entry -->
 								{#if d && passes(cell)}
 									<a
 										href="/entry/{cell}"
@@ -317,19 +317,19 @@
 		line-height: 1.3rem;
 		text-align: center;
 	}
-	/* Flex, damit sich der Knopf auf die Höhe des Suchfelds streckt */
+	/* flex, so the button stretches to the height of the search field */
 	.filter-menu {
 		position: relative;
 		display: flex;
 	}
-	/* Dropdown rechtsbündig unter dem Knopf; auf dem Handy höchstens so breit wie der Bildschirm */
+	/* dropdown right-aligned below the button; on phones at most as wide as the screen */
 	.filter {
 		position: absolute;
 		top: calc(100% + 0.4rem);
 		right: 0;
 		z-index: 20;
 		width: min(28rem, calc(100vw - 2rem));
-		/* scrollt bei wenig Höhe; Platz für Kopfzeile, Suche und (Handy) die Navigationsleiste unten */
+		/* scrolls when there is little height; room for the header, search and (phone) the navigation bar at the bottom */
 		max-height: min(34rem, calc(100dvh - 17rem));
 		overflow-y: auto;
 		display: grid;
@@ -464,7 +464,7 @@
 		background: var(--paper-2);
 		color: var(--ink);
 	}
-	/* Eintrag ohne Stimmung: nur umrandet, damit er sich von allen Stimmungsfarben abhebt */
+	/* entry without a mood: only outlined, so it stands out from all mood colours */
 	.day.has {
 		color: var(--ink);
 		font-weight: 600;

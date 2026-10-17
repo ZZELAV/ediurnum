@@ -8,7 +8,7 @@
 
 <svelte:head><title>{fmtDate(data.date, 'medium')} · ediurnum</title></svelte:head>
 
-<!-- Das Umblättern zwischen Tagen steuert (app)/+layout.svelte über View Transitions. -->
+<!-- Turning the page between days is controlled by (app)/+layout.svelte via view transitions. -->
 {#key editorKey}
 	<EntryEditor
 		date={data.date}

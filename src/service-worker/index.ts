@@ -1,8 +1,8 @@
 import { self as sw } from '$app/service-worker';
 
 /**
- * Service Worker – nur für Push-Benachrichtigungen.
- * Bewusst ohne Offline-Cache: Tagebuchinhalte sollen nie im Browser-Cache landen.
+ * Service worker – only for push notifications.
+ * Deliberately without an offline cache: journal content must never end up in the browser cache.
  */
 sw.addEventListener('install', () => {
 	sw.skipWaiting();
@@ -22,7 +22,7 @@ sw.addEventListener('push', (event) => {
 	event.waitUntil(
 		sw.registration.showNotification(data.title ?? 'ediurnum', {
 			body: data.body ?? '',
-			// PNG statt SVG: viele Systeme zeigen SVG in Benachrichtigungen nicht an
+			// PNG instead of SVG: many systems don't show SVG in notifications
 			icon: '/icon-192.png',
 			badge: '/icon-192.png',
 			tag: data.tag,

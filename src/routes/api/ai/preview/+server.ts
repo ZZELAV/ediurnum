@@ -4,7 +4,7 @@ import { isIsoDate } from '#lib/dates.ts';
 import { fail } from '#lib/server/api.ts';
 import { listEntryMeta } from '#lib/server/entries.ts';
 
-/** Zeigt vor einer Auswertung, welche Einträge übertragen würden. */
+/** Shows before an analysis which entries would be sent. */
 export const GET: RequestHandler = (event) => {
 	const session = requireSession(event);
 	const from = event.url.searchParams.get('from') ?? '';

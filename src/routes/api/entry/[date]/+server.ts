@@ -18,7 +18,7 @@ export const POST: RequestHandler = async (event) => {
 	}
 };
 
-/** Löschen. Gesperrte Einträge nur mit eingegebener PIN. */
+/** Delete. Locked entries only with the PIN entered. */
 export const DELETE: RequestHandler = (event) => {
 	const session = requireSession(event);
 	const date = dateParam(event.params.date);

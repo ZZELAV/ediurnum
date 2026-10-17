@@ -7,8 +7,8 @@
 
 	let { data, children } = $props();
 
-	// Erscheinungsbild und Sprache sofort übernehmen, wenn sie sich ändern
-	// (der Server setzt sie nur beim ersten Laden ins HTML).
+	// apply theme and language right away when they change
+	// (the server only puts them into the HTML on the first load).
 	$effect(() => {
 		const root = document.documentElement;
 		root.dataset.theme = data.theme;

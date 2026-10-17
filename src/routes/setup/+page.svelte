@@ -57,7 +57,7 @@
 			<input type="checkbox" bind:checked={confirmed} />
 			{t('setup.keyConfirm')}
 		</label>
-		<!-- Ohne href ist der Link auch per Tastatur nicht erreichbar -->
+		<!-- without href the link can't be reached with the keyboard either -->
 		<a class="btn" href={confirmed ? '/profile?welcome' : undefined} aria-disabled={!confirmed} class:disabled={!confirmed} data-sveltekit-reload>{t('setup.start')}</a>
 	{:else}
 		<h1>{t('setup.title')}</h1>
@@ -91,7 +91,7 @@
 					<input id="name" name="name" type="text" autocomplete="given-name" maxlength="60" required bind:value={name} />
 					<p class="faint">{t('setup.nameHint')}</p>
 				</div>
-				<!-- Für Passwortmanager: der Name dient als Benutzername, damit Speichern und Ausfüllen zuverlässig klappt -->
+				<!-- for password managers: the name serves as the user name, so saving and filling in work reliably -->
 				<input class="visually-hidden" type="text" name="username" value={name} autocomplete="username" tabindex="-1" aria-hidden="true" readonly />
 				<p class="faint pm">{t('setup.passwordManager')}</p>
 				<div class="field">

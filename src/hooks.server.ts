@@ -11,13 +11,13 @@ import { isLang, pickLang, pickLocale } from '#lib/i18n/index.ts';
 import { SESSION_COOKIE } from '#lib/server/auth.ts';
 
 const PUBLIC_PATHS = ['/setup', '/login', '/recover'];
-/** Prüfen selbst einen Token statt der Sitzung (z. B. Dashboard-Widget). */
+/** Check a token themselves instead of the session (e.g. dashboard widget). */
 const TOKEN_PATHS = ['/api/widget'];
 
-/** Ältere Geräte fragen eigene Namen für das Symbol ab (z. B. „-precomposed“ oder mit Grösse). */
+/** Older devices ask for icon names of their own (e.g. „-precomposed“ or with a size). */
 const TOUCH_ICON_ALIAS = /^\/apple-touch-icon(-\d+x\d+)?(-precomposed)?\.png$/;
 
-/** Beim Serverstart: Angaben ins Log schreiben und den Planer für Erinnerungen (Push) starten. */
+/** On server start: write details to the log and start the scheduler for reminders (push). */
 export const init: ServerInit = () => {
 	log.info('ediurnum started', {
 		version: __APP_VERSION__,
@@ -55,7 +55,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			redirect(303, '/setup');
 		}
 	} else if (TOKEN_PATHS.includes(path)) {
-		// Zugang über Token, siehe Endpunkt
+		// access via token, see the endpoint
 	} else if (!session && !isPublic) {
 		if (isApi) return Response.json({ error: 'error.unauthorized' }, { status: 401 });
 		redirect(303, '/login');
@@ -69,8 +69,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	});
 
 	response.headers.set('X-Content-Type-Options', 'nosniff');
-	// "same-origin" statt "no-referrer": Bei "no-referrer" senden Browser bei normalen Formularen
-	// "Origin: null" – SvelteKit lehnt solche POST-Anfragen als Cross-Site ab (z. B. beim Schliessen).
+	// "same-origin" instead of "no-referrer": with "no-referrer" browsers send "Origin: null" for normal forms
+	// – SvelteKit rejects such POST requests as cross-site (e.g. when locking).
 	response.headers.set('Referrer-Policy', 'same-origin');
 	response.headers.set('X-Frame-Options', 'DENY');
 	response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()');
@@ -82,9 +82,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 /**
- * Fehler ins Log schreiben (ohne Anfrageinhalte). Erwartete Fehler (eigene `error()`-Aufrufe wie 401/404,
- * 404 von SvelteKit) nur im Debug-Modus, andere Fehler von SvelteKit (z. B. 403 bei fremder Herkunft)
- * als Warnung, unerwartete als Fehler mit Stacktrace. Die Antwort an den Browser bleibt unverändert.
+ * Writes errors to the log (without request contents). Expected errors (own `error()` calls such as 401/404,
+ * 404 from SvelteKit) only in debug mode, other errors from SvelteKit (e.g. 403 for a foreign origin)
+ * as a warning, unexpected ones as an error with a stack trace. The response to the browser stays unchanged.
  */
 export const handleError: HandleServerError = (caught) => {
 	const where = { method: caught.event.request.method, path: caught.event.url.pathname };

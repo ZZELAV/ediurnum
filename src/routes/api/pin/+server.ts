@@ -11,7 +11,7 @@ import {
 	verifyPin
 } from '#lib/server/vault.ts';
 
-/** PIN eingeben: gesperrte Einträge werden in dieser Sitzung für 10 Minuten lesbar. */
+/** Enter the PIN: locked entries become readable in this session for 10 minutes. */
 export const POST: RequestHandler = async (event) => {
 	const session = requireSession(event);
 	if (!hasPin()) return fail('error.noPin');

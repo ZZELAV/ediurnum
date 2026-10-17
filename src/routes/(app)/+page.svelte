@@ -7,7 +7,7 @@
 
 	let { data } = $props();
 
-	// „Heute nicht“ gilt auch hier (gleich wie im Eintrag)
+	// „Heute nicht“ (not today) applies here as well (same as in the entry)
 	let dismissed = $state<Partial<Record<SectionKind, boolean>>>({});
 	onMount(() => {
 		for (const k of ['feelings', 'growth'] as const) if (isDismissed(data.today, k)) dismissed[k] = true;
@@ -266,7 +266,7 @@
 		color: var(--ink);
 		border-radius: 6px;
 	}
-	/* Linie am Listenelement, nicht am abgerundeten Link – sonst biegen sich die Enden (wie in der Suche) */
+	/* line on the list item, not on the rounded link – otherwise the ends bend (as in the search) */
 	.recent li + li {
 		border-top: 1px solid var(--rule);
 	}

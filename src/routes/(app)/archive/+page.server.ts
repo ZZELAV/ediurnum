@@ -3,10 +3,10 @@ import { addMonths, monthKey, todayIso } from '#lib/dates.ts';
 import { getEntry, listEntryMeta } from '#lib/server/entries.ts';
 import { snippetOf } from '#lib/server/snippet.ts';
 
-/** `readable`: Inhalt lesbar (nicht gesperrt oder PIN offen) – sonst fehlen Stimmung, Gefühle und Auszug. */
+/** `readable`: content readable (not locked or PIN open) – otherwise mood, feelings and excerpt are missing. */
 type Day = { date: string; mood: number | null; locked: boolean; readable: boolean; kinds: string[]; emotions: string[]; snippet: string };
 
-/** Alle Monate vom laufenden zurück bis `oldest` (beide eingeschlossen), neuester zuerst. */
+/** All months from the current one back to `oldest` (both included), newest first. */
 function monthsBack(current: string, oldest: string): string[] {
 	const out: string[] = [];
 	for (let key = current; key >= oldest; key = addMonths(key, -1)) out.push(key);
@@ -16,7 +16,7 @@ function monthsBack(current: string, oldest: string): string[] {
 export const load: PageServerLoad = ({ locals }) => {
 	const session = locals.session!;
 	const byMonth = new Map<string, Day[]>();
-	const metas = listEntryMeta(); // neuester Tag zuerst
+	const metas = listEntryMeta(); // newest day first
 	for (const m of metas) {
 		const e = m.locked && !session.lockKey ? null : getEntry(session, m.date);
 		const emotions = e?.content?.sections.feelings?.emotions;
@@ -28,14 +28,14 @@ export const load: PageServerLoad = ({ locals }) => {
 			locked: m.locked,
 			readable: !!e?.content,
 			kinds: m.kinds,
-			// für den Filter (Gefühle aus dem Wochenrückblick)
+			// for the filter (feelings from the weekly review)
 			emotions: Array.isArray(emotions) ? emotions : [],
 			snippet: e?.content ? snippetOf(e.content, 90) : ''
 		});
 	}
 	if (!metas.length) return { months: [] };
-	// Lückenlos vom laufenden Monat bis zum Monat des ersten Eintrags – auch Monate ohne Eintrag,
-	// damit sich jeder Tag im Kalender nachtragen lässt
+	// without gaps from the current month to the month of the first entry – also months without an entry,
+	// so every day in the calendar can be filled in later
 	const oldest = monthKey(metas[metas.length - 1].date);
 	const current = monthKey(todayIso());
 	const keys = monthsBack(current > oldest ? current : oldest, oldest);

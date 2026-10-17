@@ -21,7 +21,7 @@
 	let pinDialog = $state(false);
 	let preview = $state<{ send: number; locked: number; pinOpen: boolean; excluded: number } | null>(null);
 
-	// Schritt 1: erstellte Markdown-Datei; Schritt 2: Antwort aus dem Chat
+	// step 1: created Markdown file; step 2: answer from the chat
 	let result = $state<{
 		markdown: string;
 		count: number;
@@ -29,8 +29,8 @@
 		to: string;
 		filename: string;
 	} | null>(null);
-	// Schritt 2 gehört zur zuletzt erstellten Datei. Zeitraum und Anzahl (keine Inhalte) bleiben im Browser
-	// gespeichert, damit die Antwort auch nach dem Sperren (z. B. während man im KI-Chat ist) noch eingefügt werden kann.
+	// step 2 belongs to the most recently created file. Period and count (no content) stay stored in the browser,
+	// so the answer can still be pasted after locking (e.g. while you are in the AI chat).
 	type Pending = { from: string; to: string; count: number; question: string; at: number };
 	const PENDING_KEY = 'ediurnum:pending-answer';
 	const PENDING_MAX_MS = 7 * 24 * 60 * 60 * 1000;
@@ -42,7 +42,7 @@
 			if (p) localStorage.setItem(PENDING_KEY, JSON.stringify({ ...p, question: '' }));
 			else localStorage.removeItem(PENDING_KEY);
 		} catch {
-			// ohne Speicher gilt Schritt 2 nur bis zum Neuladen
+			// without storage step 2 only lasts until the page is reloaded
 		}
 	}
 
@@ -53,7 +53,7 @@
 				untrack(() => (pending ??= p));
 			} else if (p) localStorage.removeItem(PENDING_KEY);
 		} catch {
-			// nichts gespeichert
+			// nothing stored
 		}
 	});
 
@@ -66,7 +66,7 @@
 	let instructions = $state(untrack(() => data.instructions.custom || data.instructions.default));
 	const instructionsNotice = new Flash();
 
-	// „Letzte Woche“ = heute und die 6 Tage davor (7 Tage), entsprechend 30 und 90 Tage
+	// „Letzte Woche“ (last week) = today and the 6 days before (7 days), likewise 30 and 90 days
 	const from = $derived(period === 'custom' ? customFrom : addDays(data.today, 1 - Number(period)));
 	const to = $derived(period === 'custom' ? customTo : data.today);
 
@@ -119,7 +119,7 @@
 	<section class="card">
 		<h2>{t('insights.new')}</h2>
 
-		<!-- Schritt 1: Markdown-Datei erstellen -->
+		<!-- Step 1: create the Markdown file -->
 		<form
 			method="POST"
 			action="?/prompt"
@@ -221,7 +221,7 @@
 		</form>
 
 		{#if result}
-			<!-- Datei bereit: herunterladen oder kopieren -->
+			<!-- File ready: download or copy -->
 			<div class="ready">
 				<p><strong>{t('insights.fileReady', { count: result.count })}</strong></p>
 				<div class="row">
@@ -234,7 +234,7 @@
 		{/if}
 
 		{#if pending}
-			<!-- Schritt 2 (optional): Antwort der KI speichern -->
+			<!-- Step 2 (optional): save the AI's answer -->
 			{#if !result}
 				<p class="faint earlier">
 					{t('insights.pendingEarlier', { from: fmtDate(pending.from, 'short'), to: fmtDate(pending.to, 'short') })}
@@ -282,7 +282,7 @@
 		{/if}
 	</section>
 
-	<!-- Auftrag an die KI: Standard oder eigener Text -->
+	<!-- Instructions to the AI: default or own text -->
 	<details class="card instructions">
 		<summary>
 			<span class="title">{t('insights.instructions')}</span>

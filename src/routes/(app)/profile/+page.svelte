@@ -10,7 +10,7 @@
 
 	let { data } = $props();
 
-	// Formularzustand: Startwerte aus dem gespeicherten Profil (nur beim Öffnen gelesen)
+	// form state: initial values from the stored profile (read only when opening)
 	let profile = $state(sanitizeProfile(untrack(() => data.profile)));
 	let busy = $state(false);
 	const notice = new Flash();
@@ -227,7 +227,7 @@
 		transform: scale(1.1);
 	}
 	@media (max-width: 520px) {
-		/* Pole über und unter den Punkten, damit nichts seitlich überläuft */
+		/* poles above and below the points, so nothing overflows sideways */
 		.poles {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}

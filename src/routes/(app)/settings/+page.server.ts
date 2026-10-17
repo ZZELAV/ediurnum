@@ -71,7 +71,7 @@ export const actions: Actions = {
 		return { section: 'general', success: 'settings.saved' };
 	},
 
-	/** Tagebuch löschen: nur Inhalte (mode=content) oder alles zurücksetzen (mode=all). Passwort ist Pflicht. */
+	/** Delete the journal: only content (mode=content) or reset everything (mode=all). The password is required. */
 	purge: async ({ request, locals, cookies }) => {
 		const form = await request.formData();
 		const mode = form.get('mode') === 'all' ? 'all' : 'content';
@@ -111,13 +111,13 @@ export const actions: Actions = {
 		registerSuccess('password-change');
 		await setPassword(dek, next);
 		dek.fill(0);
-		// Wer das Passwort ändert, will oft andere Geräte aussperren (z. B. wenn es jemand kennen könnte)
+		// whoever changes the password often wants to lock out other devices (e.g. if someone might know it)
 		const closed = destroyOtherSessions(locals.session!);
 		log.info('password changed', { otherSessionsClosed: closed });
 		return { section: 'password', success: 'settings.passwordChanged' };
 	},
 
-	/** Wiederherstellungsschlüssel prüfen, ohne etwas zu ändern. */
+	/** Checks the recovery key without changing anything. */
 	recoveryTest: async ({ request, locals }) => {
 		const form = await request.formData();
 		const wait = throttleRemaining('recovery-test');

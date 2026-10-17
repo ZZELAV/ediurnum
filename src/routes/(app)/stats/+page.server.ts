@@ -7,7 +7,7 @@ export const load: PageServerLoad = ({ locals, url }) => {
 	const requested = url.searchParams.get('period') as StatsPeriod;
 	const period = STATS_PERIODS.includes(requested) ? requested : '365';
 	const today = todayIso();
-	const metas = listEntryMeta(); // neuester Tag zuerst
+	const metas = listEntryMeta(); // newest day first
 	const from = periodStart(period, today, metas.at(-1)?.date ?? null);
 	return {
 		period,

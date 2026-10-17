@@ -26,7 +26,7 @@
 			};
 		}}
 	>
-		<!-- Für Passwortmanager: Feld für den Benutzernamen (den Vornamen), den der Passwortmanager selbst ausfüllt -->
+		<!-- for password managers: a field for the user name (the first name) that the password manager fills in itself -->
 		<input class="visually-hidden" type="text" name="username" autocomplete="username" tabindex="-1" aria-hidden="true" />
 		<div class="field">
 			<label for="pw">{t('setup.password')}</label>

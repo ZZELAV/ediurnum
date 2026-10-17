@@ -1,11 +1,11 @@
 import { defineEnvVars } from '@sveltejs/kit/env';
 
-/** Leere Angaben gelten als nicht gesetzt. */
+/** Empty values count as not set. */
 const optional = (value: string | undefined) => (value?.trim() ? value.trim() : undefined);
 
 /**
- * Umgebungsvariablen der App (gelesen beim Start, nicht beim Build). Beschreibung für Betreiber:
- * docs/DEPLOYMENT.md. Nie Werte loggen, die Geheimnisse enthalten (WIDGET_TOKEN).
+ * Environment variables of the app (read at start, not at build time). Description for operators:
+ * docs/DEPLOYMENT.md. Never log values that contain secrets (WIDGET_TOKEN).
  */
 export const variables = defineEnvVars({
 	DATA_DIR: {

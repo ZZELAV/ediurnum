@@ -19,7 +19,7 @@ export const load: PageServerLoad = ({ locals }) => {
 		return { ...m, mood: e?.content?.mood ?? null, snippet: e?.content ? snippetOf(e.content, max) : '' };
 	};
 
-	// „Heute vor einem Jahr“ (und weiter zurück, solange es Einträge gibt)
+	// „Heute vor einem Jahr“ (on this day one year ago, and further back as long as there are entries)
 	const oldest = metas.at(-1)?.date;
 	const onThisDay = [];
 	for (let years = 1; oldest && addYears(today, -years) >= oldest; years++) {
@@ -27,14 +27,14 @@ export const load: PageServerLoad = ({ locals }) => {
 		if (m) onThisDay.push({ ...preview(m, 220), years });
 	}
 
-	// Statistik-Kachel: gleiche Quellen wie die Seite „Statistik“ und die Widget-API
+	// statistics tile: same sources as the „Statistik“ page and the widget API
 	const monthStart = periodStart('30', today, null);
 	const stats = {
 		...writingSummary(metas, today),
 		mood: computeStats(statsDays(session, monthStart), monthStart, today).mood
 	};
 
-	// Willkommenskarte, bis sie ausgeblendet wird oder alle Schritte erledigt sind
+	// welcome card, until it is hidden or all steps are done
 	const steps = welcomeProgress(metas);
 	const welcome = !locals.settings?.welcomeHidden && Object.values(steps).some((done) => !done) ? steps : null;
 
@@ -53,7 +53,7 @@ export const load: PageServerLoad = ({ locals }) => {
 };
 
 export const actions: Actions = {
-	/** Willkommenskarte ausblenden (in den Einstellungen wieder einblendbar). */
+	/** Hide the welcome card (can be shown again in the settings). */
 	hideWelcome: ({ locals }) => {
 		const session = locals.session!;
 		saveSettings(session.dek, { ...loadSettings(session.dek), welcomeHidden: true });

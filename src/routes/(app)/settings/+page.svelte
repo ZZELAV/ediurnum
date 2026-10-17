@@ -10,7 +10,7 @@
 
 	let { data, form } = $props();
 
-	// Erscheinungsbild: ohne eigene Wahl folgt die App dem System; angezeigt wird das aktuell wirksame.
+	// theme: without an own choice the app follows the system; the one currently in effect is shown.
 	let systemDark = $state(false);
 	let chosenTheme = $state<'light' | 'dark' | null>(null);
 	const themeValue = $derived(
@@ -25,7 +25,7 @@
 	});
 
 	type FormResult = { section?: string; success?: string; error?: string; seconds?: number } | null;
-	// Erfolgsmeldungen verschwinden nach ein paar Sekunden, Fehler bleiben stehen
+	// success messages disappear after a few seconds, errors stay
 	const shown = expiring(() => form as FormResult, (r) => !!r.error);
 	const result = $derived(shown.current);
 
@@ -60,7 +60,7 @@
 			<a href="#about">{t('settings.about')}</a>
 		</nav>
 
-		<!-- Allgemein -->
+		<!-- General -->
 		<section id="general" class="card">
 			<h2>{t('settings.general')}</h2>
 			{@render feedback('general')}
@@ -114,7 +114,7 @@
 			</form>
 		</section>
 
-		<!-- Über mich -->
+		<!-- About me -->
 		<section id="profile" class="card">
 			<h2>{t('profile.title')}</h2>
 			<p class="faint">{t('settings.profileIntro')}</p>
@@ -126,7 +126,7 @@
 			<a class="btn ghost" href="/profile">{data.profile.filled ? t('settings.profileEdit') : t('settings.profileFill')}</a>
 		</section>
 
-		<!-- Sicherheit -->
+		<!-- Security -->
 		<section id="security" class="card">
 			<h2>{t('settings.security')}</h2>
 			<p class="faint">{t('settings.recoveryHint')}</p>
@@ -145,7 +145,7 @@
 			<h3>{t('settings.changePassword')}</h3>
 			{@render feedback('password')}
 			<form method="POST" action="?/password" use:enhance class="grid">
-				<!-- Für Passwortmanager: der Vorname als Benutzername -->
+				<!-- for password managers: the first name as the user name -->
 				<input class="visually-hidden" type="text" name="username" value={data.settings.name} autocomplete="username" tabindex="-1" aria-hidden="true" readonly />
 				<div class="field">
 					<label for="cur">{t('settings.currentPassword')}</label>
@@ -201,7 +201,7 @@
 			</div>
 		</section>
 
-		<!-- Tagebuch löschen -->
+		<!-- Delete journal -->
 		<section id="danger" class="card danger-zone">
 			<h2>{t('settings.danger')}</h2>
 			<p class="faint">{t('settings.dangerIntro')}</p>
@@ -234,7 +234,7 @@
 			</form>
 		</section>
 
-		<!-- Über -->
+		<!-- About -->
 		<section id="about" class="card">
 			<h2>{t('settings.about')}</h2>
 			<p>{t('common.version')} {data.version}</p>
@@ -299,7 +299,7 @@
 	.check {
 		grid-column: 1 / -1;
 	}
-	/* Hinweis bündig mit dem Text neben dem Schalter (Schalterbreite + Abstand) */
+	/* hint aligned with the text next to the switch (switch width + gap) */
 	.check p {
 		margin: 0.2rem 0 0 calc(2.4rem + 0.55rem);
 	}

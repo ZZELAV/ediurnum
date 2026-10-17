@@ -4,7 +4,7 @@ import { fail, readJson } from '#lib/server/api.ts';
 import { addDevice, removeAllDevices, removeDevice } from '#lib/server/reminders.ts';
 import { log } from '#lib/server/log.ts';
 
-/** Gerät für Push-Benachrichtigungen anmelden. */
+/** Registers a device for push notifications. */
 export const POST: RequestHandler = async (event) => {
 	requireSession(event);
 	const { subscription, label } = await readJson(event.request);
@@ -19,7 +19,7 @@ export const POST: RequestHandler = async (event) => {
 	return Response.json({ ok: true });
 };
 
-/** Gerät abmelden ({ endpoint }) oder alle Geräte ({ all: true }). */
+/** Unregisters a device ({ endpoint }) or all devices ({ all: true }). */
 export const DELETE: RequestHandler = async (event) => {
 	requireSession(event);
 	const body = await event.request.json().catch(() => ({}));

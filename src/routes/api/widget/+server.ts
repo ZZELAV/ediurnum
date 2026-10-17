@@ -10,9 +10,9 @@ import { registerFailure, registerSuccess, throttleRemaining } from '#lib/server
 const digest = (s: string) => createHash('sha256').update(s).digest();
 
 /**
- * Kennzahlen für ein Dashboard (z. B. Homepage, Widget "customapi"). Nur aktiv mit WIDGET_TOKEN;
- * Abfrage mit "Authorization: Bearer <token>". Liefert ausschliesslich unverschlüsselte Metadaten
- * (Anzahl Einträge, Zeitpunkt des letzten Schreibens, heute geschrieben, aktuelle Serie) – nie Inhalte.
+ * Figures for a dashboard (e.g. Homepage, widget "customapi"). Only active with WIDGET_TOKEN;
+ * request with "Authorization: Bearer <token>". Returns only unencrypted metadata
+ * (number of entries, time of the latest save, written today, current streak) – never content.
  */
 export const GET: RequestHandler = (event) => {
 	const token = WIDGET_TOKEN ?? '';
@@ -29,6 +29,6 @@ export const GET: RequestHandler = (event) => {
 	}
 	registerSuccess(key);
 
-	// gleiche Kennzahlen wie Dashboard und Statistik
+	// same figures as dashboard and statistics
 	return Response.json(writingSummary(listEntryMeta(), todayIso()), { headers: { 'cache-control': 'no-store' } });
 };

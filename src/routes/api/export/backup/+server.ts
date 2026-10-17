@@ -8,7 +8,7 @@ import { nowIso, setMeta } from '#lib/server/db.ts';
 export const GET: RequestHandler = (event) => {
 	const session = requireSession(event);
 	log.info('backup downloaded');
-	setMeta('backup_last', nowIso()); // nur der Zeitpunkt, für die Willkommenskarte
+	setMeta('backup_last', nowIso()); // only the time, for the welcome card
 	return new Response(createBackup(session.dek), {
 		headers: {
 			'content-type': 'application/json; charset=utf-8',

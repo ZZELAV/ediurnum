@@ -1,10 +1,10 @@
 /*
- * ediurnum – Gestaltung: ruhig, klar, funktional.
- * Warme, helle Flächen, eine Schreibspalte mit angenehmer Lesebreite,
- * Serifenschrift zum Schreiben, serifenlose Schrift für die Bedienung.
+ * ediurnum – design: calm, clear, functional.
+ * Warm, light surfaces, a writing column with a pleasant reading width,
+ * a serif font for writing, a sans-serif font for the controls.
  *
- * Farbrollen:  --desk = Hintergrund · --paper = Flächen (Karten) · --paper-2 = Felder
- *              --paper-edge = Linien · --ink* = Text · --accent = Salbeigrün
+ * Colour roles:  --desk = background · --paper = surfaces (cards) · --paper-2 = fields
+ *                --paper-edge = lines · --ink* = text · --accent = sage green
  */
 
 :root {
@@ -24,7 +24,7 @@
 	--gold: #c39a52;
 	--danger: #a4553f;
 	--danger-soft: #f6e6df;
-	/* Stimmung 1–5 (schwer … sehr gut); -soft = Flächen im Kalender */
+	/* mood 1–5 (heavy … very good); -soft = surfaces in the calendar */
 	--mood-1: #7d5ba6;
 	--mood-2: #3f7cbf;
 	--mood-3: #8c8a80;
@@ -121,7 +121,7 @@ html {
 body {
 	margin: 0;
 	min-height: 100dvh;
-	/* nichts darf seitliches Scrollen auslösen (clip statt hidden, damit sticky funktioniert) */
+	/* nothing may cause horizontal scrolling (clip instead of hidden, so sticky works) */
 	overflow-x: clip;
 	font-family: var(--font-sans);
 	font-size: 15px;
@@ -176,9 +176,9 @@ p {
 	padding: 0.5rem 1rem;
 }
 
-/* ---------- Seitenaufbau ---------- */
+/* ---------- Page layout ---------- */
 
-/* Inhalt einer Ansicht */
+/* Content of a view */
 .view {
 	width: 100%;
 	max-width: 1120px;
@@ -200,7 +200,7 @@ p {
 	margin: 0;
 }
 
-/* Hauptspalte + Seitenspalte; auf schmalen Bildschirmen untereinander */
+/* Main column + side column; stacked on narrow screens */
 .split {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
@@ -209,11 +209,11 @@ p {
 }
 @media (min-width: 1100px) {
 	.split {
-		/* Seitenspalte wächst mit dem Fenster (320–380 px), damit die Schreibspalte bei 1100 px nicht zu schmal wird */
+		/* the side column grows with the window (320–380 px), so the writing column isn't too narrow at 1100 px */
 		grid-template-columns: minmax(0, 1fr) clamp(320px, 30vw, 380px);
 		gap: 1.75rem;
 	}
-	/* Seitenspalte immer rechts, egal ob sie im Markup vor oder nach dem Hauptinhalt steht */
+	/* side column always on the right, whether it comes before or after the main content in the markup */
 	.split > .side {
 		grid-column: 2;
 		grid-row: 1;
@@ -222,7 +222,7 @@ p {
 	}
 }
 @media (max-width: 1099px) {
-	/* optional: Seitenspalte auf schmalen Bildschirmen zuerst zeigen */
+	/* optional: show the side column first on narrow screens */
 	.split.side-first > .side {
 		order: -1;
 	}
@@ -287,7 +287,7 @@ p {
 	font-size: 0.88rem;
 }
 
-/* ---------- Formulare ---------- */
+/* ---------- Forms ---------- */
 
 label {
 	display: block;
@@ -314,12 +314,12 @@ input[type='file'],
 select,
 textarea {
 	width: 100%;
-	/* Felder dürfen in Flex-Zeilen und Rastern schrumpfen – iOS gibt ihnen sonst eine feste Mindestbreite,
-	 * und sie ragen rechts hinaus (z. B. neben den Nummern bei „Wofür bin ich dankbar?“) */
+	/* fields may shrink in flex rows and grids – otherwise iOS gives them a fixed minimum width
+	 * and they stick out on the right (e.g. next to the numbers of „Wofür bin ich dankbar?“) */
 	min-width: 0;
-	/* Textfelder nur in der Höhe vergrösserbar – in der Breite würden sie aus der Spalte ragen */
+	/* text areas can only be resized in height – in width they would stick out of the column */
 	resize: vertical;
-	/* Eingabe- und Auswahlfelder gleich hoch, damit Felder nebeneinander bündig stehen */
+	/* inputs and selects equally high, so fields next to each other line up */
 	min-height: 2.75rem;
 	font: inherit;
 	color: var(--ink);
@@ -332,8 +332,8 @@ textarea {
 		background 0.15s;
 }
 
-/* Datum und Uhrzeit: iOS gibt diesen Feldern eine eigene Mindestbreite und Darstellung –
- * ohne das ragen sie auf schmalen Bildschirmen rechts über ihre Spalte hinaus. */
+/* Date and time: iOS gives these fields a minimum width and look of their own –
+ * without this they stick out of their column on the right on narrow screens. */
 input[type='date'],
 input[type='time'] {
 	-webkit-appearance: none;
@@ -341,8 +341,8 @@ input[type='time'] {
 	display: block;
 	min-width: 0;
 	max-width: 100%;
-	/* feste Höhe wie die übrigen Felder (Zeilenhöhe + Innenabstand + Rahmen) – iOS zeichnet den Wert
-	 * sonst höher als das Feld, er ragt dann über darunterliegende Hinweise */
+	/* fixed height like the other fields (line height + padding + border) – otherwise iOS draws the value
+	 * higher than the field and it sticks out over hints below */
 	height: calc(1.55em + 1.2rem + 2px);
 	line-height: 1.55;
 	text-align: left;
@@ -364,7 +364,7 @@ textarea:focus {
 }
 
 
-/* Einklappbare Boxen (<details>): Pfeil rechts statt des Browser-Dreiecks, dreht sich beim Öffnen */
+/* Collapsible boxes (<details>): arrow on the right instead of the browser triangle, turns when opened */
 details > summary {
 	position: relative;
 	padding-right: 2rem;
@@ -393,8 +393,8 @@ details > summary:hover::after {
 	border-color: var(--ink);
 }
 
-/* Checkboxen erscheinen immer als Schalter (wie bei den eigenen Erinnerungen).
- * Für Ein/Aus-Optionen zusätzlich role="switch" setzen. */
+/* Checkboxes always appear as switches (like for the custom reminders).
+ * For on/off options also set role="switch". */
 input[type='checkbox'] {
 	appearance: none;
 	-webkit-appearance: none;
@@ -430,7 +430,7 @@ input[type='checkbox']:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
 }
-/* Handy: Felder mindestens 16 px, sonst zoomt iOS beim Antippen hinein und die Seite verrutscht seitlich */
+/* Phone: fields at least 16 px, otherwise iOS zooms in when tapping and the page shifts sideways */
 @media (max-width: 899px) {
 	input[type='text'],
 	input[type='password'],
@@ -446,7 +446,7 @@ input[type='checkbox']:disabled {
 	}
 }
 
-/* Schreibfelder: ruhig, ohne Rahmen, Serifenschrift */
+/* Writing fields: calm, without a border, serif font */
 :is(input, textarea).write {
 	font-family: var(--font-serif);
 	font-size: 1.05rem;
@@ -454,8 +454,8 @@ input[type='checkbox']:disabled {
 	border-color: transparent;
 	resize: none;
 }
-/* Nur Textfelder wachsen mit dem Inhalt (in die Höhe). Einzeilige Felder behalten ihre Breite und
- * scrollen – mit `field-sizing: content` würden sie mit dem Text in die Breite wachsen und rechts hinausragen. */
+/* Only text areas grow with their content (in height). Single-line fields keep their width and
+ * scroll – with `field-sizing: content` they would grow in width with the text and stick out on the right. */
 textarea.write {
 	min-height: 4.6rem;
 	field-sizing: content;
@@ -467,7 +467,7 @@ textarea.write {
 
 .field {
 	margin-bottom: 1.25rem;
-	/* in Rastern darf ein Feld schmaler werden als sein Inhalt */
+	/* in grids a field may become narrower than its content */
 	min-width: 0;
 }
 .field:last-child {
@@ -495,7 +495,7 @@ textarea.write {
 	white-space: nowrap;
 	max-width: 100%;
 }
-/* Schmale Bildschirme: lange Beschriftungen umbrechen statt über den Rand zu ragen */
+/* Narrow screens: wrap long labels instead of letting them stick out over the edge */
 @media (max-width: 599px) {
 	.btn {
 		white-space: normal;
@@ -581,7 +581,7 @@ textarea.write {
 	background: var(--dusk-soft);
 }
 
-/* Auswahl als Pillen (Zeitraum, Antworten, Gefühle): Knopf, Link oder Label mit verstecktem Radio */
+/* Choice as pills (period, answers, feelings): button, link or label with a hidden radio */
 .pills {
 	display: flex;
 	flex-wrap: wrap;
@@ -640,7 +640,7 @@ textarea.write {
 	font-family: var(--font-serif);
 	font-size: 1.02rem;
 	line-height: 1.75;
-	/* lange Wörter, Pfade oder Links umbrechen statt seitlich überzulaufen */
+	/* wrap long words, paths or links instead of overflowing sideways */
 	overflow-wrap: anywhere;
 }
 .prose h2,
@@ -655,7 +655,7 @@ textarea.write {
 .prose li {
 	margin-bottom: 0.3em;
 }
-/* Tabellen aus KI-Antworten: bei Platzmangel seitlich scrollbar statt zusammengequetscht */
+/* Tables from AI answers: scroll sideways when space is short instead of being squeezed */
 .prose .table-wrap {
 	max-width: 100%;
 	overflow-x: auto;
@@ -682,7 +682,7 @@ textarea.write {
 	border-bottom-color: var(--paper-edge);
 }
 @media (max-width: 600px) {
-	/* Handy: Spalten nach Inhalt bis 14rem breit, Rest seitlich scrollen – sonst werden Textspalten zu Türmen */
+	/* phone: columns up to 14rem wide by content, scroll the rest sideways – otherwise text columns become towers */
 	.prose table {
 		width: max-content;
 	}
@@ -698,8 +698,8 @@ textarea.write {
 	text-align: right;
 }
 
-/* !important, weil die Feldregeln (z. B. input[type=text] mit width: 100 %) sonst stärker sind
- * und ein verstecktes Feld die Seite seitlich verbreitert */
+/* !important because the field rules (e.g. input[type=text] with width: 100 %) are stronger otherwise
+ * and a hidden field widens the page sideways */
 .visually-hidden {
 	position: absolute !important;
 	width: 1px !important;
@@ -712,9 +712,9 @@ textarea.write {
 	white-space: nowrap;
 }
 
-/* ---------- Fokusmodus ----------
- * Beim Schreiben treten Navigation und Seitenspalte zurück; es bleibt die Schreibspalte.
- * Gesteuert über data-focus am <html> (src/lib/focus.ts).
+/* ---------- Focus mode ----------
+ * While writing, the navigation and the side column step back; the writing column remains.
+ * Controlled via data-focus on <html> (src/lib/focus.ts).
  */
 :is(.sidebar, .mobile-top, .tabbar, .pinbar, .daynav, .focus-exit, .focus-hint) {
 	transition: opacity 0.8s ease;
@@ -764,7 +764,7 @@ textarea.write {
 	font-size: 0.8rem;
 	color: var(--ink-faint);
 }
-/* Mit Tastatur genügt der Hinweis auf Esc; auf Touch-Geräten gibt es einen Knopf */
+/* With a keyboard the hint about Esc is enough; on touch devices there is a button */
 @media (hover: hover) and (pointer: fine) {
 	:root[data-focus] .focus-hint {
 		opacity: 0.8;
@@ -777,9 +777,9 @@ textarea.write {
 	}
 }
 
-/* ---------- Wechsel zwischen Tagen (View Transitions) ----------
- * Vorwärts gleitet der alte Tag nach links hinaus und der neue kommt von rechts,
- * rückwärts umgekehrt. Gesteuert über data-flip in (app)/+layout.svelte.
+/* ---------- Switching between days (View Transitions) ----------
+ * Forwards the old day slides out to the left and the new one comes in from the right,
+ * backwards the other way round. Controlled via data-flip in (app)/+layout.svelte.
  */
 .entry-view {
 	view-transition-name: entry-view;

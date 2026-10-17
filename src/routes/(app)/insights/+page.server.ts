@@ -13,16 +13,16 @@ import { renderMarkdown } from '#lib/markdown.ts';
 import type { AiAgent } from '#lib/types.ts';
 
 /**
- * Einsichten über einen beliebigen KI-Chat: Die App erstellt eine Markdown-Datei mit Auftrag
- * und Einträgen; die Antwort der KI kann zurückkopiert und als Auswertung gespeichert werden.
- * (KI-Agenten mit API-Schlüssel folgen in einem späteren Release – siehe #lib/server/ai.)
+ * Insights through any AI chat: the app creates a Markdown file with instructions
+ * and entries; the AI's answer can be copied back and saved as an analysis.
+ * (AI agents with an API key follow in a later release – see #lib/server/ai.)
  */
 export const load: PageServerLoad = ({ locals }) => {
 	const session = locals.session!;
 	const settings = loadSettings(session.dek);
 	return {
 		instructions: { custom: settings.aiInstructions, default: defaultInstructions(settings.language) },
-		// Stimmungsverlauf älterer Auswertungen (`moods`) wird nicht mehr gezeigt – er steht in der Statistik
+		// the mood chart of older analyses (`moods`) is no longer shown – it is in the statistics
 		analyses: listAnalyses(session.dek).map(({ moods: _, ...a }) => ({ ...a, html: renderMarkdown(a.body) })),
 		hasProfile: !isEmptyProfile(loadProfile(session.dek))
 	};
@@ -37,7 +37,7 @@ function period(form: FormData) {
 }
 
 export const actions: Actions = {
-	/** Markdown-Datei für einen KI-Chat erstellen. */
+	/** Creates the Markdown file for an AI chat. */
 	prompt: async ({ request, locals }) => {
 		const session = locals.session!;
 		const form = await request.formData();
@@ -71,7 +71,7 @@ export const actions: Actions = {
 		};
 	},
 
-	/** Eigenen Auftrag an die KI speichern; leer oder gleich wie der Standard = Standard verwenden. */
+	/** Saves own instructions to the AI; empty or equal to the default = use the default. */
 	instructions: async ({ request, locals }) => {
 		const session = locals.session!;
 		const form = await request.formData();
@@ -82,7 +82,7 @@ export const actions: Actions = {
 		return { instructionsSaved: settings.aiInstructions ? 'custom' : 'default' };
 	},
 
-	/** Antwort aus dem KI-Chat als Auswertung speichern. */
+	/** Saves the answer from the AI chat as an analysis. */
 	import: async ({ request, locals }) => {
 		const session = locals.session!;
 		const form = await request.formData();

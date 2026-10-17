@@ -5,7 +5,7 @@ import { loadSettings } from '#lib/server/settings.ts';
 import { AiError, listModels } from '#lib/server/ai/providers.ts';
 import type { AiAgent, ProviderKind } from '#lib/types.ts';
 
-/** Lädt die verfügbaren Modelle eines Anbieters (für das Agent-Formular). */
+/** Loads the available models of a provider (for the agent form). */
 export const POST: RequestHandler = async (event) => {
 	const session = requireSession(event);
 	const body = await readJson(event.request);

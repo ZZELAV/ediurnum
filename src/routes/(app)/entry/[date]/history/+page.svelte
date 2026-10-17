@@ -13,7 +13,7 @@
 	let error = $state<string | null>(null);
 
 	const rev = $derived(data.revisions[selected]);
-	// Vergleich mit der Version davor (die Liste ist von neu nach alt sortiert)
+	// comparison with the version before (the list is sorted from new to old)
 	const older = $derived(data.revisions[selected + 1]);
 	let highlight = $state(true);
 

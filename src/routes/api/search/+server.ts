@@ -6,8 +6,8 @@ import { matchEntry, searchTerms, type SearchHit } from '#lib/search.ts';
 import { getEntry, listEntryMeta } from '#lib/server/entries.ts';
 
 /**
- * Volltextsuche. Bewusst per POST: Der Suchbegriff gehört zum Tagebuchinhalt und darf
- * nicht in der Adresse stehen (Browserverlauf, Protokolle des Reverse-Proxys).
+ * Full-text search. POST on purpose: the search term belongs to the journal content and must
+ * not appear in the address (browser history, logs of the reverse proxy).
  */
 export const POST: RequestHandler = async (event) => {
 	const session = requireSession(event);

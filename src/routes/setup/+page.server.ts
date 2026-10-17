@@ -17,7 +17,7 @@ export const load: PageServerLoad = ({ locals }) => {
 	return {};
 };
 
-/** Wie initialize(), aber null statt Fehler, wenn eine gleichzeitige Einrichtung zuvorgekommen ist. */
+/** Like initialize(), but null instead of an error if a simultaneous setup came first. */
 async function tryInitialize(password: string, dek: Buffer): Promise<string | null> {
 	try {
 		return await initialize(password, dek);
@@ -71,7 +71,7 @@ export const actions: Actions = {
 		}
 		if (!(await tryInitialize(password, dek))) return fail(400, { error: 'error.alreadyInitialized', mode: 'restore' });
 		restoreBackup(data);
-		setMeta('backup_last', nowIso()); // wer aus einem Backup wiederherstellt, hat eines (Willkommenskarte)
+		setMeta('backup_last', nowIso()); // restoring from a backup means having one (welcome card)
 		startSession(cookies, dek);
 		log.info('journal restored from backup', { entries: data.entries.length });
 		redirect(303, '/');

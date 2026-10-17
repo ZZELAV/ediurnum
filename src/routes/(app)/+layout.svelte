@@ -8,11 +8,11 @@
 
 	let { data, children } = $props();
 
-	// Nach der eingestellten Zeit ohne Aktivität oder nach Verlassen der App sperrt sich das Tagebuch auch auf dem Bildschirm.
+	// after the set time without activity or after leaving the app the journal also locks itself on the screen.
 	$effect(() => watchIdle(data.sessionMinutes, data.leaveMinutes));
 
-	// Service Worker (nur für Push, ohne Cache) früh registrieren – damit ist ediurnum
-	// auch in Browsern installierbar, die dafür einen Service Worker verlangen.
+	// register the service worker (only for push, without a cache) early – this makes ediurnum
+	// installable in browsers that require a service worker for it, too.
 	onMount(() => {
 		if (!window.isSecureContext || !('serviceWorker' in navigator)) return;
 		navigator.serviceWorker
@@ -23,8 +23,8 @@
 
 	const ENTRY_ROUTE = '/(app)/entry/[date]';
 
-	// Wechsel zwischen zwei Tagen: Richtung bestimmen und View Transition starten.
-	// Die Animation steht in app.css (Abschnitt "Wechsel zwischen Tagen").
+	// switching between two days: determine the direction and start a view transition.
+	// The animation is in app.css (section "Switching between days").
 	onNavigate((nav) => {
 		const from = nav.from?.params?.date;
 		const to = nav.to?.params?.date;
@@ -57,7 +57,7 @@
 		{ href: '/reminders', key: 'nav.reminders', icon: 'bell', match: (p: string) => p.startsWith('/reminders') },
 		{ href: '/stats', key: 'nav.stats', icon: 'chart', match: (p: string) => p.startsWith('/stats') }
 	];
-	// Einstellungen stehen nicht in der Navigation, sondern beim Sperren (Seitenleiste unten, Handy oben)
+	// the settings aren't in the navigation but next to locking (sidebar at the bottom, phone at the top)
 	const settingsActive = $derived(page.url.pathname.startsWith('/settings'));
 </script>
 
@@ -84,7 +84,7 @@
 <a class="skip-link" href="#main">{t('nav.skip')}</a>
 
 <div class="shell">
-	<!-- Computer: Seitenleiste -->
+	<!-- Computer: sidebar -->
 	<aside class="sidebar">
 		<a href="/" class="brand" aria-label="ediurnum">
 			<span class="logo" aria-hidden="true">e</span>
@@ -109,7 +109,7 @@
 		</div>
 	</aside>
 
-	<!-- Handy: Kopfzeile -->
+	<!-- Phone: header -->
 	<header class="mobile-top">
 		<a href="/" class="brand" aria-label="ediurnum">
 			<span class="logo" aria-hidden="true">e</span>
@@ -139,7 +139,7 @@
 		</main>
 	</div>
 
-	<!-- Handy: Navigation unten -->
+	<!-- Phone: navigation at the bottom -->
 	<nav class="tabbar" aria-label={t('nav.today')}>
 		{#each links as l (l.href)}
 			{@const active = l.match(page.url.pathname)}
@@ -255,7 +255,7 @@
 		display: none;
 	}
 
-	/* ---------- Handy / Tablet ---------- */
+	/* ---------- Phone / tablet ---------- */
 	@media (max-width: 899px) {
 		.sidebar {
 			display: none;
