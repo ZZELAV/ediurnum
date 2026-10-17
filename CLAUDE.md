@@ -2,6 +2,10 @@
 
 Privates, verschlüsseltes Tagebuch. SvelteKit 3 + Svelte 5 (Runes), TypeScript, `node:sqlite`, Node ≥ 24.7.
 Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ statt „ß“).
+**Der gesamte Code ist englisch:** Kommentare, Funktionen, Variablen, Typen, Testnamen, Log-Meldungen,
+gespeicherte Werte und Kommentare in Dockerfile/Workflows. Deutsch bleiben nur die App-Texte in `src/lib/i18n/de.ts`
+(neben `en.ts`) und die lokalen Notizen `docs/STAND.md`/`docs/KONZEPT.md`. Gespeicherte Werte (z. B. Abschnittsarten,
+Feld-IDs) nur mit Migration und Backup-Version ändern (siehe Sicherheitsregeln).
 
 ## Befehle
 
@@ -41,6 +45,11 @@ Kommunikation mit dem Nutzer auf Deutsch (Schweizer Rechtschreibung: „ss“ st
   Einträge aus Backups entschlüsseln), `records.ts` (Zeile `entries`), `export.ts` (`entryDocs` → Markdown/JSON, auch
   für die KI-Datei), `pdf/pdf.ts` (PDF mit pdf-lib, Schriften in `pdf/fonts/`; die App lädt sie per `?inline` über `pdf/fonts.ts`).
   `backup.ts` enthält nur den Datenbank-Teil (Backup erstellen/einspielen).
+- Abschnittsarten heissen seit 1.1.0 `daily`/`feelings`/`growth` (bis 1.0.0 `erlebt`/`gefuehl`/`wachstum`, Zuordnung
+  `LEGACY_KINDS` in `templates.ts`). Verschlüsselte Inhalte mit alten Namen bleiben bestehen: Einträge und Versionen
+  **immer mit `decryptContent` (`records.ts`) entschlüsseln, nie direkt mit `decryptJson`** – sie wandelt alte Namen um.
+  Klartext (Spalte `kinds`, Erinnerungen) migriert Schema 4 bzw. `upgradeLegacyKinds` nach dem Einspielen alter Backups.
+  Tests: `e2e/legacy-kinds.test.ts`.
 - `src/lib/server/entries.ts` – ein Eintrag pro Tag; höchstens eine Version pro Kalendertag (TZ): Die erste Bearbeitung an einem neuen Tag archiviert die bisherige Fassung.
 - `src/lib/server/ai/` – Prompt-Aufbau (`buildChatMarkdown` für die Markdown-Datei, `parseResponse` für zurückkopierte Antworten) und Anbieter-Adapter für KI-Agenten mit API-Schlüssel (in der Oberfläche vorerst ausgeblendet, kommt in einem späteren Release).
 - `src/lib/reminders.ts` – Fälligkeit der Rückblicke (gemeinsam für App-Hinweise und Push); `src/lib/server/reminders.ts` – Zeitplan, VAPID, Geräte, Planer (läuft minütlich, gestartet in `hooks.server.ts` → `init`); `src/service-worker.ts` – nur Push, bewusst ohne Offline-Cache.
