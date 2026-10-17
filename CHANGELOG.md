@@ -16,7 +16,7 @@ The topmost version without a date is still in development.
 - The filter in “All entries” opens as wide as the search field and the filter button together and only scrolls
   when the window is too low.
 - Past days and the version history show the energy of the weekly review like the mood: one line with its
-  colour (“● Energy awake”).
+  colour (“● Energy awake”). The PDF and Markdown exports and the AI file show it the same way.
 - The three sections are stored under English names (daily, feelings, growth). Existing journals are updated
   automatically on the first start – nothing changes in the app, and locked entries stay locked.
 - Backups use format version 3. Older backups can still be restored; backups from 1.1.0 can't be restored in 1.0.0

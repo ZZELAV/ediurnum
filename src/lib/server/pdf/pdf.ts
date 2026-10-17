@@ -139,7 +139,20 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 	paragraph(t('export.subtitle', { date: today, count: docs.length }), faces.sans, 10, SOFT);
 	if (skippedLocked) paragraph(t('export.skippedLocked', { count: skippedLocked }), faces.sans, 10, SOFT);
 
+	/** Mood and energy: coloured dot and one line */
+	const scaleLine = (label: string, value: number, word: string) => {
+		ensure(16);
+		page.drawCircle({ x: X + 3.5, y: y - 6.5, size: 3.5, color: MOOD[value - 1] });
+		draw(`${label}: ${value}/5 · ${word}`, faces.sans, 9.5, X + 12, y - 9.5, SOFT);
+		y -= 16;
+	};
+
 	const field = (f: EntryField) => {
+		if (f.kind === 'scale') {
+			scaleLine(f.label, Number(f.values[0]), f.values[1]);
+			y -= 6;
+			return;
+		}
 		ensure(13 + 16);
 		paragraph(f.label, faces.sans, 8.5, FAINT);
 		if (f.kind === 'list') {
@@ -148,8 +161,7 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 				draw(`${i + 1}.`, faces.sans, 9, X, y - 11, FAINT);
 				paragraph(v, faces.serif, 11, INK, X + 16);
 			});
-		} else if (f.kind === 'scale') paragraph(`${f.values[0]}/5`, faces.serif, 11);
-		else paragraph(f.values.join(f.kind === 'chips' ? ' · ' : '\n'), faces.serif, 11);
+		} else paragraph(f.values.join(f.kind === 'chips' ? ' · ' : '\n'), faces.serif, 11);
 		y -= 6;
 	};
 
@@ -160,12 +172,7 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 		rule();
 		y -= 18;
 		paragraph(d.heading, faces.serifBold, 15);
-		if (d.mood) {
-			ensure(16);
-			page.drawCircle({ x: X + 3.5, y: y - 6.5, size: 3.5, color: MOOD[d.mood - 1] });
-			draw(`${t('entry.mood')}: ${d.mood}/5 · ${t(`mood.${d.mood}`)}`, faces.sans, 9.5, X + 12, y - 9.5, SOFT);
-			y -= 16;
-		}
+		if (d.mood) scaleLine(t('entry.mood'), d.mood, t(`mood.${d.mood}`));
 		for (const s of d.sections) {
 			y -= 8;
 			ensure(15 + 40);

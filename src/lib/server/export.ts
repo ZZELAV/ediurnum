@@ -9,7 +9,7 @@ import type { Entry, Lang } from '#lib/types.ts';
 
 export interface EntryField {
 	label: string;
-	/** text: one text · list: lines (e.g. gratitude) · chips: feelings (translated) · scale: value 1–5 */
+	/** text: one text · list: lines (e.g. gratitude) · chips: feelings (translated) · scale: value 1–5 and its word */
 	kind: 'text' | 'list' | 'chips' | 'scale';
 	values: string[];
 }
@@ -47,7 +47,8 @@ export function entryDocs(entries: Entry[], lang: Lang): EntryDoc[] {
 				const v = sec[f.id];
 				const label = t(`section.${def.kind}.${f.id}`);
 				if (typeof v === 'string' && v.trim()) fields.push({ label, kind: 'text', values: [v.trim()] });
-				else if (typeof v === 'number') fields.push({ label, kind: 'scale', values: [String(v)] });
+				// energy: like the mood, without the question (as in the app)
+				else if (typeof v === 'number') fields.push({ label: t('entry.energy'), kind: 'scale', values: [String(v), t(`energy.${v}`)] });
 				else if (Array.isArray(v)) {
 					const vals = v.filter((x) => x.trim()).map((x) => x.trim());
 					if (!vals.length) continue;
@@ -79,7 +80,7 @@ export function formatEntries(entries: Entry[], lang: Lang): string {
 				lines.push(`**${s.title}**`);
 				for (const f of s.fields) {
 					const value =
-						f.kind === 'scale' ? `${f.values[0]}/5` : (f.kind === 'chips' ? f.values : f.values.map(plain)).join('; ');
+						f.kind === 'scale' ? `${f.values[0]}/5 (${f.values[1]})` : (f.kind === 'chips' ? f.values : f.values.map(plain)).join('; ');
 					lines.push(`- ${f.label}: ${value}`);
 				}
 			}

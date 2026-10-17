@@ -59,7 +59,7 @@ describe('Markdown', () => {
 			`- ${t('section.daily.gratitude')}: Kaffee; Sonne`,
 			`- ${t('section.daily.experienced')}: \\# Kein Titel\nZweite Zeile`,
 			`**${t('section.feelings.title')}**`,
-			`- ${t('section.feelings.energy')}: 3/5`,
+			`- ${t('entry.energy')}: 3/5 (${t('energy.3')})`,
 			`- ${t('section.feelings.emotions')}: Freude; Müdigkeit`,
 			'**Freie Gedanken**',
 			'Frei'
