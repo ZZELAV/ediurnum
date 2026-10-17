@@ -4,7 +4,16 @@ import { getEntry, listEntryMeta } from '#lib/server/entries.ts';
 import { snippetOf } from '#lib/server/snippet.ts';
 
 /** `readable`: content readable (not locked or PIN open) – otherwise mood, feelings and excerpt are missing. */
-type Day = { date: string; mood: number | null; locked: boolean; readable: boolean; kinds: string[]; emotions: string[]; snippet: string };
+type Day = {
+	date: string;
+	mood: number | null;
+	locked: boolean;
+	readable: boolean;
+	kinds: string[];
+	emotions: string[];
+	energy: number | null;
+	snippet: string;
+};
 
 /** All months from the current one back to `oldest` (both included), newest first. */
 function monthsBack(current: string, oldest: string): string[] {
@@ -19,7 +28,7 @@ export const load: PageServerLoad = ({ locals }) => {
 	const metas = listEntryMeta(); // newest day first
 	for (const m of metas) {
 		const e = m.locked && !session.lockKey ? null : getEntry(session, m.date);
-		const emotions = e?.content?.sections.feelings?.emotions;
+		const feelings = e?.content?.sections.feelings;
 		const key = monthKey(m.date);
 		if (!byMonth.has(key)) byMonth.set(key, []);
 		byMonth.get(key)!.push({
@@ -28,8 +37,9 @@ export const load: PageServerLoad = ({ locals }) => {
 			locked: m.locked,
 			readable: !!e?.content,
 			kinds: m.kinds,
-			// for the filter (feelings from the weekly review)
-			emotions: Array.isArray(emotions) ? emotions : [],
+			// for the filter (feelings and energy from the weekly review)
+			emotions: Array.isArray(feelings?.emotions) ? feelings.emotions : [],
+			energy: typeof feelings?.energy === 'number' ? feelings.energy : null,
 			snippet: e?.content ? snippetOf(e.content, 90) : ''
 		});
 	}

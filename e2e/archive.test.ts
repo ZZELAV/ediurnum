@@ -22,7 +22,7 @@ before(async () => {
 	({ client: c } = await setupJournal(server));
 	const save = (date: string, content: unknown) => c.api(`/api/entry/${date}`, { content });
 	await save('2026-02-27', { mood: 5, sections: { daily: { gratitude: ['Kaffee im Café', '', ''], highlight: 'Spaziergang an der Straße zum See' } }, free: '' });
-	await save('2026-03-02', { mood: 2, sections: { feelings: { emotions: ['joy'] } }, free: 'Regen und Bücher' });
+	await save('2026-03-02', { mood: 2, sections: { feelings: { energy: 4, emotions: ['joy'] } }, free: 'Regen und Bücher' });
 	await save('2026-03-05', { mood: null, sections: {}, free: 'Geheimnis am See' });
 	await save('2026-03-09', { mood: 3, sections: {}, free: 'Später geleert, See' });
 	await save('2026-03-09', { mood: null, sections: {}, free: '' });
@@ -70,10 +70,10 @@ describe('All entries', () => {
 		await c.api('/api/pin', undefined, 'DELETE');
 	});
 
-	test('data for the filter: feelings and reviews, locked entries not readable without PIN', async () => {
+	test('data for the filter: feelings, energy and reviews, locked entries not readable without PIN', async () => {
 		const html = await (await c.get('/archive')).text();
-		assert.match(html, /date:"2026-03-02",mood:2,locked:false,readable:true,kinds:\[[^\]]*"feelings"[^\]]*\],emotions:\["joy"\]/);
-		assert.match(html, /date:"2026-03-05",mood:null,locked:true,readable:false,kinds:\[[^\]]*\],emotions:\[\]/);
+		assert.match(html, /date:"2026-03-02",mood:2,locked:false,readable:true,kinds:\[[^\]]*"feelings"[^\]]*\],emotions:\["joy"\],energy:4,/);
+		assert.match(html, /date:"2026-03-05",mood:null,locked:true,readable:false,kinds:\[[^\]]*\],emotions:\[\],energy:null,/);
 		await c.api('/api/pin', { pin: PIN });
 		assert.match(await (await c.get('/archive')).text(), /date:"2026-03-05",mood:null,locked:true,readable:true/);
 		await c.api('/api/pin', undefined, 'DELETE');

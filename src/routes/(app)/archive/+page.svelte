@@ -3,7 +3,7 @@
 	import { untrack } from 'svelte';
 	import { api } from '#lib/client.ts';
 	import { weekdayOf } from '#lib/dates.ts';
-	import { matchesFilter, type DayFilter } from '#lib/filter.ts';
+	import { emptyFilter, matchesFilter, type DayFilter } from '#lib/filter.ts';
 	import { currentLocale, fmtDate, fmtMonth, t } from '#lib/i18n/t.ts';
 	import PinDialog from '#lib/components/PinDialog.svelte';
 	import type { SearchHit } from '#lib/search.ts';
@@ -12,10 +12,11 @@
 	let { data } = $props();
 
 	// filter for the calendar and search results – only in the browser. Kept when coming back from an entry.
-	let filter = $state<DayFilter>({ moods: [], kinds: [], emotions: [] });
+	let filter = $state<DayFilter>(emptyFilter());
 	export const snapshot: Snapshot<DayFilter> = {
 		capture: () => $state.snapshot(filter),
-		restore: (v) => (filter = v)
+		// a snapshot from before an update may lack newer groups
+		restore: (v) => (filter = { ...emptyFilter(), ...v })
 	};
 
 	// choice as a dropdown below the button; closes on a click outside and with Escape
@@ -30,12 +31,14 @@
 		filterMenu?.querySelector('button')?.focus();
 	}
 
-	const filtering = $derived(filter.moods.length + filter.kinds.length + filter.emotions.length);
+	const filtering = $derived(filter.moods.length + filter.energies.length + filter.kinds.length + filter.emotions.length);
 	const days = $derived(new Map(data.months.flatMap((m) => m.days.map((d) => [d.date, d]))));
 	const passes = (date: string) => !filtering || matchesFilter(days.get(date)!, filter);
 	const matched = $derived([...days.keys()].filter(passes).length);
-	// locked entries without the PIN: mood and feelings unknown, they only match reviews
-	const unreadable = $derived(filter.moods.length || filter.emotions.length ? [...days.values()].filter((d) => !d.readable).length : 0);
+	// locked entries without the PIN: mood, energy and feelings unknown, they only match reviews
+	const unreadable = $derived(
+		filter.moods.length || filter.energies.length || filter.emotions.length ? [...days.values()].filter((d) => !d.readable).length : 0
+	);
 
 	function toggle(list: (string | number)[], value: string | number) {
 		const i = list.indexOf(value);
@@ -44,7 +47,7 @@
 	}
 
 	function resetFilter() {
-		filter = { moods: [], kinds: [], emotions: [] };
+		filter = emptyFilter();
 	}
 
 	// search while typing (slightly delayed). The term goes to the server via POST and never appears in the
@@ -160,6 +163,17 @@
 										{@const on = filter.moods.includes(m)}
 										<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.moods, m)}>
 											<span class="swatch m{m}" aria-hidden="true"></span>{t(`mood.${m}`)}
+										</button>
+									{/each}
+								</div>
+							</div>
+							<div>
+								<p class="faint group">{t('archive.filterEnergy')}</p>
+								<div class="pills">
+									{#each [1, 2, 3, 4, 5] as n (n)}
+										{@const on = filter.energies.includes(n)}
+										<button type="button" class="pill" class:on aria-pressed={on} onclick={() => toggle(filter.energies, n)}>
+											<span class="swatch m{n}" aria-hidden="true"></span>{t(`energy.${n}`)}
 										</button>
 									{/each}
 								</div>

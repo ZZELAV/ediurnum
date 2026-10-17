@@ -6,6 +6,11 @@ The topmost version without a date is still in development.
 
 ## [1.1.0]
 
+### Added
+
+- Filter in “All entries” by the energy of the weekly review (empty … full of energy). Like the feelings, it only
+  matches days with a weekly review.
+
 ### Changed
 
 - Past days and the version history show the energy of the weekly review like the mood: one line with its

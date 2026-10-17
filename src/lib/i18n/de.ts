@@ -245,6 +245,7 @@ export const de: Record<string, string> = {
 	'archive.legend': 'Legende',
 	'archive.legendNoMood': 'ohne Stimmung',
 	'archive.filter': 'Filter',
+	'archive.filterEnergy': 'Energie (Wochenrückblick)',
 	'archive.filterEmotions': 'Gefühle (Wochenrückblick)',
 	'archive.filterReset': 'Filter zurücksetzen',
 	'archive.filterCount': '{count} Einträge passen zum Filter.',
