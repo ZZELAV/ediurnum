@@ -8,6 +8,8 @@ The topmost version without a date is still in development.
 
 ### Added
 
+- Italian as a third language (*Settings → Language*, and automatically for browsers set to Italian). The texts are
+  not translated yet and appear in English; dates and numbers already use the Italian format.
 - Filter in “All entries” by the energy of the weekly review (empty … full of energy). Like the feelings, it only
   matches days with a weekly review.
 

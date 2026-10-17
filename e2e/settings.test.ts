@@ -80,11 +80,12 @@ describe('General', () => {
 		await general({ theme: 'system' });
 	});
 
-	test('without a session the browser language decides, English unless it is German', async () => {
+	test('without a session the browser language decides, English for unknown languages', async () => {
 		const html = async (lang: string) => (await new Client(server.url).get('/login', { 'accept-language': lang })).text();
 		assert.match(await html('de-CH,de;q=0.9'), /<html lang="de"/);
 		assert.match(await html('en-US,en;q=0.9'), /<html lang="en"/);
 		assert.match(await html('fr-CH,fr;q=0.9,de;q=0.8'), /<html lang="en"/);
+		assert.match(await html('it-CH,it;q=0.9'), /<html lang="it"/);
 	});
 
 	test('settings are stored only encrypted in the database', () => {

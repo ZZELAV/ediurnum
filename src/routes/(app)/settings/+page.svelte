@@ -4,6 +4,7 @@
 	import { ask } from '#lib/confirm.svelte.ts';
 	import { enhance } from '$app/forms';
 	import { fmtDate, t } from '#lib/i18n/t.ts';
+	import { LANGS } from '#lib/i18n/index.ts';
 	import { CHANGELOG_URL, REPO_URL } from '#lib/changelog.ts';
 	import { expiring } from '#lib/flash.svelte.ts';
 	import PasswordInput from '#lib/components/PasswordInput.svelte';
@@ -72,8 +73,7 @@
 				<div class="field">
 					<label for="lang">{t('settings.language')}</label>
 					<select id="lang" name="language" value={data.settings.language}>
-						<option value="de">Deutsch</option>
-						<option value="en">English</option>
+						{#each Object.entries(LANGS) as [code, name] (code)}<option value={code}>{name}</option>{/each}
 					</select>
 				</div>
 				<div class="field">

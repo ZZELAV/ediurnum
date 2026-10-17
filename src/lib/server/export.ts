@@ -1,5 +1,5 @@
 import { SECTIONS } from '#lib/templates.ts';
-import { translate } from '#lib/i18n/index.ts';
+import { locale, translate } from '#lib/i18n/index.ts';
 import type { Entry, Lang } from '#lib/types.ts';
 
 /**
@@ -23,11 +23,9 @@ export interface EntryDoc {
 	free: string;
 }
 
-export const dateLocale = (lang: Lang) => (lang === 'de' ? 'de-CH' : 'en-GB');
-
 export function entryDocs(entries: Entry[], lang: Lang): EntryDoc[] {
 	const t = (key: string) => translate(lang, key);
-	const dateFmt = new Intl.DateTimeFormat(dateLocale(lang), {
+	const dateFmt = new Intl.DateTimeFormat(locale(lang), {
 		weekday: 'long',
 		day: 'numeric',
 		month: 'long',

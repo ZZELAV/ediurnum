@@ -1,11 +1,11 @@
 import { page } from '$app/state';
-import { isLang, locale, translate } from './index.ts';
+import { DEFAULT_LANG, isLang, locale, translate } from './index.ts';
 import type { Lang } from '#lib/types.ts';
 
 /** Current language of the page (from the layout data). */
 function currentLang(): Lang {
 	const l = page.data?.lang;
-	return isLang(l) ? l : 'de';
+	return isLang(l) ? l : DEFAULT_LANG;
 }
 
 /**

@@ -1,7 +1,7 @@
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
-import { translate } from '#lib/i18n/index.ts';
-import { dateLocale, entryDocs, type EntryField } from '../export.ts';
+import { locale, translate } from '#lib/i18n/index.ts';
+import { entryDocs, type EntryField } from '../export.ts';
 import type { Entry, Lang } from '#lib/types.ts';
 
 /**
@@ -131,7 +131,7 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 
 	// header
 	const docs = entryDocs(entries, lang);
-	const today = new Intl.DateTimeFormat(dateLocale(lang), { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+	const today = new Intl.DateTimeFormat(locale(lang), { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 	paragraph('ediurnum', faces.sansBold, 10, ACCENT);
 	y -= 4;
 	paragraph(t('export.title'), faces.serifBold, 26);
@@ -198,7 +198,7 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 	});
 
 	doc.setTitle(`ediurnum – ${t('export.title')}`);
-	doc.setLanguage(dateLocale(lang));
+	doc.setLanguage(locale(lang));
 	doc.setCreator('ediurnum');
 	doc.setProducer('ediurnum');
 	return doc.save();

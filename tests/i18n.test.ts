@@ -5,7 +5,8 @@ import { join } from 'node:path';
 import { de } from '../src/lib/i18n/de.ts';
 import { en } from '../src/lib/i18n/en.ts';
 import { SECTIONS } from '../src/lib/templates.ts';
-import { pickLang, translate } from '../src/lib/i18n/index.ts';
+import { isLang, locale, pickLang, pickLocale, translate } from '../src/lib/i18n/index.ts';
+import { it } from '../src/lib/i18n/it.ts';
 
 test('both languages have the same keys', () => {
 	const missingEn = Object.keys(de).filter((k) => !(k in en));
@@ -82,4 +83,20 @@ test('English is the default: for browsers in other languages and for missing te
 	en['test.onlyEnglish'] = 'Only in English';
 	assert.equal(translate('de', 'test.onlyEnglish'), 'Only in English');
 	delete en['test.onlyEnglish'];
+});
+
+test('Italian: may be incomplete, but only with known keys, the same placeholders and no empty texts', () => {
+	const vars = (s: string) => [...new Set(s.match(/\{\w+\}/g) ?? [])].sort().join(',');
+	assert.deepEqual(Object.keys(it).filter((k) => !(k in en)), [], 'unknown keys');
+	assert.deepEqual(Object.keys(it).filter((k) => vars(it[k]) !== vars(en[k])), [], 'placeholders differ');
+	assert.deepEqual(Object.keys(it).filter((k) => !it[k].trim()), [], 'empty texts');
+});
+
+test('Italian: chosen for Italian browsers, missing texts in English, own formats', () => {
+	assert.equal(pickLang('it-CH,it;q=0.9,de;q=0.8'), 'it');
+	assert.equal(pickLang('it'), 'it');
+	assert.ok(isLang('it') && !isLang('fr') && !isLang('toString'));
+	assert.equal(translate('it', 'nav.stats'), it['nav.stats'] ?? en['nav.stats']);
+	assert.equal(locale('it'), 'it-IT');
+	assert.equal(pickLocale('it-CH,it;q=0.9', 'it'), 'it-CH');
 });

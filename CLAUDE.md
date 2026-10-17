@@ -69,7 +69,7 @@ Feld-IDs) nur mit Migration und Backup-Version ändern (siehe Sicherheitsregeln)
 - Handy/iPhone: Raster immer mit `minmax(0, 1fr)` bzw. `minmax(min(100%, Xpx), 1fr)`, Felder in Flex-Zeilen mit `min-width: 0` – iOS gibt Eingabefeldern sonst eine Mindestbreite und sie ragen rechts hinaus. Nach Layout-Änderungen alle Seiten bei 320 px Breite auf `scrollWidth` prüfen.
 - `Referrer-Policy` bleibt `same-origin`: Bei `no-referrer` senden Browser bei normalen Formularen `Origin: null`, SvelteKit lehnt das als Cross-Site ab.
 - Rückfragen („Wirklich löschen?“) immer mit `ask()` aus `src/lib/confirm.svelte.ts`, **nie `window.confirm()`** – Browser-Dialoge werden in eingebetteten Browsern und manchen Web-Apps unterdrückt.
-- `src/lib/i18n/{de,en}.ts` – alle Texte; jeder Schlüssel muss in beiden Sprachen existieren (`npm test` prüft das).
+- `src/lib/i18n/{de,en,it}.ts` – alle Texte; jeder Schlüssel muss in `en.ts` und `de.ts` existieren (`npm test` prüft das). Weitere Sprachen (`it.ts`, noch leer) dürfen unvollständig sein – fehlende Texte erscheinen auf Englisch. Neue Sprache: Datei anlegen, in `LANGS` (`i18n/index.ts`), `Lang` (`types.ts`) und `DEFAULT_LOCALES` (`locale.ts`) eintragen. Den KI-Auftrag (`analyze.ts`) gibt es nur auf Deutsch und Englisch.
 
 ## Sicherheitsregeln
 

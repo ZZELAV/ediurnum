@@ -5,7 +5,8 @@ import { translate } from '#lib/i18n/index.ts';
 import { isEmptyProfile, profileMarkdown, type Profile } from '#lib/profile.ts';
 import type { AiAgent, Analysis, Entry, Lang } from '#lib/types.ts';
 
-const TONES: Record<AiAgent['tone'], Record<Lang, string>> = {
+/** The instructions to the AI exist in German and English; other languages get the English ones. */
+const TONES: Record<AiAgent['tone'], Record<'de' | 'en', string>> = {
 	gentle: {
 		de: 'Sei warm, sanft und ermutigend. Formuliere Kritik behutsam.',
 		en: 'Be warm, gentle and encouraging. Phrase criticism carefully.'
@@ -33,7 +34,7 @@ export const MAX_INSTRUCTIONS = 8000;
  * in the insights; buildSystemPrompt adds the tone and the focus points.
  */
 export function defaultInstructions(lang: Lang): string {
-	if (lang === 'en') {
+	if (lang !== 'de') {
 		return [
 			'You are a reflective companion for a personal journal called "ediurnum".',
 			'You receive journal entries (daily gratitude and experiences, weekly feelings, monthly learning and growth) and help the writer understand themselves better and grow.',
@@ -59,7 +60,7 @@ export function defaultInstructions(lang: Lang): string {
 export function buildSystemPrompt(agent: PromptOptions, lang: Lang, format: 'api' | 'chat' = 'api'): string {
 	const n = Math.min(7, Math.max(1, agent.maxFocusPoints || 4));
 	const instructions = agent.instructions?.trim() || defaultInstructions(lang);
-	if (lang === 'en') {
+	if (lang !== 'de') {
 		return [
 			instructions,
 			TONES[agent.tone]?.en ?? TONES.balanced.en,
@@ -95,11 +96,11 @@ export function buildSystemPrompt(agent: PromptOptions, lang: Lang, format: 'api
 
 export function buildUserPrompt(entries: Entry[], lang: Lang, from: string, to: string, question: string): string {
 	const intro =
-		lang === 'en'
+		lang !== 'de'
 			? `Here are my journal entries from ${from} to ${to}.`
 			: `Hier sind meine Tagebucheinträge vom ${from} bis ${to}.`;
 	const q = question.trim()
-		? lang === 'en'
+		? lang !== 'de'
 			? `\n\nPlease pay special attention to this: ${plain(question)}`
 			: `\n\nBitte achte besonders auf Folgendes: ${plain(question)}`
 		: '';
@@ -154,7 +155,7 @@ export function buildChatMarkdown(params: {
 	question: string;
 }): string {
 	const { options, lang, profile, entries, from, to, question } = params;
-	const en = lang === 'en';
+	const en = lang !== 'de';
 	const about =
 		profile && (!isEmptyProfile(profile.profile) || profile.name.trim())
 			? profileMarkdown(profile.profile, profile.name, (key) => translate(lang, key))

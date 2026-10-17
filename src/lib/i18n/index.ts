@@ -1,11 +1,15 @@
 import { de } from './de.ts';
 import { en } from './en.ts';
+import { it } from './it.ts';
 import type { Lang } from '#lib/types.ts';
 
-const dictionaries: Record<Lang, Record<string, string>> = { de, en };
+const dictionaries: Record<Lang, Record<string, string>> = { de, en, it };
+
+/** Languages of the app with their own name (for the selection in the settings). */
+export const LANGS: Record<Lang, string> = { de: 'Deutsch', en: 'English', it: 'Italiano' };
 
 export function isLang(v: unknown): v is Lang {
-	return v === 'de' || v === 'en';
+	return typeof v === 'string' && Object.hasOwn(LANGS, v);
 }
 
 /** English is the default language: for browsers in other languages and for texts missing in a language. */
@@ -25,6 +29,8 @@ export function translate(lang: Lang, key: string, params?: Record<string, strin
 
 export { locale, pickLocale } from './locale.ts';
 
+/** Language of the browser: the first entry of `Accept-Language`, if the app knows it, otherwise English. */
 export function pickLang(acceptLanguage: string | null): Lang {
-	return acceptLanguage && /^de\b/i.test(acceptLanguage.trim()) ? 'de' : DEFAULT_LANG;
+	const first = (acceptLanguage ?? '').trim().split(/[-_,;\s]/)[0].toLowerCase();
+	return isLang(first) ? first : DEFAULT_LANG;
 }

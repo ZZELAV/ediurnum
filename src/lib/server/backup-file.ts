@@ -2,6 +2,7 @@ import { gunzipSync, gzipSync } from 'node:zlib';
 import { decrypt, decryptJson, encrypt, keyFingerprint, SETTINGS_AAD, unlockWithPin } from './crypto.ts';
 import { decryptContent, toMeta, type EntryRow } from './records.ts';
 import { isEmptyContent } from '#lib/templates.ts';
+import { DEFAULT_LANG, isLang } from '#lib/i18n/index.ts';
 import type { Entry, Lang } from '#lib/types.ts';
 
 /**
@@ -90,11 +91,11 @@ export function readBackup(text: string, dek: Buffer): BackupData {
 	}
 }
 
-/** Language from the (encrypted) settings in the backup; German if none is stored. */
+/** Language from the (encrypted) settings in the backup; English if none is stored. */
 export function backupLanguage(data: BackupData, dek: Buffer): Lang {
-	if (!data.meta.settings) return 'de';
+	if (!data.meta.settings) return DEFAULT_LANG;
 	const s = decryptJson<{ language?: string }>(dek, Buffer.from(data.meta.settings, 'base64'), SETTINGS_AAD);
-	return s.language === 'en' ? 'en' : 'de';
+	return isLang(s.language) ? s.language : DEFAULT_LANG;
 }
 
 const entryRows = (data: BackupData) => data.entries.map((o) => jsonToRow(o) as unknown as EntryRow);

@@ -1,8 +1,10 @@
 import type { Lang } from '#lib/types.ts';
 
+const DEFAULT_LOCALES: Record<Lang, string> = { de: 'de-CH', en: 'en-GB', it: 'it-IT' };
+
 /** Default format per language if the browser doesn't give a matching one. */
 export function locale(lang: Lang): string {
-	return lang === 'de' ? 'de-CH' : 'en-GB';
+	return DEFAULT_LOCALES[lang];
 }
 
 /**

@@ -1,4 +1,4 @@
-export type Lang = 'de' | 'en';
+export type Lang = 'de' | 'en' | 'it';
 export type Theme = 'system' | 'light' | 'dark';
 export type SectionKind = 'daily' | 'feelings' | 'growth';
 
