@@ -17,8 +17,8 @@ import { log } from './log.ts';
 import { MAX_PASSWORD, validatePin } from './validation.ts';
 
 /**
- * Tresor: verwaltet den Hauptschlüssel. Er existiert entschlüsselt nur im
- * Arbeitsspeicher und nur innerhalb einer aktiven Sitzung.
+ * Vault: manages the master key. It exists decrypted only in
+ * memory and only within an active session.
  */
 
 const WRAP_AAD = 'ediurnum/wrapped-dek';
@@ -29,18 +29,18 @@ export interface Session {
 	createdAt: number;
 	lastSeen: number;
 	idleMs: number;
-	/** Sperren, wenn die App so lange verlassen ist (0 = aus) */
+	/** Lock when the app has been left for this long (0 = off) */
 	awayMs: number;
-	/** Seit wann die App verlassen ist (0 = im Vordergrund), siehe #lib/idle */
+	/** Since when the app has been left (0 = in the foreground), see #lib/idle */
 	awaySince: number;
 	lockKey: Buffer | null;
 	lockUntil: number;
 }
 
 /**
- * Zustand im Arbeitsspeicher. Liegt auf globalThis, damit er ein Neuladen des Server-Codes übersteht:
- * Der Dev-Server lädt die Module bei jeder Änderung neu – sonst wäre man nach jedem Speichern abgemeldet.
- * Im Produktivbetrieb werden die Module nur einmal geladen.
+ * State in memory. Lives on globalThis so it survives a reload of the server code:
+ * the dev server reloads the modules on every change – otherwise you would be signed out after every save.
+ * In production the modules are loaded only once.
  */
 interface VaultState {
 	sessions: Map<string, Session>;
@@ -64,13 +64,13 @@ function storeWrappedKey(dek: Buffer, kek: Buffer, params: KdfParams) {
 	setMeta('wrapped_dek', encrypt(kek, dek, WRAP_AAD).toString('base64'));
 }
 
-/** Erstellt ein neues Tagebuch. Gibt den Wiederherstellungsschlüssel zurück (nur einmal sichtbar!). */
+/** Creates a new journal. Returns the recovery key (visible only once!). */
 export async function initialize(password: string, dek: Buffer = generateKey()): Promise<string> {
 	if (isInitialized()) throw new Error('already-initialized');
 	const params = defaultKdfParams();
 	const kek = await deriveKey(password, params);
 	transaction(() => {
-		// Nochmals prüfen: Während der Ableitung könnte eine zweite Einrichtung zuvorgekommen sein
+		// check again: a second setup could have come first while the key was being derived
 		if (isInitialized()) throw new Error('already-initialized');
 		storeWrappedKey(dek, kek, params);
 		setMeta('key_fp', keyFingerprint(dek));
@@ -95,7 +95,7 @@ export function matchesStoredKey(dek: Buffer): boolean {
 	return getMeta('key_fp') === keyFingerprint(dek);
 }
 
-/** Neues Passwort setzen (nach Login oder mit dem Wiederherstellungsschlüssel). */
+/** Sets a new password (after signing in or with the recovery key). */
 export async function setPassword(dek: Buffer, newPassword: string) {
 	const params = defaultKdfParams();
 	const kek = await deriveKey(newPassword, params);
@@ -103,7 +103,7 @@ export async function setPassword(dek: Buffer, newPassword: string) {
 }
 
 // --------------------------------------------------------------------------
-// Sitzungen
+// Sessions
 // --------------------------------------------------------------------------
 
 export function createSession(dek: Buffer, idleMinutes: number, leaveMinutes = 0): Session {
@@ -124,8 +124,8 @@ export function createSession(dek: Buffer, idleMinutes: number, leaveMinutes = 0
 }
 
 /**
- * Beendet die Sitzung, wenn sie abgelaufen ist (Inaktivität, Höchstdauer, App verlassen), und schliesst eine
- * abgelaufene PIN. Zählt selbst nicht als Aktivität – sonst hielte der regelmässige Aufräumer jede Sitzung offen.
+ * Ends the session if it has expired (inactivity, maximum duration, app left) and closes an
+ * expired PIN. Doesn't count as activity itself – otherwise the regular clean-up would keep every session open.
  */
 function expire(token: string, s: Session, now: number): boolean {
 	const left = s.awayMs > 0 && s.awaySince > 0 && now - s.awaySince > s.awayMs;
@@ -142,7 +142,7 @@ function expire(token: string, s: Session, now: number): boolean {
 	return false;
 }
 
-/** Sitzung zu einer Anfrage; die Anfrage zählt als Aktivität. */
+/** Session of a request; the request counts as activity. */
 export function getSession(token: string | undefined): Session | null {
 	if (!token) return null;
 	const s = sessions.get(token);
@@ -153,7 +153,7 @@ export function getSession(token: string | undefined): Session | null {
 	return s;
 }
 
-/** Die App wurde verlassen (geschlossen, Hintergrund, Bildschirm gesperrt) bzw. ist wieder im Vordergrund. */
+/** The app was left (closed, in the background, screen locked) or is in the foreground again. */
 export function markAway(s: Session, away: boolean) {
 	s.awaySince = away ? Date.now() : 0;
 }
@@ -171,7 +171,7 @@ export function destroyAllSessions() {
 	for (const token of [...sessions.keys()]) destroySession(token);
 }
 
-/** Beendet alle Sitzungen ausser dieser (z. B. nach dem Ändern des Passworts). Gibt die Anzahl zurück. */
+/** Ends all sessions except this one (e.g. after changing the password). Returns their number. */
 export function destroyOtherSessions(keep: Session): number {
 	let n = 0;
 	for (const [token, s] of [...sessions]) {
@@ -182,7 +182,7 @@ export function destroyOtherSessions(keep: Session): number {
 	return n;
 }
 
-/** Schliesst die offene PIN in allen anderen Sitzungen – deren Sperr-Schlüssel gilt nach einem PIN-Wechsel nicht mehr. */
+/** Closes the open PIN in all other sessions – their lock key is no longer valid after a PIN change. */
 export function closePinInOtherSessions(keep: Session) {
 	for (const s of sessions.values()) {
 		if (s === keep || !s.lockKey) continue;
@@ -192,7 +192,7 @@ export function closePinInOtherSessions(keep: Session) {
 	}
 }
 
-// Abgelaufene Sitzungen auch ohne Anfrage beenden (Schlüssel aus dem Arbeitsspeicher) – ohne sie zu verlängern
+// end expired sessions even without a request (keys out of memory) – without extending them
 if (state.sweeper) clearInterval(state.sweeper);
 state.sweeper = setInterval(() => {
 	const now = Date.now();
@@ -200,23 +200,23 @@ state.sweeper = setInterval(() => {
 }, 60_000).unref();
 
 // --------------------------------------------------------------------------
-// PIN für gesperrte Einträge
+// PIN for locked entries
 // --------------------------------------------------------------------------
 
 export function hasPin(): boolean {
 	return getMeta('pin_kdf') !== null;
 }
 
-/** Prüft die PIN und liefert den Sperr-Schlüssel (oder null). */
+/** Checks the PIN and returns the lock key (or null). */
 export async function verifyPin(dek: Buffer, pin: string): Promise<Buffer | null> {
 	const kdf = getMeta('pin_kdf');
 	const check = getMeta('pin_check');
-	// Ungültiges Format gar nicht erst ableiten (spart Argon2 bei unsinnigen Eingaben)
+	// don't even derive an invalid format (saves Argon2 for nonsense input)
 	if (!kdf || !check || validatePin(pin) !== null) return null;
 	return unlockWithPin(dek, pin, kdf, check);
 }
 
-/** Berechnet einen neuen Sperr-Schlüssel für eine neue PIN (Speichern erfolgt im Aufrufer). */
+/** Computes a new lock key for a new PIN (the caller saves it). */
 export async function prepareNewPin(dek: Buffer, pin: string) {
 	const params = defaultKdfParams();
 	params.memory = 32768;
@@ -244,12 +244,12 @@ export function relockSession(session: Session) {
 }
 
 // --------------------------------------------------------------------------
-// Einfache Bremse gegen das Durchprobieren von Passwort/PIN
+// Simple brake against guessing passwords/PINs
 // --------------------------------------------------------------------------
 
 const attempts = state.attempts;
 
-/** Gibt die verbleibende Sperrzeit in Sekunden zurück (0 = erlaubt). */
+/** Returns the remaining lockout in seconds (0 = allowed). */
 export function throttleRemaining(key: string): number {
 	const a = attempts.get(key);
 	if (!a || Date.now() > a.until) return 0;
@@ -259,7 +259,7 @@ export function throttleRemaining(key: string): number {
 export function registerFailure(key: string) {
 	const a = attempts.get(key) ?? { count: 0, until: 0 };
 	a.count += 1;
-	// Ab dem 5. Fehlversuch: 30 s, 60 s, 120 s … (max. 1 h)
+	// from the 5th failed attempt: 30 s, 60 s, 120 s … (max. 1 h)
 	a.until = a.count >= 5 ? Date.now() + Math.min(3600, 30 * 2 ** (a.count - 5)) * 1000 : 0;
 	attempts.set(key, a);
 	log.warn('failed attempt', { key, count: a.count, blockedSeconds: a.until ? Math.ceil((a.until - Date.now()) / 1000) : 0 });

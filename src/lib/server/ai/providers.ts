@@ -2,10 +2,10 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { AiAgent } from '#lib/types.ts';
 
 /**
- * Einheitliche Schnittstelle zu den KI-Anbietern.
- * - Anthropic: offizielles SDK
- * - OpenAI und alle OpenAI-kompatiblen Anbieter (Mistral, xAI, DeepSeek, OpenRouter, Ollama, …): Chat Completions
- * - Google Gemini: generateContent-REST-Schnittstelle
+ * Common interface to the AI providers.
+ * - Anthropic: official SDK
+ * - OpenAI and all OpenAI-compatible providers (Mistral, xAI, DeepSeek, OpenRouter, Ollama, …): Chat Completions
+ * - Google Gemini: generateContent REST interface
  */
 
 export class AiError extends Error {
@@ -19,7 +19,7 @@ export class AiError extends Error {
 
 const TIMEOUT_MS = 5 * 60 * 1000;
 
-// Modelle, die den serverseitigen Refusal-Fallback ("default") unterstützen.
+// Models that support the server-side refusal fallback ("default").
 const ANTHROPIC_FALLBACK_MODELS = new Set(['claude-fable-5-1', 'claude-opus-5-5', 'claude-opus-5', 'claude-sonnet-5-5']);
 
 function trimSlash(url: string) {
@@ -109,7 +109,7 @@ async function anthropicModels(agent: AiAgent): Promise<string[]> {
 }
 
 // --------------------------------------------------------------------------
-// OpenAI & OpenAI-kompatibel
+// OpenAI & OpenAI-compatible
 // --------------------------------------------------------------------------
 
 function openaiHeaders(agent: AiAgent): Record<string, string> {
@@ -182,7 +182,7 @@ async function geminiModels(agent: AiAgent): Promise<string[]> {
 
 // --------------------------------------------------------------------------
 
-/** Schlüssel nie aus Umgebungsvariablen des Servers "erben" – nur der im Agenten hinterlegte zählt. */
+/** Never "inherit" keys from the server's environment variables – only the key stored in the agent counts. */
 function requireKey(agent: AiAgent) {
 	if (agent.provider !== 'openai-compatible' && !agent.apiKey) throw new AiError('nokey', 'API key missing');
 }

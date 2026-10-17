@@ -1,13 +1,13 @@
 /**
- * Kryptografie-Bausteine von ediurnum.
+ * Cryptographic building blocks of ediurnum.
  *
- * Schlüsselhierarchie:
- *   Hauptschlüssel (DEK, 32 Byte zufällig)  = Wiederherstellungsschlüssel des Users
- *     ├─ verschlüsselt alle Datensätze (AES-256-GCM, AAD bindet den Datensatz an seine ID)
- *     ├─ wird mit dem Passwort-Schlüssel (Argon2id) "eingepackt" in der DB gespeichert
- *     └─ zusammen mit der PIN ergibt er den Sperr-Schlüssel für gesperrte Einträge
+ * Key hierarchy:
+ *   master key (DEK, 32 random bytes)  = the user's recovery key
+ *     ├─ encrypts all records (AES-256-GCM, the AAD binds a record to its ID)
+ *     ├─ is stored in the DB "wrapped" with the password key (Argon2id)
+ *     └─ together with the PIN it gives the lock key for locked entries
  *
- * Es werden ausschliesslich Funktionen aus node:crypto verwendet (keine nativen Zusatzpakete).
+ * Only functions from node:crypto are used (no native add-on packages).
  */
 import {
 	argon2,
@@ -62,7 +62,7 @@ export function generateKey(): Buffer {
 	return randomBytes(KEY_LEN);
 }
 
-/** Verschlüsselt Daten: [version(1) | iv(12) | tag(16) | ciphertext] */
+/** Encrypts data: [version(1) | iv(12) | tag(16) | ciphertext] */
 export function encrypt(key: Buffer, plaintext: Buffer | string, aad: string): Buffer {
 	const iv = randomBytes(IV_LEN);
 	const cipher = createCipheriv('aes-256-gcm', key, iv);
@@ -75,7 +75,7 @@ export function encrypt(key: Buffer, plaintext: Buffer | string, aad: string): B
 export function decrypt(key: Buffer, blob: Uint8Array, aad: string): Buffer {
 	const buf = Buffer.from(blob);
 	if (buf.length < 1 + IV_LEN + TAG_LEN || buf[0] !== FORMAT_VERSION) {
-		throw new Error('Unbekanntes Verschlüsselungsformat');
+		throw new Error('Unknown encryption format');
 	}
 	const iv = buf.subarray(1, 1 + IV_LEN);
 	const tag = buf.subarray(1 + IV_LEN, 1 + IV_LEN + TAG_LEN);
@@ -94,7 +94,7 @@ export function decryptJson<T>(key: Buffer, blob: Uint8Array, aad: string): T {
 	return JSON.parse(decrypt(key, blob, aad).toString('utf8')) as T;
 }
 
-/** Sperr-Schlüssel für gesperrte Einträge: abgeleitet aus Hauptschlüssel + PIN-Schlüssel. */
+/** Lock key for locked entries: derived from the master key + PIN key. */
 export function deriveLockKey(dek: Buffer, pinKey: Buffer): Buffer {
 	return Buffer.from(hkdfSync('sha256', Buffer.concat([dek, pinKey]), Buffer.alloc(0), 'ediurnum/lock/v1', KEY_LEN));
 }
@@ -103,7 +103,7 @@ export async function lockKeyFromPin(dek: Buffer, pin: string, params: KdfParams
 	return deriveLockKey(dek, await deriveKey(pin, params));
 }
 
-// Prüfwert der PIN (meta.pin_check): ein bekannter Text, mit dem Sperr-Schlüssel verschlüsselt
+// PIN check value (meta.pin_check): a known text, encrypted with the lock key
 const PIN_CHECK_AAD = 'ediurnum/pin-check';
 const PIN_CHECK_TEXT = 'ediurnum-pin-ok';
 
@@ -111,7 +111,7 @@ export function pinCheck(lockKey: Buffer): string {
 	return encrypt(lockKey, PIN_CHECK_TEXT, PIN_CHECK_AAD).toString('base64');
 }
 
-/** Leitet aus der PIN den Sperr-Schlüssel ab und prüft ihn am Prüfwert; null bei falscher PIN. */
+/** Derives the lock key from the PIN and checks it against the check value; null for a wrong PIN. */
 export async function unlockWithPin(dek: Buffer, pin: string, kdf: string, check: string): Promise<Buffer | null> {
 	const lockKey = await lockKeyFromPin(dek, pin, JSON.parse(kdf) as KdfParams);
 	try {
@@ -121,11 +121,11 @@ export async function unlockWithPin(dek: Buffer, pin: string, kdf: string, check
 	}
 }
 
-/** Zusatzdaten (AAD) der Datensätze – binden den verschlüsselten Inhalt an Eintrag und Version bzw. an die Einstellungen. */
+/** Additional data (AAD) of the records – binds the encrypted content to entry and version or to the settings. */
 export const entryAad = (id: string, revision: number) => `entry:${id}:rev:${revision}`;
 export const SETTINGS_AAD = 'ediurnum/settings';
 
-/** Kurzer, nicht geheimer Fingerabdruck eines Schlüssels (zum Vergleichen von Backups). */
+/** Short, non-secret fingerprint of a key (to compare backups). */
 export function keyFingerprint(key: Buffer): string {
 	return createHash('sha256').update('ediurnum/fingerprint/v1').update(key).digest('hex').slice(0, 16);
 }
@@ -135,8 +135,8 @@ export function randomToken(bytes = 32): string {
 }
 
 // ---------------------------------------------------------------------------
-// Wiederherstellungsschlüssel: Base32 (Crockford-ähnlich, ohne verwechselbare
-// Zeichen) in Vierergruppen plus Prüfsumme, z. B. "K7QM-3XRD-…-9F2A".
+// Recovery key: Base32 (similar to Crockford, without easily confused
+// characters) in groups of four plus a checksum, e.g. "K7QM-3XRD-…-9F2A".
 // ---------------------------------------------------------------------------
 const B32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -178,7 +178,7 @@ function checksum(key: Buffer): string {
 }
 
 export function formatRecoveryKey(key: Buffer): string {
-	const body = base32Encode(key) + checksum(key); // 52 + 4 = 56 Zeichen
+	const body = base32Encode(key) + checksum(key); // 52 + 4 = 56 characters
 	return body.match(/.{1,4}/g)!.join('-');
 }
 

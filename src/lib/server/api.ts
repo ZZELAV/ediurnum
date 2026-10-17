@@ -6,8 +6,8 @@ export function fail(key: string, status = 400, extra: Record<string, unknown> =
 }
 
 /**
- * Liest den JSON-Körper einer Anfrage. Ungültiges JSON oder etwas anderes als ein Objekt ergibt 400
- * statt eines Serverfehlers.
+ * Reads the JSON body of a request. Invalid JSON or anything other than an object results in 400
+ * instead of a server error.
  */
 export async function readJson(request: Request): Promise<Record<string, unknown>> {
 	let body: unknown;
@@ -20,13 +20,13 @@ export async function readJson(request: Request): Promise<Record<string, unknown
 	return body as Record<string, unknown>;
 }
 
-/** Prüft den Datumsparameter einer Route. */
+/** Checks the date parameter of a route. */
 export function dateParam(value: string): string {
 	if (!isIsoDate(value)) error(404, 'not-found');
 	return value;
 }
 
-/** Zukünftige Tage dürfen nicht beschrieben werden. */
+/** Future days must not be written. */
 export function assertNotFuture(date: string): boolean {
 	return date <= todayIso();
 }

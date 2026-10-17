@@ -21,16 +21,16 @@ const TONES: Record<AiAgent['tone'], Record<Lang, string>> = {
 };
 
 /**
- * Einstellungen für den Auftrag an die KI (KI-Agent oder Markdown-Datei für einen KI-Chat).
- * `instructions`: eigener Auftrag der schreibenden Person (leer = Standard, siehe defaultInstructions).
+ * Options for the instructions to the AI (AI agent or Markdown file for an AI chat).
+ * `instructions`: the writer's own instructions (empty = default, see defaultInstructions).
  */
 export type PromptOptions = Pick<AiAgent, 'tone' | 'persona' | 'maxFocusPoints'> & { instructions?: string };
 
 export const MAX_INSTRUCTIONS = 8000;
 
 /**
- * Standard-Auftrag an die KI: Rolle, Regeln und Gliederung der Antwort. Diesen Teil kann die
- * schreibende Person in den Einsichten anpassen; Tonfall und Fokuspunkte ergänzt buildSystemPrompt.
+ * Default instructions to the AI: role, rules and structure of the answer. The writer can adapt this part
+ * in the insights; buildSystemPrompt adds the tone and the focus points.
  */
 export function defaultInstructions(lang: Lang): string {
 	if (lang === 'en') {
@@ -52,9 +52,9 @@ export function defaultInstructions(lang: Lang): string {
 }
 
 /**
- * Auftrag an die KI: eigener oder Standard-Auftrag, dazu Tonfall und die Fokuspunkte am Schluss.
- * Bei `chat` stehen die Fokuspunkte unter einer eigenen Überschrift, damit eine aus dem Chat
- * kopierte Antwort sie zuverlässig enthält (siehe parseResponse).
+ * Instructions to the AI: own or default instructions, plus tone and the focus points at the end.
+ * With `chat` the focus points get their own heading, so an answer copied from the chat
+ * reliably contains them (see parseResponse).
  */
 export function buildSystemPrompt(agent: PromptOptions, lang: Lang, format: 'api' | 'chat' = 'api'): string {
 	const n = Math.min(7, Math.max(1, agent.maxFocusPoints || 4));
@@ -106,7 +106,7 @@ export function buildUserPrompt(entries: Entry[], lang: Lang, from: string, to: 
 	return `${intro}${q}\n\n${formatEntries(entries, lang)}`;
 }
 
-/** Listenpunkte ohne Aufzählungszeichen und Fettschrift; doppelte und leere entfallen, höchstens sieben. */
+/** List items without bullets and bold text; duplicates and empty ones are dropped, at most seven. */
 const listItems = (block: string) => [
 	...new Set(
 		block
@@ -117,21 +117,21 @@ const listItems = (block: string) => [
 ].slice(0, 7);
 
 /**
- * Überschrift des Abschnitts mit den Fokuspunkten: als Markdown („## Fokuspunkte“, auch mit Zusatz wie
- * „für die nächsten Wochen“) oder als blosse Zeile – so kommt sie an, wenn die Antwort im Chat
- * markiert und kopiert statt über den Kopieren-Knopf übernommen wurde.
+ * Heading of the section with the focus points: as Markdown („## Fokuspunkte“, also with additions such as
+ * „für die nächsten Wochen“) or as a plain line – that is how it arrives when the answer was selected
+ * and copied in the chat instead of using the copy button.
  */
 const FOCUS_HEADING = /^(?:#{1,4}[ \t]*)?\**[ \t]*(?:Fokuspunkte|Fokus-Punkte|Focus points)\b[^\n]{0,60}?\**[ \t]*:?[ \t]*$/gim;
 
 /**
- * Trennt die Fokuspunkte vom restlichen Text: entweder ein <focus>-Block (KI-Agent)
- * oder der letzte Abschnitt „## Fokuspunkte“ / „## Focus points“ (Antwort aus einem KI-Chat).
+ * Separates the focus points from the rest of the text: either a <focus> block (AI agent)
+ * or the last section „## Fokuspunkte“ / „## Focus points“ (answer from an AI chat).
  */
 export function parseResponse(text: string): { body: string; focusPoints: string[] } {
 	text = text.replace(/\r\n/g, '\n');
 	const block = text.match(/<(focus|fokus)>([\s\S]*?)<\/\1>/i);
 	if (block) return { body: text.replace(block[0], '').trim(), focusPoints: listItems(block[2]) };
-	// die letzte passende Überschrift – der Abschnitt steht laut Auftrag am Schluss
+	// the last matching heading – according to the instructions the section comes last
 	const heading = [...text.matchAll(FOCUS_HEADING)].at(-1);
 	if (!heading || heading.index === undefined) return { body: text.trim(), focusPoints: [] };
 	const after = text.slice(heading.index + heading[0].length);
@@ -143,7 +143,7 @@ export function parseResponse(text: string): { body: string; focusPoints: string
 	return { body: (text.slice(0, heading.index) + rest).trim(), focusPoints };
 }
 
-/** Markdown-Datei für einen beliebigen KI-Chat: Auftrag, Selbsteinschätzung und Einträge in einem Dokument. */
+/** Markdown file for any AI chat: instructions, self-assessment and entries in one document. */
 export function buildChatMarkdown(params: {
 	options: PromptOptions;
 	lang: Lang;
@@ -162,7 +162,7 @@ export function buildChatMarkdown(params: {
 	return [
 		en ? '# ediurnum – journal review' : '# ediurnum – Tagebuch-Auswertung',
 		en ? '## Your task' : '## Dein Auftrag',
-		// Vorgegebene Antwort-Überschriften als Liste, damit sie die Gliederung der Datei nicht stören
+		// expected answer headings as a list, so they don't disturb the structure of the file
 		buildSystemPrompt(options, lang, 'chat').replace(/^## (.+)$/gm, '- `## $1`'),
 		...(about
 			? [

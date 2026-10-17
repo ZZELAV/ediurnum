@@ -51,8 +51,8 @@ describe('AES-256-GCM', () => {
 		}
 		const wrongVersion = Buffer.from(blob);
 		wrongVersion[0] = 2;
-		assert.throws(() => decrypt(key, wrongVersion, 'x'), /Unbekanntes Verschlüsselungsformat/);
-		assert.throws(() => decrypt(key, blob.subarray(0, 20), 'x'), /Unbekanntes Verschlüsselungsformat/);
+		assert.throws(() => decrypt(key, wrongVersion, 'x'), /Unknown encryption format/);
+		assert.throws(() => decrypt(key, blob.subarray(0, 20), 'x'), /Unknown encryption format/);
 	});
 
 	test('JSON hin und zurück', () => {

@@ -37,7 +37,7 @@ function rowByDate(date: string): EntryRow | undefined {
 	return getDb().prepare('SELECT * FROM entries WHERE date = ?').get(date) as EntryRow | undefined;
 }
 
-/** Alle geschriebenen Einträge (ohne komplett geleerte), neuester zuerst. */
+/** All written entries (without completely cleared ones), newest first. */
 export function listEntryMeta(): EntryMeta[] {
 	const rows = getDb()
 		.prepare(
@@ -58,9 +58,9 @@ export function getEntry(session: Session, date: string): Entry | null {
 }
 
 /**
- * Speichert den Eintrag eines Tages. Pro Kalendertag (Zeitzone TZ) gibt es höchstens eine Version:
- * Die erste Bearbeitung an einem neuen Tag archiviert die bisherige Fassung als eigene Version,
- * alle weiteren Änderungen am selben Tag landen in derselben Version.
+ * Saves the entry of a day. There is at most one version per calendar day (time zone TZ):
+ * the first edit on a new day archives the previous text as a version of its own,
+ * all further changes on the same day go into the same version.
  */
 export function saveEntry(
 	session: Session,
@@ -149,9 +149,9 @@ export function restoreRevision(session: Session, date: string, revision: number
 }
 
 /**
- * Sperrt bzw. entsperrt einen Eintrag inkl. aller früheren Versionen. Benötigt die PIN.
- * Sperren schliesst den Eintrag von der KI aus; Entsperren lässt die Freigabe unverändert –
- * eine Freigabe für die KI geschieht nur ausdrücklich.
+ * Locks or unlocks an entry including all earlier versions. Requires the PIN.
+ * Locking excludes the entry from the AI; unlocking leaves that setting unchanged –
+ * an entry is only shared with the AI explicitly.
  */
 export function setLocked(session: Session, date: string, locked: boolean) {
 	const row = rowByDate(date);
@@ -189,7 +189,7 @@ export function deleteEntry(date: string) {
 	getDb().prepare('DELETE FROM entries WHERE date = ?').run(date);
 }
 
-/** Verschlüsselt alle gesperrten Datensätze mit einem neuen Sperr-Schlüssel (PIN-Wechsel). */
+/** Encrypts all locked records with a new lock key (PIN change). */
 export function rekeyLocked(oldKey: Buffer, newKey: Buffer) {
 	const d = getDb();
 	const rows = d.prepare('SELECT * FROM entries WHERE locked = 1').all() as unknown as EntryRow[];
@@ -212,7 +212,7 @@ export function countLocked(): number {
 	return (getDb().prepare('SELECT COUNT(*) AS n FROM entries WHERE locked = 1').get() as { n: number }).n;
 }
 
-/** Einträge eines Zeitraums für die KI-Auswertung. */
+/** Entries of a period for the AI analysis. */
 export function entriesForAi(
 	session: Session,
 	from: string,
@@ -235,8 +235,8 @@ export function entriesForAi(
 }
 
 /**
- * Geschriebene Tage für die Statistik (ab `from`, sonst alle), älteste zuerst: Datum und Abschnittsarten immer,
- * Stimmung, Energie und Gefühle nur, wenn der Eintrag lesbar ist (gesperrt → nur mit PIN).
+ * Written days for the statistics (from `from`, otherwise all), oldest first: date and section kinds always,
+ * mood, energy and feelings only if the entry is readable (locked → only with the PIN).
  */
 export function statsDays(session: Session, from = ''): StatsDay[] {
 	const rows = getDb()

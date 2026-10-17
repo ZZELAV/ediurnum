@@ -25,7 +25,7 @@ export function deleteAnalysis(id: string) {
 	getDb().prepare('DELETE FROM analyses WHERE id = ?').run(id);
 }
 
-/** Es gibt immer höchstens eine "angeheftete" Auswertung, deren Fokuspunkte das Dashboard zeigt. */
+/** There is always at most one "pinned" analysis whose focus points the dashboard shows. */
 export function pinAnalysis(dek: Buffer, id: string | null) {
 	for (const a of listAnalyses(dek)) {
 		const pinned = a.id === id;

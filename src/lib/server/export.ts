@@ -3,20 +3,20 @@ import { translate } from '#lib/i18n/index.ts';
 import type { Entry, Lang } from '#lib/types.ts';
 
 /**
- * Lesbarer Export (Klartext!): eine Aufbereitung pro Eintrag (`entryDocs`), aus der Markdown und PDF entstehen.
- * Wird von der App (Einstellungen, KI-Datei) und vom Konverter-Skript genutzt – deshalb ohne Datenbank-Import.
+ * Readable export (plain text!): one prepared document per entry (`entryDocs`), from which Markdown and PDF are made.
+ * Used by the app (settings, AI file) and by the converter script – hence no database import.
  */
 
 export interface EntryField {
 	label: string;
-	/** text: ein Text · list: Zeilen (z. B. Dankbarkeit) · chips: Gefühle (übersetzt) · scale: Wert 1–5 */
+	/** text: one text · list: lines (e.g. gratitude) · chips: feelings (translated) · scale: value 1–5 */
 	kind: 'text' | 'list' | 'chips' | 'scale';
 	values: string[];
 }
 
 export interface EntryDoc {
 	date: string;
-	/** Datum ausgeschrieben, z. B. „Freitag, 16. Oktober 2026“ */
+	/** Date written out, e.g. „Freitag, 16. Oktober 2026“ */
 	heading: string;
 	mood: number | null;
 	sections: { title: string; fields: EntryField[] }[];
@@ -63,12 +63,12 @@ export function entryDocs(entries: Entry[], lang: Lang): EntryDoc[] {
 }
 
 /**
- * Text aus dem Tagebuch für Markdown: Zeilen, die mit „#“ beginnen, würden sonst zu Überschriften
- * und brächten die Gliederung der Datei (Auftrag, Einträge, Tage) durcheinander.
+ * Journal text for Markdown: lines starting with „#“ would otherwise become headings
+ * and mess up the structure of the file (instructions, entries, days).
  */
 export const plain = (text: string) => text.trim().replace(/^(\s*)#/gm, '$1\\#');
 
-/** Einträge als Markdown (Tage als `###`) – für die KI-Datei und den lesbaren Export. */
+/** Entries as Markdown (days as `###`) – for the AI file and the readable export. */
 export function formatEntries(entries: Entry[], lang: Lang): string {
 	const t = (key: string) => translate(lang, key);
 	return entryDocs(entries, lang)

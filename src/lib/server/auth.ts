@@ -34,7 +34,7 @@ export function setLangCookie(cookies: Cookies, lang: string) {
 	cookies.set('lang', lang, { path: '/', httpOnly: false, sameSite: 'strict', secure: secureCookies(), maxAge: 60 * 60 * 24 * 365 });
 }
 
-/** Für API-Routen: liefert die Sitzung oder bricht mit 401 ab. */
+/** For API routes: returns the session or aborts with 401. */
 export function requireSession(event: RequestEvent): Session {
 	const s = event.locals.session;
 	if (!s) error(401, 'unauthorized');

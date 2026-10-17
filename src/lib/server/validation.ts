@@ -1,8 +1,8 @@
 export const MIN_PASSWORD = 10;
-/** Obergrenze, damit niemand riesige Eingaben durch Argon2 schicken kann (auch ohne Anmeldung). */
+/** Upper limit, so nobody can push huge inputs through Argon2 (even without signing in). */
 export const MAX_PASSWORD = 1024;
 
-/** Gibt einen i18n-Fehlerschlüssel zurück oder null. */
+/** Returns an i18n error key or null. */
 export function validateNewPassword(password: string, confirm: string): string | null {
 	if (password.length < MIN_PASSWORD) return 'error.passwordTooShort';
 	if (password.length > MAX_PASSWORD) return 'error.passwordTooLong';

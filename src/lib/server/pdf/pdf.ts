@@ -5,10 +5,10 @@ import { dateLocale, entryDocs, type EntryField } from '../export.ts';
 import type { Entry, Lang } from '#lib/types.ts';
 
 /**
- * Lesbarer Export als PDF – aus derselben Aufbereitung wie das Markdown (`entryDocs`).
- * Schriften: Lora (Text) und Inter (Beschriftungen) wie in der App, als WOFF in `fonts/` (Lizenz: SIL OFL).
- * Je Schnitt zwei Dateien: Latin und Latin Extended. Zeichen, die keine der beiden enthält (z. B. Emojis), fallen weg.
- * Die App lädt die Dateien über `fonts.ts` (in den Server-Build eingebettet), das Skript direkt aus dem Ordner.
+ * Readable export as PDF – from the same prepared documents as the Markdown (`entryDocs`).
+ * Fonts: Lora (text) and Inter (labels) as in the app, as WOFF in `fonts/` (license: SIL OFL).
+ * Two files per style: Latin and Latin Extended. Characters that neither contains (e.g. emojis) are dropped.
+ * The app loads the files through `fonts.ts` (embedded in the server build), the script directly from the folder.
  */
 
 export const FONT_FILES = {
@@ -18,7 +18,7 @@ export const FONT_FILES = {
 	sansBold: ['inter-latin-600-normal.woff', 'inter-latin-ext-600-normal.woff']
 } as const;
 
-/** Dateiname → Inhalt aller Dateien aus FONT_FILES */
+/** File name → content of all files from FONT_FILES */
 export type PdfFonts = Record<string, Uint8Array>;
 
 type FaceName = keyof typeof FONT_FILES;
@@ -27,7 +27,7 @@ interface Face {
 	chars: Set<number>[];
 }
 
-// Farben wie im hellen Design (app.css)
+// colours as in the light theme (app.css)
 const hex = (h: string) => rgb(parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255);
 const INK = hex('#2b2723');
 const SOFT = hex('#645b52');
@@ -36,7 +36,7 @@ const RULE = hex('#e7e1d5');
 const ACCENT = hex('#46624d');
 const MOOD = ['#7d5ba6', '#3f7cbf', '#8c8a80', '#4c9a5b', '#d4991c'].map(hex);
 
-// A4 in Punkten, Ränder
+// A4 in points, margins
 const W = 595.28;
 const H = 841.89;
 const X = 64;
@@ -44,7 +44,7 @@ const TOP = 64;
 const BOTTOM = 72;
 const MAX_W = W - 2 * X;
 
-/** Text in Abschnitte je Schrift (Latin, sonst Latin Extended); Zeichen ohne Glyphe entfallen. */
+/** Splits text into runs per font (Latin, otherwise Latin Extended); characters without a glyph are dropped. */
 function runs(face: Face, text: string) {
 	const out: { font: PDFFont; text: string }[] = [];
 	for (const ch of text) {
@@ -60,7 +60,7 @@ function runs(face: Face, text: string) {
 const widthOf = (face: Face, text: string, size: number) =>
 	runs(face, text).reduce((w, r) => w + r.font.widthOfTextAtSize(r.text, size), 0);
 
-/** Bricht Text auf die Breite um; Absätze bleiben erhalten, überlange Wörter werden geteilt. */
+/** Wraps text to the width; paragraphs are kept, overlong words are split. */
 function wrap(face: Face, text: string, size: number, maxWidth: number): string[] {
 	const lines: string[] = [];
 	const space = widthOf(face, ' ', size);
@@ -106,7 +106,7 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 		page = doc.addPage([W, H]);
 		y = H - TOP;
 	};
-	/** Neue Seite, wenn weniger als `h` Platz bleibt */
+	/** New page if less than `h` space is left */
 	const ensure = (h: number) => {
 		if (y - h < BOTTOM) newPage();
 	};
@@ -116,7 +116,7 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 			x += r.font.widthOfTextAtSize(r.text, size);
 		}
 	};
-	/** Umgebrochener Text ab der aktuellen Position; Zeilenhöhe 1.45 × Schriftgrösse */
+	/** Wrapped text from the current position; line height 1.45 × font size */
 	const paragraph = (text: string, face: Face, size: number, color = INK, x = X) => {
 		const lh = size * 1.45;
 		for (const line of wrap(face, text, size, MAX_W - (x - X))) {
@@ -129,7 +129,7 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 		page.drawLine({ start: { x: X, y }, end: { x: W - X, y }, thickness: 0.6, color: RULE });
 	};
 
-	// Kopf
+	// header
 	const docs = entryDocs(entries, lang);
 	const today = new Intl.DateTimeFormat(dateLocale(lang), { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 	paragraph('ediurnum', faces.sansBold, 10, ACCENT);
@@ -154,7 +154,7 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 	};
 
 	for (const d of docs) {
-		// Datum nicht allein unten auf der Seite
+		// don't leave a date alone at the bottom of a page
 		y -= 20;
 		ensure(90);
 		rule();
@@ -182,7 +182,7 @@ export async function exportPdf(entries: Entry[], lang: Lang, skippedLocked: num
 		}
 	}
 
-	// Fusszeile mit Seitenzahlen
+	// footer with page numbers
 	const pages = doc.getPages();
 	pages.forEach((p, i) => {
 		page = p;

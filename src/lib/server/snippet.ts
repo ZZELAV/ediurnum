@@ -1,6 +1,6 @@
 import type { EntryContent } from '#lib/types.ts';
 
-/** Kurzer Auszug für Übersichten: Höhepunkt, sonst Erlebtes, sonst freie Seite. */
+/** Short excerpt for overviews: highlight, otherwise what was experienced, otherwise the free page. */
 export function snippetOf(c: EntryContent, max = 140): string {
 	const e = c.sections.daily ?? {};
 	const candidates = [e.highlight, e.experienced, c.free, ...(Array.isArray(e.gratitude) ? e.gratitude : [])];

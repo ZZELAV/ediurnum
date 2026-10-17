@@ -2,11 +2,11 @@ import { getDb, setMeta, transaction } from './db.ts';
 import { destroyAllSessions } from './vault.ts';
 
 /**
- * Endgültiges Löschen („Purge“). SQLite läuft mit secure_delete, gelöschte Inhalte werden
- * überschrieben; danach wird die Datei verdichtet, damit keine alten Seiten übrig bleiben.
+ * Final deletion („purge“). SQLite runs with secure_delete, deleted content is
+ * overwritten; afterwards the file is compacted so that no old pages remain.
  */
 
-/** Löscht alle Einträge, Versionen und KI-Auswertungen. Konto, Einstellungen und Erinnerungen bleiben. */
+/** Deletes all entries, versions and AI analyses. Account, settings and reminders stay. */
 export function purgeContent() {
 	transaction(() => {
 		getDb().exec('DELETE FROM entry_revisions; DELETE FROM entries; DELETE FROM analyses;');
@@ -16,7 +16,7 @@ export function purgeContent() {
 	compact();
 }
 
-/** Setzt ediurnum vollständig zurück: alle Daten inkl. Passwort und Geräte. Danach folgt die Einrichtung. */
+/** Resets ediurnum completely: all data including password and devices. Setup follows afterwards. */
 export function resetAll() {
 	transaction(() => {
 		getDb().exec(`

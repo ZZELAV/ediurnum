@@ -21,7 +21,7 @@ export function loadSettings(dek: Buffer): Settings {
 	const raw = getMeta('settings');
 	if (!raw) return defaultSettings();
 	const settings = { ...defaultSettings(), ...decryptJson<Partial<Settings>>(dek, Buffer.from(raw, 'base64'), AAD) };
-	// Unbekannte Erscheinungsbilder (z. B. ein entferntes) folgen wieder dem System
+	// unknown themes (e.g. a removed one) follow the system again
 	if (settings.theme !== 'light' && settings.theme !== 'dark') settings.theme = 'system';
 	return settings;
 }

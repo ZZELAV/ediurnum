@@ -24,7 +24,7 @@ export function createBackup(dek: Buffer): string {
 
 function insertRows(table: string, rows: Record<string, unknown>[]) {
 	const d = getDb();
-	// nur bekannte Spalten – die Namen landen im SQL
+	// known columns only – the names end up in the SQL
 	const known = new Set((d.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).map((c) => c.name));
 	for (const o of rows) {
 		const r = jsonToRow(o);
@@ -36,7 +36,7 @@ function insertRows(table: string, rows: Record<string, unknown>[]) {
 	}
 }
 
-/** Spielt ein Backup in eine leere Datenbank ein (beim Einrichten). */
+/** Restores a backup into an empty database (during setup). */
 export function restoreBackup(data: BackupData) {
 	transaction(() => {
 		const d = getDb();
@@ -50,7 +50,7 @@ export function restoreBackup(data: BackupData) {
 	});
 }
 
-/** Alle Einträge, die aktuell entschlüsselt werden können (ältester zuerst), für den lesbaren Export. */
+/** All entries that can currently be decrypted (oldest first), for the readable export. */
 export function readableEntries(session: Session) {
 	const entries: Entry[] = [];
 	let skippedLocked = 0;

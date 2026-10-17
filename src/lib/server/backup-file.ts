@@ -5,13 +5,13 @@ import { isEmptyContent } from '#lib/templates.ts';
 import type { Entry, Lang } from '#lib/types.ts';
 
 /**
- * Backup-Format (.ediurnum):
- * Eine JSON-Datei mit einem kleinen, unverschlüsselten Kopf und dem Inhalt,
- * der mit dem Hauptschlüssel (= Wiederherstellungsschlüssel) verschlüsselt ist.
- * Die Datensätze darin sind zusätzlich weiterhin einzeln verschlüsselt –
- * gesperrte Einträge bleiben also auch im Backup PIN-geschützt.
+ * Backup format (.ediurnum):
+ * A JSON file with a small, unencrypted header and the content,
+ * encrypted with the master key (= recovery key).
+ * The records inside are still encrypted individually as well –
+ * so locked entries stay PIN-protected in the backup too.
  *
- * Ohne Datenbank-Import: Dieses Modul nutzen auch das Konverter-Skript (`scripts/convert.ts`) und die Unit-Tests.
+ * No database import: the converter script (`scripts/convert.ts`) and the unit tests use this module as well.
  */
 
 const AAD = 'ediurnum/backup/v1';
@@ -65,7 +65,7 @@ export function encodeBackup(dek: Buffer, data: BackupData, appVersion: string):
 	return JSON.stringify(header, null, 2);
 }
 
-/** Liest den unverschlüsselten Kopf und prüft Format und Version (ohne Schlüssel). */
+/** Reads the unencrypted header and checks format and version (without a key). */
 export function parseBackupHeader(text: string): BackupHeader {
 	let header: BackupHeader;
 	try {
@@ -90,7 +90,7 @@ export function readBackup(text: string, dek: Buffer): BackupData {
 	}
 }
 
-/** Sprache aus den (verschlüsselten) Einstellungen im Backup; Deutsch, wenn keine gespeichert ist. */
+/** Language from the (encrypted) settings in the backup; German if none is stored. */
 export function backupLanguage(data: BackupData, dek: Buffer): Lang {
 	if (!data.meta.settings) return 'de';
 	const s = decryptJson<{ language?: string }>(dek, Buffer.from(data.meta.settings, 'base64'), SETTINGS_AAD);
@@ -99,20 +99,20 @@ export function backupLanguage(data: BackupData, dek: Buffer): Lang {
 
 const entryRows = (data: BackupData) => data.entries.map((o) => jsonToRow(o) as unknown as EntryRow);
 
-/** Anzahl gesperrter Einträge im Backup (ohne komplett geleerte). */
+/** Number of locked entries in the backup (without completely cleared ones). */
 export function lockedCount(data: BackupData): number {
 	return entryRows(data).filter((r) => r.locked === 1 && r.empty !== 1).length;
 }
 
-/** PIN prüfen und den Sperr-Schlüssel liefern; null bei falscher PIN oder wenn das Backup keine PIN hat. */
+/** Checks the PIN and returns the lock key; null for a wrong PIN or if the backup has no PIN. */
 export function unlockBackupPin(data: BackupData, dek: Buffer, pin: string): Promise<Buffer | null> {
 	const { pin_kdf: kdf, pin_check: check } = data.meta;
 	return kdf && check ? unlockWithPin(dek, pin, kdf, check) : Promise.resolve(null);
 }
 
 /**
- * Entschlüsselte Einträge aus einem Backup, ältester zuerst – wie `readableEntries` (backup.ts) in der App.
- * Gesperrte Einträge nur mit Sperr-Schlüssel, sonst zählen sie zu `skippedLocked`. Komplett geleerte fehlen.
+ * Decrypted entries from a backup, oldest first – like `readableEntries` (backup.ts) in the app.
+ * Locked entries only with the lock key, otherwise they count towards `skippedLocked`. Completely cleared ones are left out.
  */
 export function backupEntries(data: BackupData, dek: Buffer, lockKey: Buffer | null) {
 	const entries: Entry[] = [];
@@ -125,7 +125,7 @@ export function backupEntries(data: BackupData, dek: Buffer, lockKey: Buffer | n
 			continue;
 		}
 		const content = decryptContent(key, r.payload, r.id, r.revision);
-		// Backups vor Format-Version 2 kennen die Spalte "empty" nicht
+		// backups before format version 2 don't have the column "empty"
 		if (r.empty === undefined && isEmptyContent(content)) continue;
 		entries.push({ ...toMeta(r), content });
 	}

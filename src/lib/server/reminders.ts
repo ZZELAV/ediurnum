@@ -25,12 +25,12 @@ import {
 import type { Lang } from '#lib/types.ts';
 
 /**
- * Erinnerungen und Push-Benachrichtigungen.
- * Bewusst unverschlüsselt gespeichert: Zeitplan, Sprache, VAPID-Schlüssel und die
- * Push-Adressen der Geräte. Die Nachrichten enthalten nie Tagebuchinhalte.
+ * Reminders and push notifications.
+ * Stored unencrypted on purpose: schedule, language, VAPID keys and the
+ * push addresses of the devices. The messages never contain journal content.
  */
 
-// ---------------------------------------------------------------- Zeitplan
+// ---------------------------------------------------------------- Schedule
 
 export function loadReminders(): ReminderConfig {
 	const raw = getMeta('reminders');
@@ -44,8 +44,8 @@ export function saveReminders(cfg: ReminderConfig) {
 }
 
 /**
- * Neuer Zeitplan der Rückblicke. Fällt ein Rückblick auf heute und ist seine Uhrzeit schon vorbei,
- * gilt er für heute als gesendet – sonst käme die Benachrichtigung sofort nach dem Speichern.
+ * New schedule of the reviews. If a review falls on today and its time has already passed,
+ * it counts as sent today – otherwise the notification would arrive right after saving.
  */
 export function saveReviewSchedule(cfg: ReminderConfig, now = new Date()) {
 	saveReminders(cfg);
@@ -61,9 +61,9 @@ export function setReminderLang(lang: Lang) {
 	saveReminders({ ...loadReminders(), lang });
 }
 
-// ---------------------------------------------------------------- Eigene Erinnerungen
+// ---------------------------------------------------------------- Custom reminders
 
-/** Pro eigener Erinnerung der Tag, an dem zuletzt gesendet wurde. */
+/** For each custom reminder, the day it was last sent. */
 function sentMarkers(): Record<string, string> {
 	const raw = getMeta('reminder_sent_custom');
 	return raw ? (JSON.parse(raw) as Record<string, string>) : {};
@@ -74,9 +74,9 @@ function setSentMarkers(markers: Record<string, string>) {
 }
 
 /**
- * Legt eine eigene Erinnerung an oder ersetzt eine bestehende (gleiche ID).
- * Ist die Uhrzeit heute schon vorbei, gilt sie für heute als gesendet –
- * sonst käme die Benachrichtigung sofort nach dem Speichern.
+ * Creates a custom reminder or replaces an existing one (same ID).
+ * If its time has already passed today, it counts as sent today –
+ * otherwise the notification would arrive right after saving.
  */
 export function saveCustomReminder(input: unknown, now = new Date()): CustomReminder | CustomReminderError {
 	const r = sanitizeCustomReminder(input);
@@ -92,7 +92,7 @@ export function saveCustomReminder(input: unknown, now = new Date()): CustomRemi
 	return saved;
 }
 
-/** Ist die Uhrzeit heute schon vorbei, gilt die Erinnerung für heute als gesendet (sonst: zurücksetzen). */
+/** If the time has already passed today, the reminder counts as sent today (otherwise: reset). */
 function markIfPassedToday(r: CustomReminder, now: Date) {
 	const today = todayIso(now);
 	const markers = sentMarkers();
@@ -101,7 +101,7 @@ function markIfPassedToday(r: CustomReminder, now: Date) {
 	setSentMarkers(markers);
 }
 
-/** Ein- oder ausschalten. Beim Einschalten nach der heutigen Uhrzeit kommt die Erinnerung erst beim nächsten Mal. */
+/** Switches on or off. Switched on after today's time, the reminder only comes the next time. */
 export function setCustomReminderEnabled(id: string, enabled: boolean, now = new Date()) {
 	const cfg = loadReminders();
 	const r = cfg.custom.find((c) => c.id === id);
@@ -121,7 +121,7 @@ export function deleteCustomReminder(id: string) {
 }
 
 
-/** Eigene Erinnerungen für die Anzeige, nach nächster Fälligkeit sortiert (vorbei/pausiert am Schluss). */
+/** Custom reminders for display, sorted by next due date (past/paused at the end). */
 export function listCustomReminders(now = new Date()): CustomReminderView[] {
 	const today = todayIso(now);
 	const minutes = now.getHours() * 60 + now.getMinutes();
@@ -131,7 +131,7 @@ export function listCustomReminders(now = new Date()): CustomReminderView[] {
 		.sort((a, b) => rank(a).localeCompare(rank(b)) || a.title.localeCompare(b.title));
 }
 
-// ---------------------------------------------------------------- VAPID & Geräte
+// ---------------------------------------------------------------- VAPID & devices
 
 function vapidKeys(): { publicKey: string; privateKey: string } {
 	const raw = getMeta('vapid');
@@ -176,8 +176,8 @@ export function removeAllDevices() {
 }
 
 /**
- * Absender für die Push-Dienste (VAPID „subject“). Apple lehnt Adressen wie „localhost“ ab,
- * deshalb die öffentliche Adresse aus ORIGIN – oder ausdrücklich VAPID_SUBJECT (mailto: oder https:).
+ * Sender for the push services (VAPID „subject“). Apple rejects addresses such as „localhost“,
+ * hence the public address from ORIGIN – or explicitly VAPID_SUBJECT (mailto: or https:).
  */
 function vapidSubject(): string {
 	if (VAPID_SUBJECT) return VAPID_SUBJECT;
@@ -185,7 +185,7 @@ function vapidSubject(): string {
 	return 'mailto:ediurnum@example.com';
 }
 
-/** Sendet eine Benachrichtigung an alle Geräte. Abgelaufene Geräte werden entfernt. */
+/** Sends a notification to all devices. Expired devices are removed. */
 export async function sendToAll(payload: { title: string; body: string; url: string; tag: string }): Promise<number> {
 	const { publicKey, privateKey } = vapidKeys();
 	const rows = getDb().prepare('SELECT endpoint, keys FROM push_subscriptions').all() as { endpoint: string; keys: string }[];
@@ -195,8 +195,8 @@ export async function sendToAll(payload: { title: string; body: string; url: str
 			await webpush.sendNotification({ endpoint: r.endpoint, keys: JSON.parse(r.keys) }, JSON.stringify(payload), {
 				vapidDetails: { subject: vapidSubject(), publicKey, privateKey },
 				TTL: 60 * 60 * 12,
-				// „high“: sofort zustellen. Bei „normal“ darf Apple (iOS) die Nachricht zurückhalten, bis das Gerät
-				// ohnehin aufwacht – sie kam dann oft erst an, wenn z. B. ein VPN das iPhone geweckt hat.
+				// „high“: deliver immediately. With „normal“ Apple (iOS) may hold the message back until the device
+				// wakes up anyway – it then often only arrived when e.g. a VPN woke up the iPhone.
 				urgency: 'high'
 			});
 			sent++;
@@ -213,9 +213,9 @@ export async function sendToAll(payload: { title: string; body: string; url: str
 	return sent;
 }
 
-// ---------------------------------------------------------------- Planer
+// ---------------------------------------------------------------- Scheduler
 
-/** Prüft einmal pro Minute, ob eine Erinnerung fällig ist. Pro Fälligkeitstag wird höchstens einmal gesendet. */
+/** Checks once a minute whether a reminder is due. At most one message is sent per due day. */
 async function reminderTick(now = new Date()) {
 	if (listDevices().length === 0) return;
 	const cfg = loadReminders();

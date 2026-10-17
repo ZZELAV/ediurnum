@@ -1,10 +1,10 @@
 import { LOG_LEVEL } from '$app/env/private';
 
 /**
- * Protokoll für die Konsole (Docker-Log). Enthält nie Tagebuchinhalte, Passwörter oder Schlüssel –
- * nur Ereignisse, technische Angaben und Fehler.
+ * Log for the console (Docker log). Never contains journal content, passwords or keys –
+ * only events, technical details and errors.
  *
- * LOG_LEVEL: "error", "warn", "info" (Standard) oder "debug" (zusätzlich jede Anfrage).
+ * LOG_LEVEL: "error", "warn", "info" (default) or "debug" (additionally every request).
  */
 const LEVELS = { error: 0, warn: 1, info: 2, debug: 3 } as const;
 type Level = keyof typeof LEVELS;

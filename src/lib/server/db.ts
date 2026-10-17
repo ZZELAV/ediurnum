@@ -5,10 +5,10 @@ import { DATA_DIR } from '$app/env/private';
 import { LEGACY_KINDS, upgradeSections } from '#lib/templates.ts';
 
 /**
- * SQLite-Datenbank (node:sqlite, ohne native Zusatzpakete).
- * Inhalte liegen ausschliesslich verschlüsselt in den Spalten `payload`.
- * Klartext sind nur technische Metadaten: IDs, Datum, Zeitstempel,
- * Sperr-/KI-Flags und welche Abschnitte ein Eintrag enthält.
+ * SQLite database (node:sqlite, no native add-on packages).
+ * Contents are stored only encrypted, in the `payload` columns.
+ * Plain text is limited to technical metadata: IDs, date, timestamps,
+ * lock/AI flags and which sections an entry contains.
  */
 const SCHEMA_VERSION = 4;
 
@@ -63,7 +63,7 @@ function migrate(d: DatabaseSync) {
 		`);
 	}
 	if (current < 2) {
-		// Geräte für Push-Benachrichtigungen (enthält keine Tagebuchinhalte)
+		// devices for push notifications (contains no journal content)
 		d.exec(`
 			CREATE TABLE push_subscriptions (
 				endpoint TEXT PRIMARY KEY,
@@ -74,8 +74,8 @@ function migrate(d: DatabaseSync) {
 		`);
 	}
 	if (current < 3) {
-		// Kennzeichen für Einträge, deren Inhalt komplett gelöscht wurde: Sie bleiben samt Versionen
-		// erhalten, zählen aber nicht als geschrieben (Liste, Kalender, Serie, Widget).
+		// flag for entries whose content was cleared completely: they are kept together with their versions
+		// but don't count as written (list, calendar, streak, widget).
 		d.exec(`ALTER TABLE entries ADD COLUMN empty INTEGER NOT NULL DEFAULT 0`);
 	}
 	if (current < 4) {

@@ -9,8 +9,8 @@ import interLatin600 from './fonts/inter-latin-600-normal.woff?inline';
 import interExt600 from './fonts/inter-latin-ext-600-normal.woff?inline';
 
 /**
- * Schriften für das PDF in der App: Vite bettet sie per `?inline` als data-URL in den Server-Build ein,
- * so braucht der Server zur Laufzeit keinen Dateipfad. (Das Konverter-Skript liest sie direkt aus `fonts/`.)
+ * Fonts for the PDF in the app: Vite embeds them into the server build as data URLs via `?inline`,
+ * so the server needs no file path at runtime. (The converter script reads them directly from `fonts/`.)
  */
 const inline: Record<string, string> = {
 	'lora-latin-400-normal.woff': loraLatin400,
