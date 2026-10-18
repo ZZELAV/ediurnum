@@ -3,23 +3,112 @@ import { complete } from './providers.ts';
 import { formatEntries, plain } from '../export.ts';
 import { langOf, translate } from '#lib/i18n/index.ts';
 import { isEmptyProfile, profileMarkdown, type Profile } from '#lib/profile.ts';
-import type { AiAgent, Analysis, Entry } from '#lib/types.ts';
+import type { AiAgent, Analysis, Entry, Lang } from '#lib/types.ts';
 
-/** The instructions to the AI exist in German and English; other languages get the English ones. */
-const TONES: Record<AiAgent['tone'], Record<'de' | 'en', string>> = {
-	gentle: {
-		de: 'Sei warm, sanft und ermutigend. Formuliere Kritik behutsam.',
-		en: 'Be warm, gentle and encouraging. Phrase criticism carefully.'
+/** Texts of the instructions to the AI and of the AI file, one set per language of the app. */
+type PromptTexts = {
+	/** Default instructions as paragraphs; the last one lists the headings of the answer. */
+	instructions: string[];
+	tones: Record<AiAgent['tone'], string>;
+	persona: string;
+	/** Last section of an answer from an AI chat (must be recognised by FOCUS_HEADING) */
+	focusChat: (n: number) => string;
+	/** <focus> block of an answer from an AI agent */
+	focusApi: (n: number) => string;
+	intro: (from: string, to: string) => string;
+	question: (question: string) => string;
+	title: string;
+	task: string;
+	about: string;
+	aboutHint: string;
+	entries: string;
+};
+
+const PROMPTS: Record<Lang, PromptTexts> = {
+	de: {
+		instructions: [
+			'Du bist ein reflektierender Begleiter für ein persönliches Tagebuch namens "ediurnum".',
+			'Du erhältst Tagebucheinträge (täglich Dankbarkeit und Erlebtes, wöchentlich Gefühle, monatlich Gelerntes und Weiterentwicklung) und hilfst der schreibenden Person, sich selbst besser zu verstehen und sich weiterzuentwickeln.',
+			'Beziehe dich auf konkrete Einträge und Daten. Erfinde nichts, was nicht in den Einträgen steht. Du bist kein Therapeut und stellst keine Diagnosen; deuten Einträge auf eine ernste Krise hin, empfiehl behutsam, mit einer Vertrauensperson zu sprechen oder professionelle Hilfe zu suchen.',
+			'Antworte auf Deutsch, formatiert als Markdown mit diesen Überschriften:',
+			'## Überblick\n## Was gut läuft\n## Muster und Beobachtungen\n## Knackpunkte für die nächsten Wochen'
+		],
+		tones: {
+			gentle: 'Sei warm, sanft und ermutigend. Formuliere Kritik behutsam.',
+			balanced: 'Sei wertschätzend und ehrlich zugleich. Benenne Positives und Herausforderungen ausgewogen.',
+			direct: 'Sei klar, direkt und konkret wie ein guter Coach. Keine Floskeln.'
+		},
+		persona: 'Individuelle Anweisungen der schreibenden Person:',
+		focusChat: (n) =>
+			`Schliesse mit einem letzten Abschnitt "## Fokuspunkte" ab, der genau ${n} kurze, konkrete und umsetzbare Fokuspunkte für die nächsten Wochen enthält (einer pro Zeile, jeweils mit "- " beginnend).`,
+		focusApi: (n) =>
+			`Schliesse mit genau ${n} kurzen, konkreten und umsetzbaren Fokuspunkten für die nächsten Wochen in einem Block wie diesem ab (einer pro Zeile, jeweils mit "- " beginnend):`,
+		intro: (from, to) => `Hier sind meine Tagebucheinträge vom ${from} bis ${to}.`,
+		question: (q) => `Bitte achte besonders auf Folgendes: ${q}`,
+		title: '# ediurnum – Tagebuch-Auswertung',
+		task: '## Dein Auftrag',
+		about: '## Über mich (Selbsteinschätzung)',
+		aboutHint:
+			'Nutze das als Hintergrund, um mich zu verstehen und deine Rückmeldung darauf abzustimmen. Bewerte es nicht und wiederhole es nicht; beziehe dich darauf, wo es hilft.',
+		entries: '## Meine Tagebucheinträge'
 	},
-	balanced: {
-		de: 'Sei wertschätzend und ehrlich zugleich. Benenne Positives und Herausforderungen ausgewogen.',
-		en: 'Be appreciative and honest at the same time. Balance positives and challenges.'
+	en: {
+		instructions: [
+			'You are a reflective companion for a personal journal called "ediurnum".',
+			'You receive journal entries (daily gratitude and experiences, weekly feelings, monthly learning and growth) and help the writer understand themselves better and grow.',
+			'Refer to concrete entries and dates. Do not invent anything that is not in the entries. You are not a therapist and do not make diagnoses; if entries suggest a serious crisis, gently recommend talking to a trusted person or professional help.',
+			'Answer in English, formatted as Markdown with these headings:',
+			'## Overview\n## What is going well\n## Patterns and observations\n## Key points for the coming weeks'
+		],
+		tones: {
+			gentle: 'Be warm, gentle and encouraging. Phrase criticism carefully.',
+			balanced: 'Be appreciative and honest at the same time. Balance positives and challenges.',
+			direct: 'Be clear, direct and concrete like a good coach. No filler.'
+		},
+		persona: 'Individual instructions from the writer:',
+		focusChat: (n) =>
+			`Finish with a last section "## Focus points" containing exactly ${n} short, concrete and actionable focus points for the coming weeks (one per line, each starting with "- ").`,
+		focusApi: (n) =>
+			`Finish with exactly ${n} short, concrete and actionable focus points for the coming weeks inside a block like this (one per line, each starting with "- "):`,
+		intro: (from, to) => `Here are my journal entries from ${from} to ${to}.`,
+		question: (q) => `Please pay special attention to this: ${q}`,
+		title: '# ediurnum – journal review',
+		task: '## Your task',
+		about: '## About me (self-assessment)',
+		aboutHint:
+			'Use this as background to understand me and to tailor your feedback. Do not judge it or repeat it back; refer to it where it helps.',
+		entries: '## My journal entries'
 	},
-	direct: {
-		de: 'Sei klar, direkt und konkret wie ein guter Coach. Keine Floskeln.',
-		en: 'Be clear, direct and concrete like a good coach. No filler.'
+	it: {
+		instructions: [
+			'Sei un compagno di riflessione per un diario personale chiamato "ediurnum".',
+			'Ricevi pagine di diario (ogni giorno gratitudine ed esperienze, ogni settimana sentimenti, ogni mese ciò che si è imparato e la crescita personale) e aiuti chi scrive a capirsi meglio e a crescere.',
+			'Fai riferimento a pagine e date concrete. Non inventare nulla che non sia scritto nelle pagine. Non sei un terapeuta e non fai diagnosi; se le pagine fanno pensare a una crisi seria, consiglia con delicatezza di parlarne con una persona di fiducia o di cercare un aiuto professionale.',
+			'Rispondi in italiano, in formato Markdown con questi titoli:',
+			'## Panoramica\n## Cosa va bene\n## Schemi e osservazioni\n## Punti critici per le prossime settimane'
+		],
+		tones: {
+			gentle: 'Sii caloroso, delicato e incoraggiante. Formula le critiche con tatto.',
+			balanced: 'Sii riconoscente e onesto allo stesso tempo. Bilancia gli aspetti positivi e le difficoltà.',
+			direct: 'Sii chiaro, diretto e concreto come un buon coach. Niente frasi fatte.'
+		},
+		persona: 'Istruzioni personali di chi scrive:',
+		focusChat: (n) =>
+			`Concludi con un’ultima sezione "## Punti di focus" che contenga esattamente ${n} punti di focus brevi, concreti e realizzabili per le prossime settimane (uno per riga, ciascuno preceduto da "- ").`,
+		focusApi: (n) =>
+			`Concludi con esattamente ${n} punti di focus brevi, concreti e realizzabili per le prossime settimane in un blocco come questo (uno per riga, ciascuno preceduto da "- "):`,
+		intro: (from, to) => `Ecco le mie pagine di diario dal ${from} al ${to}.`,
+		question: (q) => `Presta particolare attenzione a questo: ${q}`,
+		title: '# ediurnum – analisi del diario',
+		task: '## Il tuo compito',
+		about: '## Su di me (autovalutazione)',
+		aboutHint:
+			'Usalo come contesto per capirmi e per adattare il tuo riscontro. Non giudicarlo e non ripeterlo; fai riferimento a esso dove è utile.',
+		entries: '## Le mie pagine di diario'
 	}
 };
+
+const prompts = (loc: string) => PROMPTS[langOf(loc)];
 
 /**
  * Options for the instructions to the AI (AI agent or Markdown file for an AI chat).
@@ -34,22 +123,7 @@ export const MAX_INSTRUCTIONS = 8000;
  * in the insights; buildSystemPrompt adds the tone and the focus points.
  */
 export function defaultInstructions(loc: string): string {
-	if (langOf(loc) !== 'de') {
-		return [
-			'You are a reflective companion for a personal journal called "ediurnum".',
-			'You receive journal entries (daily gratitude and experiences, weekly feelings, monthly learning and growth) and help the writer understand themselves better and grow.',
-			'Refer to concrete entries and dates. Do not invent anything that is not in the entries. You are not a therapist and do not make diagnoses; if entries suggest a serious crisis, gently recommend talking to a trusted person or professional help.',
-			'Answer in English, formatted as Markdown with these headings:',
-			'## Overview\n## What is going well\n## Patterns and observations\n## Key points for the coming weeks'
-		].join('\n\n');
-	}
-	return [
-		'Du bist ein reflektierender Begleiter für ein persönliches Tagebuch namens "ediurnum".',
-		'Du erhältst Tagebucheinträge (täglich Dankbarkeit und Erlebtes, wöchentlich Gefühle, monatlich Gelerntes und Weiterentwicklung) und hilfst der schreibenden Person, sich selbst besser zu verstehen und sich weiterzuentwickeln.',
-		'Beziehe dich auf konkrete Einträge und Daten. Erfinde nichts, was nicht in den Einträgen steht. Du bist kein Therapeut und stellst keine Diagnosen; deuten Einträge auf eine ernste Krise hin, empfiehl behutsam, mit einer Vertrauensperson zu sprechen oder professionelle Hilfe zu suchen.',
-		'Antworte auf Deutsch, formatiert als Markdown mit diesen Überschriften:',
-		'## Überblick\n## Was gut läuft\n## Muster und Beobachtungen\n## Knackpunkte für die nächsten Wochen'
-	].join('\n\n');
+	return prompts(loc).instructions.join('\n\n');
 }
 
 /**
@@ -59,52 +133,21 @@ export function defaultInstructions(loc: string): string {
  */
 export function buildSystemPrompt(agent: PromptOptions, loc: string, format: 'api' | 'chat' = 'api'): string {
 	const n = Math.min(7, Math.max(1, agent.maxFocusPoints || 4));
-	const instructions = agent.instructions?.trim() || defaultInstructions(loc);
-	if (langOf(loc) !== 'de') {
-		return [
-			instructions,
-			TONES[agent.tone]?.en ?? TONES.balanced.en,
-			agent.persona ? `Individual instructions from the writer:\n${agent.persona}` : '',
-			...(format === 'chat'
-				? [
-						`Finish with a last section "## Focus points" containing exactly ${n} short, concrete and actionable focus points for the coming weeks (one per line, each starting with "- ").`
-					]
-				: [
-						`Finish with exactly ${n} short, concrete and actionable focus points for the coming weeks inside a block like this (one per line, each starting with "- "):`,
-						'<focus>\n- …\n</focus>'
-					])
-		]
-			.filter(Boolean)
-			.join('\n\n');
-	}
+	const p = prompts(loc);
 	return [
-		instructions,
-		TONES[agent.tone]?.de ?? TONES.balanced.de,
-		agent.persona ? `Individuelle Anweisungen der schreibenden Person:\n${agent.persona}` : '',
-		...(format === 'chat'
-			? [
-					`Schliesse mit einem letzten Abschnitt "## Fokuspunkte" ab, der genau ${n} kurze, konkrete und umsetzbare Fokuspunkte für die nächsten Wochen enthält (einer pro Zeile, jeweils mit "- " beginnend).`
-				]
-			: [
-					`Schliesse mit genau ${n} kurzen, konkreten und umsetzbaren Fokuspunkten für die nächsten Wochen in einem Block wie diesem ab (einer pro Zeile, jeweils mit "- " beginnend):`,
-					'<focus>\n- …\n</focus>'
-				])
+		agent.instructions?.trim() || defaultInstructions(loc),
+		p.tones[agent.tone] ?? p.tones.balanced,
+		agent.persona ? `${p.persona}\n${agent.persona}` : '',
+		...(format === 'chat' ? [p.focusChat(n)] : [p.focusApi(n), '<focus>\n- …\n</focus>'])
 	]
 		.filter(Boolean)
 		.join('\n\n');
 }
 
 export function buildUserPrompt(entries: Entry[], loc: string, from: string, to: string, question: string): string {
-	const intro =
-		langOf(loc) !== 'de'
-			? `Here are my journal entries from ${from} to ${to}.`
-			: `Hier sind meine Tagebucheinträge vom ${from} bis ${to}.`;
-	const q = question.trim()
-		? langOf(loc) !== 'de'
-			? `\n\nPlease pay special attention to this: ${plain(question)}`
-			: `\n\nBitte achte besonders auf Folgendes: ${plain(question)}`
-		: '';
-	return `${intro}${q}\n\n${formatEntries(entries, loc)}`;
+	const p = prompts(loc);
+	const q = question.trim() ? `\n\n${p.question(plain(question))}` : '';
+	return `${p.intro(from, to)}${q}\n\n${formatEntries(entries, loc)}`;
 }
 
 /** List items without bullets and bold text; duplicates and empty ones are dropped, at most seven. */
@@ -118,15 +161,17 @@ const listItems = (block: string) => [
 ].slice(0, 7);
 
 /**
- * Heading of the section with the focus points: as Markdown ("## Focus points" or the German "## Fokuspunkte",
- * also with additions such as "for the coming weeks") or as a plain line – that is how it arrives when the
- * answer was selected and copied in the chat instead of using the copy button.
+ * Heading of the section with the focus points in any language of the app: as Markdown ("## Focus points",
+ * German "## Fokuspunkte", Italian "## Punti di focus", also with additions such as "for the coming weeks") or
+ * as a plain line – that is how it arrives when the answer was selected and copied in the chat instead of using
+ * the copy button.
  */
-const FOCUS_HEADING = /^(?:#{1,4}[ \t]*)?\**[ \t]*(?:Fokuspunkte|Fokus-Punkte|Focus points)\b[^\n]{0,60}?\**[ \t]*:?[ \t]*$/gim;
+const FOCUS_HEADING =
+	/^(?:#{1,4}[ \t]*)?\**[ \t]*(?:Fokuspunkte|Fokus-Punkte|Focus points|Punti di focus|Punti focali)\b[^\n]{0,60}?\**[ \t]*:?[ \t]*$/gim;
 
 /**
  * Separates the focus points from the rest of the text: either a <focus> block (AI agent)
- * or the last section "## Fokuspunkte" / "## Focus points" (answer from an AI chat).
+ * or the last section with the focus points, e.g. "## Focus points" (answer from an AI chat).
  */
 export function parseResponse(text: string): { body: string; focusPoints: string[] } {
 	text = text.replace(/\r\n/g, '\n');
@@ -156,26 +201,18 @@ export function buildChatMarkdown(params: {
 	question: string;
 }): string {
 	const { options, locale: loc, profile, entries, from, to, question } = params;
-	const en = langOf(loc) !== 'de';
+	const p = prompts(loc);
 	const about =
 		profile && (!isEmptyProfile(profile.profile) || profile.name.trim())
 			? profileMarkdown(profile.profile, profile.name, (key) => translate(loc, key))
 			: '';
 	return [
-		en ? '# ediurnum – journal review' : '# ediurnum – Tagebuch-Auswertung',
-		en ? '## Your task' : '## Dein Auftrag',
+		p.title,
+		p.task,
 		// expected answer headings as a list, so they don't disturb the structure of the file
 		buildSystemPrompt(options, loc, 'chat').replace(/^## (.+)$/gm, '- `## $1`'),
-		...(about
-			? [
-					en ? '## About me (self-assessment)' : '## Über mich (Selbsteinschätzung)',
-					en
-						? 'Use this as background to understand me and to tailor your feedback. Do not judge it or repeat it back; refer to it where it helps.'
-						: 'Nutze das als Hintergrund, um mich zu verstehen und deine Rückmeldung darauf abzustimmen. Bewerte es nicht und wiederhole es nicht; beziehe dich darauf, wo es hilft.',
-					about
-				]
-			: []),
-		en ? '## My journal entries' : '## Meine Tagebucheinträge',
+		...(about ? [p.about, p.aboutHint, about] : []),
+		p.entries,
 		buildUserPrompt(entries, loc, from, to, question)
 	].join('\n\n');
 }

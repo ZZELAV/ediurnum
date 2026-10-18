@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildChatMarkdown, defaultInstructions, parseResponse } from '../src/lib/server/ai/analyze.ts';
+import { LANGS } from '../src/lib/i18n/langs.ts';
 import type { Entry, EntryContent } from '../src/lib/types.ts';
 
 const entry = (date: string, content: EntryContent): Entry => ({
@@ -111,4 +112,35 @@ test('AI file in English with own instructions', () => {
 	assert.match(md, /Be brief\./);
 	assert.doesNotMatch(md, /reflective companion/);
 	assert.match(md, /## Focus points/);
+});
+
+test('AI file in Italian: instructions, focus section and entries', () => {
+	const md = buildChatMarkdown({
+		options,
+		locale: 'it-CH',
+		entries: [entry('2026-03-01', { mood: 4, sections: {}, free: 'Ciao' })],
+		from: '2026-03-01',
+		to: '2026-03-01',
+		question: 'Come dormo?'
+	});
+	assert.ok(md.startsWith('# ediurnum – analisi del diario'));
+	assert.ok(md.includes(defaultInstructions('it').split('\n')[0]));
+	assert.match(md, /Rispondi in italiano/);
+	assert.match(md, /"## Punti di focus" che contenga esattamente 3 punti/);
+	assert.match(md, /Presta particolare attenzione a questo: Come dormo\?/);
+	assert.match(md, /## Le mie pagine di diario/);
+	assert.doesNotMatch(md, /reflective companion|Begleiter/);
+});
+
+test('every language of the app has its own default instructions', () => {
+	const all = Object.keys(LANGS).map((lang) => defaultInstructions(lang));
+	assert.equal(new Set(all).size, all.length);
+});
+
+test('Italian focus section of an answer', () => {
+	assert.deepEqual(parseResponse('## Panoramica\nBene.\n\n## Punti di focus\n- Dormire di più\n- Correre').focusPoints, [
+		'Dormire di più',
+		'Correre'
+	]);
+	assert.deepEqual(parseResponse('Testo\n\n**Punti focali per le prossime settimane:**\n- A').focusPoints, ['A']);
 });

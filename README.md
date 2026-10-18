@@ -37,7 +37,7 @@ with optional AI feedback for personal growth.
 - **Encrypted backup**, readable export (Markdown, JSON or **PDF**) and **delete journal** (all entries, or a complete reset)
 - **Backup converter**: a small command-line script turns an encrypted backup into Markdown, JSON or PDF – without a
   running app, e.g. if your server is gone (see [Backups](docs/DEPLOYMENT.md#11-backups))
-- German and English, light and dark theme (follows your device unless you choose one), installable as a web app
+- German, English and Italian, light and dark theme (follows your device unless you choose one), installable as a web app
 
 ## Security at a glance
 

@@ -8,8 +8,8 @@ The topmost version without a date is still in development.
 
 ### Added
 
-- Italian as a third language (*Settings → Language*, and automatically for browsers set to Italian). The
-  instructions in the file for an AI chat stay in English.
+- Italian as a third language (*Settings → Language*, and automatically for browsers set to Italian), including
+  the instructions in the file for an AI chat.
 - *Settings → Region*: the country decides the format of dates and numbers and the spelling (e.g. German in
   Switzerland: “3.5”, “ss”; German in Germany: “3,5”, “ß”; English: British spelling except in the USA, Canada and
   the Philippines). “Automatic” takes the country from the device's time zone (phones set it from their location)
