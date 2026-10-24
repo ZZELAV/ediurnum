@@ -25,7 +25,7 @@
     "convert": "node --disable-warning=ExperimentalWarning scripts/convert.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.133.0",
+    "@anthropic-ai/sdk": "^0.137.0",
     "@pdf-lib/fontkit": "^1.1.1",
     "pdf-lib": "^1.17.1",
     "web-push": "^3.6.7"
@@ -34,14 +34,14 @@
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/lora": "^5.3.0",
     "@sveltejs/adapter-node": "^6.0.0",
-    "@sveltejs/kit": "^3.0.1",
+    "@sveltejs/kit": "^3.1.0",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@types/node": "^24.0.0",
     "@types/web-push": "^3.6.4",
     "devalue": "^5.9.4",
     "svelte": "^5.57.2",
-    "svelte-check": "^4.7.6",
+    "svelte-check": "^4.7.7",
     "typescript": "^6.0.0",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   }
 }
