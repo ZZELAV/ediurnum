@@ -27,8 +27,8 @@ with optional AI feedback for personal growth.
 - **Reminders**: weekly and monthly reviews plus your own reminders (once, daily, on chosen weekdays or monthly),
   shown in the app and as **push notifications** on registered devices
 - **Optional focus mode**: while you write, navigation and side column fade out; press Esc to return
-- **All content encrypted at rest**, with a recovery key shown once at setup (and testable in the settings); the journal locks itself after a set
-  time without activity
+- **All content encrypted at rest**, with a recovery key shown once at setup (and testable in the settings); the journal locks itself shortly after
+  you leave the app
 - **Locked entries** with an additional PIN
 - **AI insights without API keys**: ediurnum turns the entries of a period into a Markdown file for the AI chat of your
   choice (ChatGPT, Claude, Gemini, …), optionally with your self-assessment. The instructions for the AI can be customised. Paste the answer back to keep it – its
@@ -37,7 +37,7 @@ with optional AI feedback for personal growth.
 - **Encrypted backup**, readable export (Markdown, JSON or **PDF**) and **delete journal** (all entries, or a complete reset)
 - **Backup converter**: a small command-line script turns an encrypted backup into Markdown, JSON or PDF – without a
   running app, e.g. if your server is gone (see [Backups](docs/DEPLOYMENT.md#11-backups))
-- German, English and Italian, light and dark theme (follows your device unless you choose one), installable as a web app
+- German, English and Italian with date and number formats of your region, light and dark theme (follows your device unless you choose one), installable as a web app
 
 ## Security at a glance
 
