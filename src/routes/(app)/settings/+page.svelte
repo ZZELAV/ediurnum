@@ -83,7 +83,7 @@
 		<section id="general" class="card">
 			<h2>{t('settings.general')}</h2>
 			{@render feedback('general')}
-			<form method="POST" action="?/general" use:enhance={keepValues} class="grid">
+			<form method="POST" action="?/general" use:enhance={keepValues} class="form-grid">
 				<div class="field">
 					<label for="name">{t('settings.name')}</label>
 					<input id="name" name="name" type="text" autocomplete="given-name" maxlength="60" value={data.settings.name} />
@@ -157,8 +157,8 @@
 			<h3>{t('settings.recoveryTest')}</h3>
 			<p class="faint">{t('settings.recoveryTestIntro')}</p>
 			{@render feedback('recovery')}
-			<form method="POST" action="?/recoveryTest" use:enhance class="grid">
-				<div class="field">
+			<form method="POST" action="?/recoveryTest" use:enhance class="form-grid button-below">
+				<div class="field wide">
 					<label for="rk">{t('setup.recoveryKey')}</label>
 					<input id="rk" name="recoveryKey" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" required />
 				</div>
@@ -167,7 +167,7 @@
 
 			<h3>{t('settings.changePassword')}</h3>
 			{@render feedback('password')}
-			<form method="POST" action="?/password" use:enhance class="grid">
+			<form method="POST" action="?/password" use:enhance class="form-grid button-below">
 				<!-- for password managers: the first name as the user name -->
 				<input class="visually-hidden" type="text" name="username" value={data.settings.name} autocomplete="username" tabindex="-1" aria-hidden="true" readonly />
 				<div class="field">
@@ -189,7 +189,7 @@
 			<p class="faint">{t('settings.pinIntro')}</p>
 			<p>{data.hasPin ? t('settings.pinActive', { count: data.lockedCount }) : t('settings.pinNone')}</p>
 			{@render feedback('pin')}
-			<form method="POST" action="?/pin" use:enhance class="grid">
+			<form method="POST" action="?/pin" use:enhance class="form-grid button-below">
 				{#if data.hasPin}
 					<div class="field">
 						<label for="cpin">{t('settings.currentPin')}</label>
@@ -309,16 +309,6 @@
 	}
 	h3 {
 		margin-top: 1.5rem;
-	}
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
-		gap: 0 1.2rem;
-		align-items: end;
-	}
-	/* space to what follows the form (e.g. the next heading) – not at the end of a card, where its padding applies */
-	.grid:not(:last-child) > div:last-child {
-		margin-bottom: 1.4rem;
 	}
 	.check {
 		grid-column: 1 / -1;

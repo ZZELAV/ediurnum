@@ -4,6 +4,12 @@ All notable changes to ediurnum are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [Semantic Versioning](https://semver.org).
 The topmost version without a date is still in development.
 
+## [1.1.1]
+
+### Changed
+
+- *Settings → Security*: the buttons sit below the fields, and the field for the recovery key uses the full width.
+
 ## [1.1.0] - 2026-10-24
 
 ### Added

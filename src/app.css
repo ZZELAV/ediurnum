@@ -289,6 +289,26 @@ p {
 
 /* ---------- Forms ---------- */
 
+/* fields side by side (as many as fit, at least 210 px each), the button at the bottom of its row */
+.form-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+	gap: 0 1.2rem;
+	align-items: end;
+}
+/* space to what follows the form (e.g. the next heading) – not at the end of a card, where its padding applies */
+.form-grid:not(:last-child) > div:last-child {
+	margin-bottom: 1.4rem;
+}
+/* the button in a row of its own, left below all fields */
+.form-grid.button-below > div:last-child {
+	grid-column: 1 / -1;
+}
+/* a single field over the whole width */
+.form-grid .wide {
+	grid-column: 1 / -1;
+}
+
 label {
 	display: block;
 	font-size: 0.9rem;
