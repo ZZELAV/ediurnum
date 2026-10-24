@@ -9,7 +9,7 @@ import type { Settings } from '#lib/types.ts';
 
 export const SESSION_COOKIE = 'ediurnum_session';
 /** Time zone of the device (set by the browser, see +layout.svelte) – only to find the country for the locale */
-export const TZ_COOKIE = 'tz';
+const TZ_COOKIE = 'tz';
 
 /** Locale for the language and the region of the settings (with "auto": the country of the device sending the request). */
 export function settingsLocale(event: RequestEvent, settings: Pick<Settings, 'language' | 'region'>) {

@@ -48,17 +48,19 @@ test('all text keys used in the code exist', () => {
 	assert.deepEqual([...missing], []);
 });
 
-test('placeholders such as {count} are the same in both languages', () => {
+test('placeholders such as {count} are the same in all languages', () => {
 	const vars = (s: string) => [...new Set(s.match(/\{\w+\}/g) ?? [])].sort().join(',');
-	const differ = Object.keys(de).filter((k) => k in en && vars(de[k]) !== vars(en[k]));
-	assert.deepEqual(differ, []);
+	for (const [name, dict] of Object.entries({ de, it })) {
+		const differ = Object.keys(dict).filter((k) => k in en && vars(dict[k]) !== vars(en[k]));
+		assert.deepEqual(differ, [], `placeholders differ in ${name}.ts`);
+	}
 });
 
 test('singular forms (.one) have a base form, no text is empty', () => {
-	const all = { ...de, ...en };
+	const all = { ...de, ...en, ...it };
 	const orphans = Object.keys(all).filter((k) => k.endsWith('.one') && !(k.slice(0, -4) in en));
 	assert.deepEqual(orphans, []);
-	const empty = [...Object.entries(de), ...Object.entries(en)].filter(([, v]) => !v.trim()).map(([k]) => k);
+	const empty = [de, en, it].flatMap((dict) => Object.entries(dict)).filter(([, v]) => !v.trim()).map(([k]) => k);
 	assert.deepEqual(empty, []);
 });
 
@@ -110,12 +112,6 @@ test('English is the default: for browsers in other languages and for missing te
 	en['test.onlyEnglish'] = 'Only in English';
 	assert.equal(translate('de', 'test.onlyEnglish'), 'Only in English');
 	delete en['test.onlyEnglish'];
-});
-
-test('Italian: the same placeholders as in English and no empty texts', () => {
-	const vars = (s: string) => [...new Set(s.match(/\{\w+\}/g) ?? [])].sort().join(',');
-	assert.deepEqual(Object.keys(it).filter((k) => vars(it[k]) !== vars(en[k])), [], 'placeholders differ');
-	assert.deepEqual(Object.keys(it).filter((k) => !it[k].trim()), [], 'empty texts');
 });
 
 test('Italian: chosen for Italian browsers, missing texts in English, own formats', () => {

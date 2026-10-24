@@ -3,7 +3,7 @@ import { decrypt, decryptJson, encrypt, keyFingerprint, SETTINGS_AAD, unlockWith
 import { decryptContent, toMeta, type EntryRow } from './records.ts';
 import { isEmptyContent } from '#lib/templates.ts';
 import { DEFAULT_LANG, isLang, isLocale } from '#lib/i18n/index.ts';
-import type { Entry, Lang } from '#lib/types.ts';
+import type { Entry } from '#lib/types.ts';
 
 /**
  * Backup format (.ediurnum):

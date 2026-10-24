@@ -22,7 +22,6 @@ import {
 	type CustomReminderView,
 	type ReminderConfig
 } from '#lib/reminders.ts';
-import type { Lang } from '#lib/types.ts';
 
 /**
  * Reminders and push notifications.
