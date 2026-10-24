@@ -60,8 +60,8 @@ with optional AI feedback for personal growth.
 
 ## Running ediurnum
 
-ediurnum runs as a single Docker container behind a reverse proxy that provides HTTPS
-(for example NGINX Proxy Manager).
+ediurnum runs as a single Docker container, ideally behind a reverse proxy that provides HTTPS
+(for example NGINX Proxy Manager). Plain `http://` works too, but without push notifications and installing the app.
 
 The image is on Docker Hub: [`zzelav/ediurnum`](https://hub.docker.com/r/zzelav/ediurnum) (amd64, arm64).
 

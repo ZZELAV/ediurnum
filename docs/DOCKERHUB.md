@@ -24,8 +24,8 @@ weekly and monthly reviews, reminders and optional AI insights through the AI ch
 
 ## Quick start
 
-ediurnum needs a reverse proxy with **HTTPS** in front of it (e.g. NGINX Proxy Manager) – browsers only allow push
-notifications and installing the app on secure origins.
+A reverse proxy with **HTTPS** in front of it (e.g. NGINX Proxy Manager) is recommended – browsers only allow push
+notifications and installing the app on secure origins. Without it, ediurnum also runs over plain `http://`.
 
 ```bash
 mkdir ediurnum && cd ediurnum
