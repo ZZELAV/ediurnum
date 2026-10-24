@@ -29,7 +29,7 @@ curl -fsSLO https://raw.githubusercontent.com/ZZELAV/ediurnum/main/.env.example
 ```bash
 git clone https://github.com/ZZELAV/ediurnum.git
 cd ediurnum
-git checkout v1.0.0             # optional: a specific release
+git checkout v1.1.0             # optional: a specific release
 ```
 
 In step 5 and for updates, add `-f docker-compose.yml -f docker-compose.build.yml` and `--build` to
@@ -48,7 +48,7 @@ nano .env
   Without HTTPS (home network only) use the `http://` address, e.g. `http://192.168.1.10:3000`; push notifications
   and installing the app then do not work, because browsers only allow them on secure origins.
 - `TZ` – your time zone (`Europe/Zurich`, …). “Today”, the version history (one version per day) and all reminder times use it.
-- `EDIURNUM_VERSION` (optional) – pin a release, e.g. `1.0.0`. Without it, the newest release (`latest`) is used.
+- `EDIURNUM_VERSION` (optional) – pin a release, e.g. `1.1.0`. Without it, the newest release (`latest`) is used.
 - `COOKIE_SECURE` (optional) – whether the session cookie is marked `Secure` (only sent over HTTPS). By default this
   follows `ORIGIN`: on with `https://`, off with `http://`. Set `true` or `false` only if that does not fit, e.g.
   `false` if the journal must also be reachable over plain `http://` while `ORIGIN` is `https://`.
