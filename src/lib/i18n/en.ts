@@ -484,6 +484,7 @@ export const en: Record<string, string> = {
 	'settings.exportMd': 'As Markdown',
 	'settings.exportJson': 'As JSON',
 	'settings.exportPdf': 'As PDF',
+	'settings.exportRangeHint': 'Optional: export only the entries in this range. Leave both fields empty to export all entries; with only one date the range is open on the other side.',
 
 	// Readable export (Markdown, PDF) – also used by the converter script
 	'export.title': 'Journal',

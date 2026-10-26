@@ -14,6 +14,19 @@ export function todayIso(now = new Date()): string {
 	return `${y}-${m}-${d}`;
 }
 
+export type DateRange = { from: string | null; to: string | null };
+
+/** Optional date range from user input: invalid or empty bounds are open, swapped bounds are put in order. */
+export function parseRange(from: string | null, to: string | null): DateRange {
+	const f = from && isIsoDate(from) ? from : null;
+	const t = to && isIsoDate(to) ? to : null;
+	return f && t && f > t ? { from: t, to: f } : { from: f, to: t };
+}
+
+export function inRange(iso: string, range: DateRange): boolean {
+	return (!range.from || iso >= range.from) && (!range.to || iso <= range.to);
+}
+
 export function addDays(iso: string, days: number): string {
 	const d = new Date(iso + 'T00:00:00Z');
 	d.setUTCDate(d.getUTCDate() + days);

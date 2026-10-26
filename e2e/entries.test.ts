@@ -233,3 +233,32 @@ async function readableFor(client: Client) {
 	const r = await client.api('/api/export/plain?format=json');
 	return new Set((r.json.entries as { date: string }[]).map((e) => e.date));
 }
+
+describe('Readable export of a range', () => {
+	const DAYS = ['2026-04-01', '2026-04-15', '2026-04-30'];
+	const dates = async (query: string) => {
+		const r = await c.api(`/api/export/plain?format=json${query}`);
+		return (r.json.entries as { date: string }[]).map((e) => e.date).filter((d) => d.startsWith('2026-04'));
+	};
+
+	before(async () => {
+		for (const d of DAYS) await c.api(`/api/entry/${d}`, { content: { mood: 3, sections: { daily: daily(`Tag ${d}`) }, free: '' } });
+	});
+
+	test('only the entries between "From" and "To" (both included)', async () => {
+		assert.deepEqual(await dates('&from=2026-04-01&to=2026-04-15'), ['2026-04-01', '2026-04-15']);
+		assert.deepEqual(await dates('&from=2026-04-15&to=2026-04-01'), ['2026-04-01', '2026-04-15'], 'swapped bounds');
+	});
+
+	test('one bound leaves the other side open, empty or invalid bounds export everything', async () => {
+		assert.deepEqual(await dates('&from=2026-04-02'), ['2026-04-15', '2026-04-30']);
+		assert.deepEqual(await dates('&to=2026-04-14'), ['2026-04-01']);
+		assert.deepEqual(await dates('&from=&to='), DAYS);
+		assert.deepEqual(await dates('&from=2026-02-30&to=x'), DAYS);
+	});
+
+	test('the file name names the range', async () => {
+		const r = await c.get('/api/export/plain?format=md&from=2026-04-01&to=2026-04-15');
+		assert.match(r.headers.get('content-disposition') ?? '', /filename="ediurnum-export-2026-04-01_2026-04-15\.md"/);
+	});
+});

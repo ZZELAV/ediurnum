@@ -499,6 +499,7 @@ export const de: Record<string, string> = {
 	'settings.exportMd': 'Als Markdown',
 	'settings.exportJson': 'Als JSON',
 	'settings.exportPdf': 'Als PDF',
+	'settings.exportRangeHint': 'Optional: nur die Einträge in diesem Zeitraum exportieren. Lass beide Felder leer, um alle Einträge zu exportieren; mit nur einem Datum ist der Zeitraum auf der anderen Seite offen.',
 
 	// Readable export (Markdown, PDF) – also used by the converter script
 	'export.title': 'Tagebuch',

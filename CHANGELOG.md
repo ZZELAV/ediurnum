@@ -4,7 +4,12 @@ All notable changes to ediurnum are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [Semantic Versioning](https://semver.org).
 The topmost version without a date is still in development.
 
-## [1.1.1]
+## [1.2.0]
+
+### Added
+
+- *Settings → Backup & export*: the readable export (Markdown, JSON, PDF) can be limited to a date range
+  ("From"/"To"); without dates everything is exported as before.
 
 ### Changed
 

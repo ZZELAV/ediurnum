@@ -3,6 +3,7 @@ import { getDb, getMeta, setMeta, transaction, upgradeLegacyKinds } from './db.t
 import { listEntryMeta, getEntry } from './entries.ts';
 import type { Session } from './vault.ts';
 import type { Entry } from '#lib/types.ts';
+import { inRange, type DateRange } from '#lib/dates.ts';
 
 const META_KEYS = ['created_at', 'settings', 'profile', 'pin_kdf', 'pin_check', 'reminders'];
 
@@ -51,10 +52,11 @@ export function restoreBackup(data: BackupData) {
 }
 
 /** All entries that can currently be decrypted (oldest first), for the readable export. */
-export function readableEntries(session: Session) {
+export function readableEntries(session: Session, range: DateRange = { from: null, to: null }) {
 	const entries: Entry[] = [];
 	let skippedLocked = 0;
 	for (const m of [...listEntryMeta()].reverse()) {
+		if (!inRange(m.date, range)) continue;
 		const e = getEntry(session, m.date);
 		if (!e?.content) {
 			skippedLocked++;

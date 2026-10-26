@@ -217,11 +217,25 @@
 
 			<h3>{t('settings.plainExport')}</h3>
 			<p class="notice error">{t('settings.plainExportWarning')}</p>
-			<div class="row">
-				<a class="btn ghost small" href="/api/export/plain?format=md" download>{t('settings.exportMd')}</a>
-				<a class="btn ghost small" href="/api/export/plain?format=json" download>{t('settings.exportJson')}</a>
-				<a class="btn ghost small" href="/api/export/plain?format=pdf" download>{t('settings.exportPdf')}</a>
-			</div>
+			<!-- native GET form: the endpoint answers with a download, the page stays -->
+			<form method="GET" action="/api/export/plain" data-sveltekit-reload class="form-grid button-below">
+				<div class="field">
+					<div class="label-row">
+						<label for="export-from">{t('insights.from')}</label>
+						<InfoButton text={t('settings.exportRangeHint')} />
+					</div>
+					<input id="export-from" name="from" type="date" max={data.today} />
+				</div>
+				<div class="field">
+					<label for="export-to">{t('insights.to')}</label>
+					<input id="export-to" name="to" type="date" max={data.today} />
+				</div>
+				<div class="row">
+					<button class="btn ghost small" name="format" value="md">{t('settings.exportMd')}</button>
+					<button class="btn ghost small" name="format" value="json">{t('settings.exportJson')}</button>
+					<button class="btn ghost small" name="format" value="pdf">{t('settings.exportPdf')}</button>
+				</div>
+			</form>
 		</section>
 
 		<!-- Delete journal -->

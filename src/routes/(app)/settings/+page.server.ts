@@ -31,6 +31,7 @@ import {
 } from '#lib/server/vault.ts';
 import { setReminderLang } from '#lib/server/reminders.ts';
 import type { AiAgent } from '#lib/types.ts';
+import { todayIso } from '#lib/dates.ts';
 
 export const load: PageServerLoad = ({ locals }) => {
 	const settings = loadSettings(locals.session!.dek);
@@ -39,6 +40,7 @@ export const load: PageServerLoad = ({ locals }) => {
 	return {
 		settings: { ...settings, agents: settings.agents.map(publicAgent) },
 		lockedCount: countLocked(),
+		today: todayIso(),
 		profile: { filled: !isEmptyProfile(profile), updatedAt: profile.updatedAt },
 		changelog: latest ? { version: latest.version, date: latest.date, html: renderMarkdown(latest.body) } : null
 	};

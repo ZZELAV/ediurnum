@@ -485,6 +485,7 @@ export const it: Record<string, string> = {
 	'settings.exportMd': 'Come Markdown',
 	'settings.exportJson': 'Come JSON',
 	'settings.exportPdf': 'Come PDF',
+	'settings.exportRangeHint': 'Facoltativo: esporta solo le pagine di questo periodo. Lascia vuoti entrambi i campi per esportare tutte le pagine; con una sola data il periodo resta aperto dall\'altro lato.',
 
 	// Readable export (Markdown, PDF) – also used by the converter script
 	'export.title': 'Diario',

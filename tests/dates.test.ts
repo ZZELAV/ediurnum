@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addDays, addMonths, addYears, daysBetween, isIsoDate, monthKey, todayIso, weekdayOf } from '../src/lib/dates.ts';
+import { addDays, addMonths, addYears, daysBetween, inRange, isIsoDate, monthKey, parseRange, todayIso, weekdayOf } from '../src/lib/dates.ts';
 
 test('valid calendar dates', () => {
 	assert.ok(isIsoDate('2026-10-10'));
@@ -43,4 +43,18 @@ test('weekday (0 = Sunday) and shifting months', () => {
 	assert.equal(addMonths('2025-12', 1), '2026-01');
 	assert.equal(addMonths('2026-10', -22), '2024-12');
 	assert.equal(addMonths('2026-10', 15), '2028-01');
+});
+
+test('optional date range from user input', () => {
+	assert.deepEqual(parseRange('2026-01-01', '2026-03-31'), { from: '2026-01-01', to: '2026-03-31' });
+	assert.deepEqual(parseRange('2026-03-31', '2026-01-01'), { from: '2026-01-01', to: '2026-03-31' });
+	assert.deepEqual(parseRange('', null), { from: null, to: null });
+	assert.deepEqual(parseRange('2026-02-30', '2026-03-31'), { from: null, to: '2026-03-31' });
+	const range = { from: '2026-01-01', to: '2026-03-31' };
+	assert.ok(inRange('2026-01-01', range));
+	assert.ok(inRange('2026-03-31', range));
+	assert.ok(!inRange('2025-12-31', range));
+	assert.ok(!inRange('2026-04-01', range));
+	assert.ok(inRange('1999-01-01', { from: null, to: '2026-01-01' }));
+	assert.ok(inRange('2030-01-01', { from: null, to: null }));
 });
