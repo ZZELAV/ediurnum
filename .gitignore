@@ -13,5 +13,4 @@ Thumbs.db
 /.claude/
 
 # Internal working notes (local only)
-/docs/STAND.md
-/docs/KONZEPT.md
+/docs/intern/
