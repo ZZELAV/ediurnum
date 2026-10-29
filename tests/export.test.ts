@@ -1,9 +1,11 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 import { PDFDocument } from 'pdf-lib';
 import {
 	defaultKdfParams,
+	encrypt,
 	encryptJson,
 	entryAad,
 	generateKey,
@@ -99,6 +101,20 @@ describe('PDF', () => {
 		assert.equal((await PDFDocument.load(await exportPdf([entry('2026-10-16', odd)], 'en', 0, fonts))).getPageCount(), 1);
 		assert.equal((await PDFDocument.load(await exportPdf([], 'de', 0, fonts))).getPageCount(), 1);
 	});
+
+	test('overlong words are split quickly and other requests keep running meanwhile', async () => {
+		// splitting character by character took minutes for this (several seconds per word)
+		const long: EntryContent = { mood: 3, sections: {}, free: 'y'.repeat(1500) };
+		const many = Array.from({ length: 40 }, (_, i) => entry(`2026-02-${String((i % 28) + 1).padStart(2, '0')}`, long));
+		let ticks = 0;
+		const timer = setInterval(() => ticks++, 5);
+		const started = performance.now();
+		const pdf = await PDFDocument.load(await exportPdf(many, 'en', 0, fonts));
+		clearInterval(timer);
+		assert.ok(performance.now() - started < 15_000, `${Math.round(performance.now() - started)} ms`);
+		assert.ok(pdf.getPageCount() > 10, `${pdf.getPageCount()} pages`);
+		assert.ok(ticks > 1, 'the event loop was free in between');
+	});
 });
 
 describe('Reading backups (also for the converter script)', async () => {
@@ -148,6 +164,13 @@ describe('Reading backups (also for the converter script)', async () => {
 
 	test('a wrong key is detected', () => {
 		assert.throws(() => readBackup(text, generateKey()), /backup.wrongKey/);
+	});
+
+	test('a forged backup that unpacks into too much is rejected (before setup anyone may upload one)', () => {
+		// 20 gzip members of 16 MiB zeros each: a few hundred KB packed, 320 MiB unpacked
+		const bomb = Buffer.concat(Array(20).fill(gzipSync(Buffer.alloc(16 * 1024 * 1024))));
+		const header = { ...parseBackupHeader(text), data: encrypt(dek, bomb, 'ediurnum/backup/v1').toString('base64') };
+		assert.throws(() => readBackup(JSON.stringify(header), dek), /backup.invalidFile/);
 	});
 
 	test('entries oldest first; locked ones only with the PIN; cleared ones are left out', async () => {

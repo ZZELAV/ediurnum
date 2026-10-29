@@ -21,6 +21,8 @@ const AAD = 'ediurnum/backup/v1';
  * Older versions stay readable (legacy kinds are converted when read and restored); older apps reject version 3.
  */
 const VERSION = 3;
+/** Upper limit for the unpacked content – far above real backups (the records inside are encrypted and barely compress) */
+const MAX_UNPACKED = 256 * 1024 * 1024;
 
 export interface BackupHeader {
 	format: 'ediurnum-backup';
@@ -85,8 +87,11 @@ export function readBackup(text: string, dek: Buffer): BackupData {
 	const header = parseBackupHeader(text);
 	if (header.keyFingerprint !== keyFingerprint(dek)) throw new Error('backup.wrongKey');
 	try {
-		return JSON.parse(gunzipSync(decrypt(dek, Buffer.from(header.data, 'base64'), AAD)).toString('utf8'));
-	} catch {
+		const json = gunzipSync(decrypt(dek, Buffer.from(header.data, 'base64'), AAD), { maxOutputLength: MAX_UNPACKED });
+		return JSON.parse(json.toString('utf8'));
+	} catch (e) {
+		// a forged backup (key chosen by the uploader) must not unpack into gigabytes
+		if ((e as NodeJS.ErrnoException).code === 'ERR_BUFFER_TOO_LARGE') throw new Error('backup.invalidFile');
 		throw new Error('backup.wrongKey');
 	}
 }

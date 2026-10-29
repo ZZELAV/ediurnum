@@ -14,6 +14,19 @@ The topmost version without a date is still in development.
 ### Changed
 
 - *Settings → Security*: the buttons sit below the fields, and the field for the recovery key uses the full width.
+- `docs/DEPLOYMENT.md` explains `ADDRESS_HEADER` and `XFF_DEPTH` (needed behind a proxy so that the limit on wrong
+  passwords counts per visitor).
+
+### Fixed
+
+- The PDF export is much faster (long words without spaces took minutes, large journals several times as long), and
+  the app stays usable for other requests while it is being created.
+- Removing a push device with an invalid request no longer causes a server error.
+
+### Security
+
+- Restoring a backup refuses files that would unpack into an unreasonable amount of data (before setup, anyone who
+  can reach the app may upload a backup).
 
 ## [1.1.0] - 2026-10-24
 

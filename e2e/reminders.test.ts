@@ -107,6 +107,9 @@ describe('Devices', () => {
 		assert.match(await server.waitForOutput(/push failed status=500/), /push failed status=500/);
 		await c.api('/api/push', { endpoint: broken.subscription.endpoint }, 'DELETE');
 		assert.equal(deviceCount(), 1);
+		// valid JSON that is not an object: 400 instead of a crash (500)
+		assert.equal((await c.api('/api/push', null, 'DELETE')).status, 400);
+		assert.equal(deviceCount(), 1);
 	});
 });
 

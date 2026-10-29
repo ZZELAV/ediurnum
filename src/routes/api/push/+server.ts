@@ -22,7 +22,7 @@ export const POST: RequestHandler = async (event) => {
 /** Unregisters a device ({ endpoint }) or all devices ({ all: true }). */
 export const DELETE: RequestHandler = async (event) => {
 	requireSession(event);
-	const body = await event.request.json().catch(() => ({}));
+	const body = await readJson(event.request);
 	if (body.all === true) removeAllDevices();
 	else if (typeof body.endpoint === 'string') removeDevice(body.endpoint);
 	log.info(body.all === true ? 'all push devices removed' : 'push device removed');

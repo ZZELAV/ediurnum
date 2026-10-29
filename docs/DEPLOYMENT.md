@@ -48,6 +48,11 @@ nano .env
   Without HTTPS (home network only) use the `http://` address, e.g. `http://192.168.1.10:3000`; push notifications
   and installing the app then do not work, because browsers only allow them on secure origins.
 - `TZ` – your time zone (`Europe/Zurich`, …). “Today”, the version history (one version per day) and all reminder times use it.
+- `ADDRESS_HEADER` and `XFF_DEPTH` – where the real client IP comes from behind the proxy. The limit on wrong passwords
+  and recovery keys counts per IP, so keep both: `X-Forwarded-For` and `1` for exactly one proxy in front of the
+  container (as in this guide). Add one per further proxy (e.g. `2` with Cloudflare in front of NGINX Proxy Manager).
+  Without them every request seems to come from the proxy (a stranger guessing passwords locks you out too); with
+  too high a number a guesser can pick a new IP for every attempt. Remove both only if no proxy is in front.
 - `EDIURNUM_VERSION` (optional) – pin a release, e.g. `1.1.0`. Without it, the newest release (`latest`) is used.
 - `COOKIE_SECURE` (optional) – whether the session cookie is marked `Secure` (only sent over HTTPS). By default this
   follows `ORIGIN`: on with `https://`, off with `http://`. Set `true` or `false` only if that does not fit, e.g.
