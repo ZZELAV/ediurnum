@@ -114,7 +114,7 @@ const prompts = (loc: string) => PROMPTS[langOf(loc)];
  * Options for the instructions to the AI (AI agent or Markdown file for an AI chat).
  * `instructions`: the writer's own instructions (empty = default, see defaultInstructions).
  */
-export type PromptOptions = Pick<AiAgent, 'tone' | 'persona' | 'maxFocusPoints'> & { instructions?: string };
+type PromptOptions = Pick<AiAgent, 'tone' | 'persona' | 'maxFocusPoints'> & { instructions?: string };
 
 export const MAX_INSTRUCTIONS = 8000;
 

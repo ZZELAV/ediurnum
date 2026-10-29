@@ -23,7 +23,7 @@ export function currentStreak(dates: Iterable<string>, today: string): number {
 	return count;
 }
 
-export interface WritingSummary {
+interface WritingSummary {
 	entries: number;
 	/** Time (ISO, UTC) of the latest save of any entry – not just the date. */
 	lastEntry: string | null;
@@ -62,7 +62,7 @@ export interface Average {
 	count: number;
 }
 
-export interface Stats {
+interface Stats {
 	from: string;
 	to: string;
 	days: number;

@@ -14,7 +14,7 @@ export interface EntryField {
 	values: string[];
 }
 
-export interface EntryDoc {
+interface EntryDoc {
 	date: string;
 	/** Date written out, e.g. "Friday, 16 October 2026" */
 	heading: string;

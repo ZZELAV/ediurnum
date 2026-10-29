@@ -4,7 +4,7 @@
  * (they then count as "cancel") – things could no longer be deleted.
  * The question is shown by <ConfirmDialog /> in the root layout.
  */
-export interface ConfirmRequest {
+interface ConfirmRequest {
 	message: string;
 	confirmLabel?: string;
 	danger?: boolean;

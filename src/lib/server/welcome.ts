@@ -9,7 +9,7 @@ import type { EntryMeta } from '#lib/types.ts';
  * once it's done – only existing metadata is checked, no content.
  */
 export const WELCOME_STEPS = ['entry', 'profile', 'reminders', 'pin', 'backup'] as const;
-export type WelcomeStep = (typeof WELCOME_STEPS)[number];
+type WelcomeStep = (typeof WELCOME_STEPS)[number];
 
 export function welcomeProgress(metas: EntryMeta[]): Record<WelcomeStep, boolean> {
 	return {

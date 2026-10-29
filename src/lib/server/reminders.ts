@@ -144,7 +144,7 @@ export function vapidPublicKey(): string {
 	return vapidKeys().publicKey;
 }
 
-export interface PushDevice {
+interface PushDevice {
 	endpoint: string;
 	label: string;
 	createdAt: string;

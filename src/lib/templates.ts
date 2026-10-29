@@ -1,8 +1,8 @@
 import type { EntryContent, SectionKind } from './types.ts';
 
-export type FieldType = 'text' | 'textarea' | 'lines' | 'scale' | 'chips';
+type FieldType = 'text' | 'textarea' | 'lines' | 'scale' | 'chips';
 
-export interface FieldDef {
+interface FieldDef {
 	id: string;
 	type: FieldType;
 	/** Number of lines for "lines" */
@@ -11,7 +11,7 @@ export interface FieldDef {
 	options?: string[];
 }
 
-export interface SectionDef {
+interface SectionDef {
 	kind: SectionKind;
 	/** Suggested rhythm (not binding). */
 	rhythm: 'daily' | 'weekly' | 'monthly';

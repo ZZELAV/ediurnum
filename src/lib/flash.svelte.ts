@@ -1,7 +1,7 @@
 /** How long success messages stay visible; errors stay until the next action replaces them. */
 const FLASH_MS = 5000;
 
-export type FlashMessage = { kind: 'ok' | 'error'; text: string };
+type FlashMessage = { kind: 'ok' | 'error'; text: string };
 
 /** Message that disappears by itself after FLASH_MS (except errors). */
 export class Flash {

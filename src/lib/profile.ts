@@ -12,7 +12,7 @@
  */
 
 export const TRAITS = ['extraversion', 'agreeableness', 'conscientiousness', 'stability', 'openness'] as const;
-export type Trait = (typeof TRAITS)[number];
+type Trait = (typeof TRAITS)[number];
 
 export const VALUES = [
 	'family',
@@ -34,7 +34,7 @@ export const VALUES = [
 ] as const;
 
 export const JOURNALING = ['none', 'past', 'occasional', 'regular'] as const;
-export type Journaling = (typeof JOURNALING)[number];
+type Journaling = (typeof JOURNALING)[number];
 
 /** Free text fields in display order. */
 export const PROFILE_TEXTS = ['life', 'strengths', 'challenges', 'goals', 'coping', 'hopes', 'sensitive'] as const;
