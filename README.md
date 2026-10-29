@@ -34,7 +34,7 @@ with optional AI feedback for personal growth.
   choice (ChatGPT, Claude, Gemini, …), optionally with your self-assessment. The instructions for the AI can be customised. Paste the answer back to keep it – its
   focus points for the coming weeks appear on the dashboard. ediurnum never sends anything
   to an AI on its own; AI agents with your own API key are planned for a later release.
-- **Encrypted backup**, readable export (Markdown, JSON or **PDF**) and **delete journal** (all entries, or a complete reset)
+- **Encrypted backup**, readable export (Markdown, JSON or **PDF**, everything or a date range) and **delete journal** (all entries, or a complete reset)
 - **Backup converter**: a small command-line script turns an encrypted backup into Markdown, JSON or PDF – without a
   running app, e.g. if your server is gone (see [Backups](docs/DEPLOYMENT.md#11-backups))
 - German, English and Italian with date and number formats of your region, light and dark theme (follows your device unless you choose one), installable as a web app

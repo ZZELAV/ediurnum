@@ -4,7 +4,7 @@ All notable changes to ediurnum are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [Semantic Versioning](https://semver.org).
 The topmost version without a date is still in development.
 
-## [1.2.0]
+## [1.2.0] - 2026-10-29
 
 ### Added
 
@@ -297,6 +297,7 @@ First public beta of ediurnum – a private, self-hosted, encrypted journal for 
 - Optional focus mode while writing, German and English, light and dark theme, installable web app,
   Docker Compose setup for self-hosting.
 
+[1.2.0]: https://github.com/ZZELAV/ediurnum/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/ZZELAV/ediurnum/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/ZZELAV/ediurnum/compare/v0.1.0-beta.6...v1.0.0
 [0.1.0-beta.6]: https://github.com/ZZELAV/ediurnum/compare/v0.1.0-beta.5...v0.1.0-beta.6
